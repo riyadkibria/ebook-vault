@@ -1,15 +1,35 @@
-export default function Home(){
+import { Octokit } from "octokit";
 
-return (
+async function getRepoTree() {
+  const octokit = new Octokit();
 
-<main>
+  const response = await octokit.rest.git.getTree({
+    owner: "riyadkibria",
+    repo: "My-ebook-library",
+    tree_sha: "main",
+    recursive: "true",
+  });
 
-<h1>
-GitHub Ebook Viewer
-</h1>
+  return response.data.tree;
+}
 
-</main>
+export default async function Home() {
+  const files = await getRepoTree();
 
-)
+  return (
+    <main className="p-8">
+      <h1 className="text-3xl font-bold mb-6">
+        My Ebook Library
+      </h1>
 
+      <div>
+        {files.map((file) => (
+          <div key={file.sha} className="mb-2">
+            {file.type === "tree" ? "📁" : "📄"}{" "}
+            {file.path}
+          </div>
+        ))}
+      </div>
+    </main>
+  );
 }
