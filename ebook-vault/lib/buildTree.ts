@@ -6,21 +6,34 @@ export type TreeNode = {
 };
 
 
-export function buildTree(paths:any[]) {
+export function buildTree(paths: any[]): TreeNode[] {
 
-  const root:TreeNode[] = [];
+  const root: TreeNode[] = [];
 
 
-  for(const item of paths){
+  for (const item of paths) {
+
+
+    // only markdown files
+    if (
+      item.type !== "blob" ||
+      !item.path.endsWith(".md")
+    ) {
+      continue;
+    }
+
 
     const parts = item.path.split("/");
+
 
     let current = root;
 
 
-    parts.forEach((part:string,index:number)=>{
+    parts.forEach((part: string, index: number) => {
 
-      const isFile = index === parts.length - 1;
+
+      const isFile =
+        index === parts.length - 1;
 
 
       let existing = current.find(
@@ -28,7 +41,8 @@ export function buildTree(paths:any[]) {
       );
 
 
-      if(!existing){
+      if (!existing) {
+
 
         existing = {
 
@@ -39,10 +53,13 @@ export function buildTree(paths:any[]) {
             : "folder",
 
           path: parts
-            .slice(0,index+1)
+            .slice(0, index + 1)
             .join("/"),
 
-          children: []
+
+          ...(isFile
+            ? {}
+            : { children: [] })
 
         };
 
@@ -52,7 +69,9 @@ export function buildTree(paths:any[]) {
       }
 
 
-      if(existing.children){
+      if (
+        existing.children
+      ) {
 
         current = existing.children;
 
@@ -60,7 +79,6 @@ export function buildTree(paths:any[]) {
 
 
     });
-
 
   }
 
