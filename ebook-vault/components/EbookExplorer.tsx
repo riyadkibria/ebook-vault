@@ -2,77 +2,118 @@
 
 import { useState } from "react";
 
-
 type FileItem = {
   path: string;
   type: string;
 };
 
 
-type Props = {
-  files: FileItem[];
-};
-
-
 export default function EbookExplorer({
   files,
-}: Props) {
+}: {
+  files: FileItem[];
+}) {
 
+  const [selectedFile, setSelectedFile] = useState("");
 
-  const [selected, setSelected] = useState("");
+  const markdownFiles = files.filter(
+    (file) => file.type === "blob"
+  );
 
 
   return (
-    <div className="flex h-screen">
 
-      <div className="w-1/3 border-r p-4 overflow-auto">
-
-        <h2 className="font-bold mb-4">
-          📚 Library
-        </h2>
+    <main className="flex h-screen">
 
 
-        {files.map((file) => (
+      {/* LEFT SIDEBAR */}
+
+      <aside className="w-1/3 border-r p-5 overflow-auto">
+
+
+        <h1 className="text-xl font-bold mb-5">
+          📚 Ebook Library
+        </h1>
+
+
+        {markdownFiles.map((file)=>(
 
           <div
+
             key={file.path}
-            onClick={() => setSelected(file.path)}
+
+            onClick={() =>
+              setSelectedFile(file.path)
+            }
+
             className="
               cursor-pointer
-              hover:bg-gray-100
               p-2
               rounded
+              hover:bg-gray-100
             "
+
           >
 
-            {file.type === "tree"
-              ? "📁"
-              : "📄"}
-
-            {" "}
-
-            {file.path}
+            📄 {file.path}
 
           </div>
+
 
         ))}
 
 
-      </div>
+      </aside>
 
 
-      <div className="flex-1 p-6">
 
-        <h2 className="text-xl font-bold">
+      {/* RIGHT CONTENT */}
 
-          {selected || "Select a file"}
-
-        </h2>
+      <section className="flex-1 p-8">
 
 
-      </div>
+        {
+
+        selectedFile ?
+
+        (
+
+          <>
+          <h2 className="text-2xl font-bold">
+
+            {selectedFile}
+
+          </h2>
 
 
-    </div>
+          <div className="mt-8">
+
+            Markdown content will appear here
+
+          </div>
+
+          </>
+
+        )
+
+        :
+
+        (
+
+          <h2>
+            Select a markdown file
+          </h2>
+
+        )
+
+        }
+
+
+      </section>
+
+
+
+    </main>
+
   );
 }
