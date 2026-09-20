@@ -15,6 +15,8 @@ import {
   BookOpen,
   Menu,
   X,
+  Copy,
+  Check,
 } from "lucide-react";
 
 
@@ -26,52 +28,60 @@ export default function EbookExplorer({
 }) {
 
 
-  const [openFolders, setOpenFolders] =
+  const [openFolders,setOpenFolders] =
     useState<Set<string>>(new Set());
 
 
-  const [selectedFile, setSelectedFile] =
+  const [selectedFile,setSelectedFile] =
     useState("");
 
 
-  const [content, setContent] =
+  const [content,setContent] =
     useState("");
 
 
-  const [loading, setLoading] =
+  const [loading,setLoading] =
     useState(false);
 
 
-  const [mobileOpen, setMobileOpen] =
+  const [mobileOpen,setMobileOpen] =
     useState(false);
+
+
+  const [copied,setCopied] =
+    useState(false);
+
+
 
 
 
   // Floating button position
 
-  const [menuPosition, setMenuPosition] =
+  const [menuPosition,setMenuPosition] =
     useState({
-      x: 16,
-      y: 16,
+      x:16,
+      y:16,
     });
 
 
 
-  const dragging = useRef(false);
+  const dragging =
+    useRef(false);
 
 
-  const dragOffset = useRef({
-    x: 0,
-    y: 0,
-  });
+  const dragOffset =
+    useRef({
+      x:0,
+      y:0,
+    });
 
 
 
 
 
   function startDrag(
-    e: React.TouchEvent<HTMLButtonElement>
-  ) {
+    e:React.TouchEvent<HTMLButtonElement>
+  ){
 
     dragging.current = true;
 
@@ -79,13 +89,13 @@ export default function EbookExplorer({
     dragOffset.current = {
 
       x:
-        e.touches[0].clientX -
-        menuPosition.x,
+      e.touches[0].clientX -
+      menuPosition.x,
 
 
       y:
-        e.touches[0].clientY -
-        menuPosition.y,
+      e.touches[0].clientY -
+      menuPosition.y,
 
     };
 
@@ -96,27 +106,25 @@ export default function EbookExplorer({
 
 
   function moveDrag(
-    e: React.TouchEvent<HTMLButtonElement>
-  ) {
+    e:React.TouchEvent<HTMLButtonElement>
+  ){
 
-    if (!dragging.current)
+    if(!dragging.current)
       return;
-
 
 
     setMenuPosition({
 
       x:
-        e.touches[0].clientX -
-        dragOffset.current.x,
+      e.touches[0].clientX -
+      dragOffset.current.x,
 
 
       y:
-        e.touches[0].clientY -
-        dragOffset.current.y,
+      e.touches[0].clientY -
+      dragOffset.current.y,
 
     });
-
 
   }
 
@@ -126,7 +134,7 @@ export default function EbookExplorer({
 
   function stopDrag(){
 
-    dragging.current = false;
+    dragging.current=false;
 
   }
 
@@ -135,15 +143,12 @@ export default function EbookExplorer({
 
 
 
-
   function toggleFolder(path:string){
-
 
     setOpenFolders(prev=>{
 
-
-      const next = new Set(prev);
-
+      const next =
+      new Set(prev);
 
 
       if(next.has(path)){
@@ -158,15 +163,11 @@ export default function EbookExplorer({
       }
 
 
-
       return next;
-
 
     });
 
-
   }
-
 
 
 
@@ -176,31 +177,50 @@ export default function EbookExplorer({
 
   async function openFile(path:string){
 
-
     setSelectedFile(path);
 
-
     setMobileOpen(false);
-
 
     setLoading(true);
 
 
-
     const markdown =
-      await getFileContent(path);
-
+    await getFileContent(path);
 
 
     setContent(markdown);
 
-
     setLoading(false);
-
 
   }
 
 
+
+
+
+
+  async function copyMarkdown(){
+
+
+    if(!content)
+      return;
+
+
+    await navigator.clipboard.writeText(
+      content
+    );
+
+
+    setCopied(true);
+
+
+    setTimeout(()=>{
+
+      setCopied(false);
+
+    },2000);
+
+  }
 
 
 
@@ -218,164 +238,167 @@ export default function EbookExplorer({
 
 
       const folder =
-        node.type === "folder";
+      node.type==="folder";
 
 
       const opened =
-        openFolders.has(node.path);
+      openFolders.has(node.path);
 
 
 
       const selected =
-        selectedFile === node.path;
-
-
+      selectedFile===node.path;
 
 
 
       return (
 
         <div
-          key={node.path}
+        key={node.path}
         >
 
 
           <div
 
 
-            onClick={()=>{
+          onClick={()=>{
 
 
-              if(folder){
+            if(folder){
 
-                toggleFolder(node.path);
+              toggleFolder(node.path);
 
-              }
+            }
 
-              else{
+            else{
 
-                openFile(node.path);
+              openFile(node.path);
 
-              }
-
-
-            }}
+            }
 
 
-            className={`
-              flex
-              items-center
-              h-10
-              rounded-lg
-              cursor-pointer
-              transition
-              px-2
-              text-sm
-
-              ${
-                selected
-
-                ?
-
-                "bg-blue-50 text-blue-700"
-
-                :
-
-                "hover:bg-gray-100 text-gray-700"
-
-              }
-            `}
+          }}
 
 
-            style={{
-              paddingLeft:
-              `${level * 18 + 8}px`
-            }}
+
+          className={`
+
+          flex
+          items-center
+          h-10
+          rounded-lg
+          cursor-pointer
+          transition
+          px-2
+          text-sm
+
+
+          ${
+            selected
+
+            ?
+
+            "bg-blue-50 text-blue-700"
+
+            :
+
+            "hover:bg-gray-100 text-gray-700"
+
+          }
+
+          `}
+
+
+
+          style={{
+
+            paddingLeft:
+            `${level*18+8}px`
+
+          }}
+
 
 
           >
 
 
-            <span
-              className="
-              w-5
-              flex
-              justify-center
-              "
-            >
 
-            {
-              folder &&
+          <span
+          className="
+          w-5
+          flex
+          justify-center
+          "
+          >
 
-              (
-                opened
+          {
 
-                ?
+          folder &&
 
-                <ChevronDown
-                  size={16}
-                />
+          (
 
-                :
+          opened
 
-                <ChevronRight
-                  size={16}
-                />
+          ?
 
-              )
-            }
+          <ChevronDown size={16}/>
 
+          :
 
-            </span>
+          <ChevronRight size={16}/>
 
+          )
 
+          }
 
-
-
-            <span
-              className="
-              w-6
-              flex
-              justify-center
-              "
-            >
-
-
-            {
-              folder
-
-              ?
-
-              <Folder
-                size={17}
-                className="text-amber-500"
-              />
-
-
-              :
-
-              <FileText
-                size={17}
-                className="text-blue-500"
-              />
-
-
-            }
-
-
-            </span>
+          </span>
 
 
 
 
 
-            <span
-              className="truncate"
-            >
+          <span
+          className="
+          w-6
+          flex
+          justify-center
+          "
+          >
 
-              {node.name}
 
-            </span>
+          {
+
+          folder
+
+          ?
+
+          <Folder
+          size={17}
+          className="text-amber-500"
+          />
+
+          :
+
+          <FileText
+          size={17}
+          className="text-blue-500"
+          />
+
+          }
+
+
+          </span>
+
+
+
+
+
+          <span className="truncate">
+
+          {node.name}
+
+          </span>
+
 
 
 
@@ -385,23 +408,25 @@ export default function EbookExplorer({
 
 
 
+
           {
-            folder &&
-            opened &&
-            node.children &&
+
+          folder &&
+          opened &&
+          node.children &&
 
 
-            renderTree(
-              node.children,
-              level + 1
-            )
+          renderTree(
+            node.children,
+            level+1
+          )
+
 
           }
 
 
 
         </div>
-
 
       );
 
@@ -447,9 +472,7 @@ onClick={()=>setMobileOpen(true)}
 
 onTouchStart={startDrag}
 
-
 onTouchMove={moveDrag}
-
 
 onTouchEnd={stopDrag}
 
@@ -457,12 +480,9 @@ onTouchEnd={stopDrag}
 
 style={{
 
-left:
-menuPosition.x,
+left:menuPosition.x,
 
-
-top:
-menuPosition.y,
+top:menuPosition.y,
 
 }}
 
@@ -490,9 +510,7 @@ transition
 >
 
 
-<Menu
-size={16}
-/>
+<Menu size={16}/>
 
 
 </button>
@@ -504,19 +522,12 @@ size={16}
 
 
 
-{/* MOBILE OVERLAY */}
 
-
-{
-
-mobileOpen &&
-
+{mobileOpen &&
 
 <div
 
-
 onClick={()=>setMobileOpen(false)}
-
 
 className="
 fixed
@@ -528,7 +539,6 @@ md:hidden
 
 />
 
-
 }
 
 
@@ -538,9 +548,7 @@ md:hidden
 
 
 
-
 {/* SIDEBAR */}
-
 
 
 <aside
@@ -558,7 +566,6 @@ border-r
 shadow-xl
 p-5
 overflow-y-auto
-
 
 transition-transform
 duration-300
@@ -578,11 +585,11 @@ mobileOpen
 
 }
 
+
 `}
 
 
 >
-
 
 
 <div
@@ -607,15 +614,10 @@ items-center
 
 >
 
-
 <BookOpen
-
 size={24}
-
 className="text-blue-600"
-
 />
-
 
 
 <h1
@@ -632,11 +634,7 @@ Ebook Vault
 </h1>
 
 
-
 </div>
-
-
-
 
 
 
@@ -648,9 +646,7 @@ onClick={()=>setMobileOpen(false)}
 
 >
 
-<X
-size={22}
-/>
+<X size={22}/>
 
 
 </button>
@@ -658,7 +654,6 @@ size={22}
 
 
 </div>
-
 
 
 
@@ -682,12 +677,9 @@ Library
 
 
 
-
-
 {
 renderTree(tree)
 }
-
 
 
 
@@ -707,7 +699,6 @@ renderTree(tree)
 
 
 <section
-
 
 className="
 flex-1
@@ -731,12 +722,13 @@ selectedFile
 <div>
 
 
-<h2
+<div
 
 className="
-text-xl
-md:text-2xl
-font-semibold
+flex
+items-center
+justify-between
+gap-4
 mb-8
 border-b
 pb-4
@@ -744,9 +736,88 @@ pb-4
 
 >
 
+
+<h2
+
+className="
+text-xl
+md:text-2xl
+font-semibold
+truncate
+"
+
+>
+
 {selectedFile}
 
 </h2>
+
+
+
+
+<button
+
+
+onClick={copyMarkdown}
+
+
+disabled={!content}
+
+
+className="
+flex
+items-center
+gap-2
+px-3
+py-2
+rounded-lg
+border
+bg-gray-50
+hover:bg-gray-100
+text-sm
+transition
+disabled:opacity-40
+"
+
+>
+
+
+{
+
+copied
+
+?
+
+<>
+
+<Check size={16}/>
+
+Copied
+
+</>
+
+
+:
+
+<>
+
+<Copy size={16}/>
+
+Copy
+
+</>
+
+
+}
+
+
+
+</button>
+
+
+
+</div>
+
 
 
 
@@ -765,6 +836,7 @@ loading
 Loading...
 
 </p>
+
 
 
 :
@@ -816,9 +888,7 @@ text-gray-400
 >
 
 
-<div
-className="text-center"
->
+<div className="text-center">
 
 
 <BookOpen
@@ -841,7 +911,6 @@ Select a chapter
 </p>
 
 
-
 </div>
 
 
@@ -859,8 +928,8 @@ Select a chapter
 
 
 
-</main>
 
+</main>
 
 );
 
