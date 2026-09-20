@@ -17,6 +17,7 @@ import {
   X,
   Copy,
   Check,
+  Scissors,
 } from "lucide-react";
 
 
@@ -52,17 +53,19 @@ export default function EbookExplorer({
     useState(false);
 
 
+  const [chunkCopied,setChunkCopied] =
+    useState(false);
 
 
 
-  // Floating button position
+
+  // floating menu
 
   const [menuPosition,setMenuPosition] =
     useState({
       x:16,
       y:16,
     });
-
 
 
   const dragging =
@@ -79,14 +82,15 @@ export default function EbookExplorer({
 
 
 
+
   function startDrag(
     e:React.TouchEvent<HTMLButtonElement>
   ){
 
-    dragging.current = true;
+    dragging.current=true;
 
 
-    dragOffset.current = {
+    dragOffset.current={
 
       x:
       e.touches[0].clientX -
@@ -100,6 +104,7 @@ export default function EbookExplorer({
     };
 
   }
+
 
 
 
@@ -132,11 +137,13 @@ export default function EbookExplorer({
 
 
 
+
   function stopDrag(){
 
     dragging.current=false;
 
   }
+
 
 
 
@@ -151,16 +158,11 @@ export default function EbookExplorer({
       new Set(prev);
 
 
-      if(next.has(path)){
-
+      if(next.has(path))
         next.delete(path);
 
-      }
-      else{
-
+      else
         next.add(path);
-
-      }
 
 
       return next;
@@ -168,6 +170,8 @@ export default function EbookExplorer({
     });
 
   }
+
+
 
 
 
@@ -193,6 +197,9 @@ export default function EbookExplorer({
     setLoading(false);
 
   }
+
+
+
 
 
 
@@ -228,6 +235,99 @@ export default function EbookExplorer({
 
 
 
+  function getFirstChunk(
+    text:string,
+    limit:number=1500
+  ){
+
+
+    const words =
+    text.split(/\s+/);
+
+
+
+    if(words.length<=limit)
+      return text;
+
+
+
+    let chunk =
+    words
+    .slice(0,limit)
+    .join(" ");
+
+
+
+    const remaining =
+    text.substring(
+      chunk.length
+    );
+
+
+
+    const nextLine =
+    remaining.split("\n")[0];
+
+
+
+    chunk += nextLine;
+
+
+
+    return chunk.trim();
+
+  }
+
+
+
+
+
+
+
+
+  async function copyFirstChunk(){
+
+
+    if(!content)
+      return;
+
+
+
+    const chunk =
+    getFirstChunk(
+      content,
+      1500
+    );
+
+
+
+    await navigator.clipboard.writeText(
+      chunk
+    );
+
+
+
+    setChunkCopied(true);
+
+
+
+    setTimeout(()=>{
+
+      setChunkCopied(false);
+
+    },2000);
+
+
+  }
+
+
+
+
+
+
+
+
+
   function renderTree(
     nodes:TreeNode[],
     level=0
@@ -253,180 +353,170 @@ export default function EbookExplorer({
 
       return (
 
-        <div
-        key={node.path}
-        >
+      <div
+      key={node.path}
+      >
 
 
-          <div
+      <div
 
 
-          onClick={()=>{
+      onClick={()=>{
 
 
-            if(folder){
+        if(folder)
 
-              toggleFolder(node.path);
+          toggleFolder(node.path);
 
-            }
 
-            else{
+        else
 
-              openFile(node.path);
+          openFile(node.path);
 
-            }
 
+      }}
 
-          }}
 
 
+      className={`
 
-          className={`
+      flex
+      items-center
+      h-10
+      rounded-lg
+      cursor-pointer
+      transition
+      px-2
+      text-sm
 
-          flex
-          items-center
-          h-10
-          rounded-lg
-          cursor-pointer
-          transition
-          px-2
-          text-sm
 
+      ${
+        selected
 
-          ${
-            selected
+        ?
 
-            ?
+        "bg-blue-50 text-blue-700"
 
-            "bg-blue-50 text-blue-700"
+        :
 
-            :
+        "hover:bg-gray-100 text-gray-700"
 
-            "hover:bg-gray-100 text-gray-700"
+      }
 
-          }
+      `}
 
-          `}
 
+      style={{
+        paddingLeft:
+        `${level*18+8}px`
+      }}
 
 
-          style={{
 
-            paddingLeft:
-            `${level*18+8}px`
+      >
 
-          }}
 
 
+      <span className="
+      w-5
+      flex
+      justify-center
+      ">
 
-          >
+      {
 
+      folder &&
 
+      (
 
-          <span
-          className="
-          w-5
-          flex
-          justify-center
-          "
-          >
+      opened
 
-          {
+      ?
 
-          folder &&
+      <ChevronDown size={16}/>
 
-          (
+      :
 
-          opened
+      <ChevronRight size={16}/>
 
-          ?
+      )
 
-          <ChevronDown size={16}/>
+      }
 
-          :
+      </span>
 
-          <ChevronRight size={16}/>
 
-          )
 
-          }
 
-          </span>
 
+      <span className="
+      w-6
+      flex
+      justify-center
+      ">
 
 
+      {
 
+      folder
 
-          <span
-          className="
-          w-6
-          flex
-          justify-center
-          "
-          >
+      ?
 
+      <Folder
+      size={17}
+      className="text-amber-500"
+      />
 
-          {
 
-          folder
+      :
 
-          ?
+      <FileText
+      size={17}
+      className="text-blue-500"
+      />
 
-          <Folder
-          size={17}
-          className="text-amber-500"
-          />
+      }
 
-          :
 
-          <FileText
-          size={17}
-          className="text-blue-500"
-          />
+      </span>
 
-          }
 
 
-          </span>
 
 
+      <span className="truncate">
 
+      {node.name}
 
+      </span>
 
-          <span className="truncate">
 
-          {node.name}
 
-          </span>
 
+      </div>
 
 
 
-          </div>
 
 
 
+      {
 
+      folder &&
+      opened &&
+      node.children &&
 
 
-          {
+      renderTree(
+        node.children,
+        level+1
+      )
 
-          folder &&
-          opened &&
-          node.children &&
+      }
 
 
-          renderTree(
-            node.children,
-            level+1
-          )
 
-
-          }
-
-
-
-        </div>
+      </div>
 
       );
 
@@ -461,7 +551,9 @@ overflow-hidden
 
 
 
-{/* FLOATING MOBILE MENU */}
+
+{/* MOBILE FLOATING MENU */}
+
 
 
 <button
@@ -498,7 +590,6 @@ rounded-full
 bg-white/60
 backdrop-blur-md
 border
-border-gray-200
 shadow-md
 flex
 items-center
@@ -514,7 +605,6 @@ transition
 
 
 </button>
-
 
 
 
@@ -548,7 +638,9 @@ md:hidden
 
 
 
+
 {/* SIDEBAR */}
+
 
 
 <aside
@@ -592,27 +684,21 @@ mobileOpen
 >
 
 
-<div
 
-className="
+<div className="
 flex
 items-center
 justify-between
 mb-8
-"
-
->
+">
 
 
-<div
-
-className="
+<div className="
 flex
 gap-3
 items-center
-"
+">
 
->
 
 <BookOpen
 size={24}
@@ -620,14 +706,11 @@ className="text-blue-600"
 />
 
 
-<h1
 
-className="
+<h1 className="
 font-semibold
 text-xl
-"
-
->
+">
 
 Ebook Vault
 
@@ -635,6 +718,8 @@ Ebook Vault
 
 
 </div>
+
+
 
 
 
@@ -652,24 +737,18 @@ onClick={()=>setMobileOpen(false)}
 </button>
 
 
-
 </div>
 
 
 
 
 
-
-<p
-
-className="
+<p className="
 text-xs
 uppercase
 text-gray-400
 mb-3
-"
-
->
+">
 
 Library
 
@@ -677,10 +756,8 @@ Library
 
 
 
-{
-renderTree(tree)
-}
 
+{renderTree(tree)}
 
 
 
@@ -718,35 +795,26 @@ selectedFile
 
 ?
 
-
 <div>
 
 
-<div
-
-className="
+<div className="
 flex
 items-center
 justify-between
-gap-4
+gap-3
 mb-8
 border-b
 pb-4
-"
-
->
+">
 
 
-<h2
-
-className="
+<h2 className="
 text-xl
 md:text-2xl
 font-semibold
 truncate
-"
-
->
+">
 
 {selectedFile}
 
@@ -755,11 +823,17 @@ truncate
 
 
 
+
+
+<div className="
+flex
+gap-2
+">
+
+
 <button
 
-
 onClick={copyMarkdown}
-
 
 disabled={!content}
 
@@ -811,12 +885,78 @@ Copy
 }
 
 
+</button>
+
+
+
+
+
+
+
+<button
+
+onClick={copyFirstChunk}
+
+disabled={!content}
+
+
+className="
+flex
+items-center
+gap-2
+px-3
+py-2
+rounded-lg
+border
+bg-blue-50
+hover:bg-blue-100
+text-sm
+transition
+disabled:opacity-40
+"
+
+>
+
+
+{
+
+chunkCopied
+
+?
+
+<>
+
+<Check size={16}/>
+
+Copied
+
+</>
+
+
+:
+
+<>
+
+<Scissors size={16}/>
+
+1500
+
+</>
+
+
+}
+
+
 
 </button>
 
 
 
 </div>
+
+
+</div>
+
 
 
 
@@ -830,7 +970,6 @@ loading
 
 ?
 
-
 <p className="text-gray-400">
 
 Loading...
@@ -838,20 +977,15 @@ Loading...
 </p>
 
 
-
 :
 
 
-<div
-
-className="
+<div className="
 prose
 max-w-none
 prose-headings:text-gray-900
 prose-p:text-gray-700
-"
-
->
+">
 
 
 <ReactMarkdown>
@@ -872,36 +1006,32 @@ prose-p:text-gray-700
 
 
 
+
+
 :
 
 
-<div
-
-className="
+<div className="
 h-full
 flex
 items-center
 justify-center
 text-gray-400
-"
-
->
+">
 
 
 <div className="text-center">
 
 
 <BookOpen
-
 size={45}
-
 className="
 mx-auto
 mb-4
 opacity-30
 "
-
 />
+
 
 
 <p>
@@ -911,7 +1041,9 @@ Select a chapter
 </p>
 
 
+
 </div>
+
 
 
 </div>
