@@ -10,55 +10,152 @@ export default function EbookExplorer({
   tree: TreeNode[];
 }) {
 
-  const [selectedFile, setSelectedFile] = useState("");
+
+  const [openFolders, setOpenFolders] = useState<
+    Set<string>
+  >(new Set());
 
 
-  function renderTree(nodes: TreeNode[], level = 0) {
+  const [selectedFile, setSelectedFile] =
+    useState("");
 
-    return nodes.map((node) => (
 
-      <div key={node.path}>
 
-        <div
-          onClick={() => {
-            if (node.type === "file") {
-              setSelectedFile(node.path);
+  function toggleFolder(path:string){
+
+    setOpenFolders(prev => {
+
+      const newSet = new Set(prev);
+
+
+      if(newSet.has(path)){
+
+        newSet.delete(path);
+
+      }else{
+
+        newSet.add(path);
+
+      }
+
+
+      return newSet;
+
+    });
+
+  }
+
+
+
+
+  function renderTree(
+    nodes:TreeNode[],
+    level=0
+  ){
+
+
+    return nodes.map(node => {
+
+
+      const isOpen =
+        openFolders.has(node.path);
+
+
+
+      return (
+
+        <div key={node.path}>
+
+
+          <div
+
+            className="
+              cursor-pointer
+              hover:bg-gray-100
+              rounded
+              p-1
+            "
+
+            style={{
+              paddingLeft:
+              `${level * 20}px`
+            }}
+
+
+            onClick={()=>{
+
+
+              if(node.type==="folder"){
+
+                toggleFolder(node.path);
+
+              }
+
+
+              if(node.type==="file"){
+
+                setSelectedFile(
+                  node.path
+                );
+
+              }
+
+
+            }}
+
+          >
+
+
+            {
+              node.type==="folder"
+
+              ?
+
+              (
+                isOpen
+                ?
+                "📂"
+                :
+                "📁"
+              )
+
+              :
+
+              "📄"
             }
-          }}
-          className="
-            cursor-pointer
-            hover:bg-gray-100
-            rounded
-            p-1
-          "
-          style={{
-            paddingLeft: `${level * 20}px`
-          }}
-        >
 
-          {node.type === "folder"
-            ? "📁"
-            : "📄"
+
+            {" "}
+
+            {node.name}
+
+
+          </div>
+
+
+
+
+          {
+            node.children &&
+            isOpen &&
+            renderTree(
+              node.children,
+              level+1
+            )
           }
 
-          {" "}
-
-          {node.name}
 
         </div>
 
+      );
 
-        {node.children &&
-          renderTree(
-            node.children,
-            level + 1
-          )
-        }
 
-      </div>
+    });
 
-    ));
+
   }
+
+
 
 
   return (
@@ -66,28 +163,41 @@ export default function EbookExplorer({
     <main className="flex h-screen">
 
 
-      {/* LEFT SIDEBAR */}
+      {/* LEFT */}
 
-      <aside className="w-1/3 border-r p-4 overflow-auto">
+      <aside
+        className="
+        w-1/3
+        border-r
+        p-4
+        overflow-auto
+        "
+      >
 
-        <h1 className="font-bold text-xl mb-4">
+        <h1 className="text-xl font-bold mb-5">
           📚 Ebook Library
         </h1>
 
 
-        {renderTree(tree)}
+        {
+          renderTree(tree)
+        }
+
 
       </aside>
 
 
 
-      {/* RIGHT CONTENT */}
+      {/* RIGHT */}
+
 
       <section className="flex-1 p-8">
 
 
         {
-          selectedFile ?
+          selectedFile
+
+          ?
 
           <div>
 
@@ -97,16 +207,19 @@ export default function EbookExplorer({
 
 
             <p className="mt-5">
-              Markdown content will appear here
+              Markdown content loading soon...
             </p>
 
+
           </div>
+
 
           :
 
           <h2>
             Select a markdown file
           </h2>
+
         }
 
 
@@ -116,4 +229,5 @@ export default function EbookExplorer({
     </main>
 
   );
+
 }
