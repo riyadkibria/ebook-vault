@@ -3,6 +3,10 @@
 import { useState } from "react";
 import type { TreeNode } from "@/lib/buildTree";
 
+import ReactMarkdown from "react-markdown";
+
+import { getFileContent } from "@/lib/github";
+
 import {
   ChevronRight,
   ChevronDown,
@@ -12,6 +16,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+
 
 
 export default function EbookExplorer({
@@ -29,6 +34,14 @@ export default function EbookExplorer({
     useState("");
 
 
+  const [content,setContent] =
+    useState("");
+
+
+  const [loading,setLoading] =
+    useState(false);
+
+
   const [mobileOpen,setMobileOpen] =
     useState(false);
 
@@ -42,11 +55,12 @@ export default function EbookExplorer({
       const next = new Set(prev);
 
 
-      next.has(path)
-      ?
-      next.delete(path)
-      :
-      next.add(path);
+      if(next.has(path)){
+        next.delete(path);
+      }
+      else{
+        next.add(path);
+      }
 
 
       return next;
@@ -58,10 +72,38 @@ export default function EbookExplorer({
 
 
 
+
+  async function openFile(path:string){
+
+
+    setSelectedFile(path);
+
+    setMobileOpen(false);
+
+    setLoading(true);
+
+
+    const markdown =
+      await getFileContent(path);
+
+
+    setContent(markdown);
+
+
+    setLoading(false);
+
+  }
+
+
+
+
+
+
   function renderTree(
     nodes:TreeNode[],
     level=0
   ){
+
 
     return nodes.map(node=>{
 
@@ -82,10 +124,13 @@ export default function EbookExplorer({
 
       return (
 
-        <div key={node.path}>
+        <div
+          key={node.path}
+        >
 
 
           <div
+
 
           onClick={()=>{
 
@@ -97,14 +142,13 @@ export default function EbookExplorer({
             }
             else{
 
-              setSelectedFile(node.path);
-
-              setMobileOpen(false);
+              openFile(node.path);
 
             }
 
 
           }}
+
 
 
           className={`
@@ -119,10 +163,15 @@ export default function EbookExplorer({
 
           ${
             selected
+
             ?
+
             "bg-blue-50 text-blue-700"
+
             :
+
             "hover:bg-gray-100 text-gray-700"
+
           }
 
           `}
@@ -133,49 +182,73 @@ export default function EbookExplorer({
             `${level*18+8}px`
           }}
 
+
           >
 
 
-          <span className="w-5">
+
+          <span
+          className="
+          w-5
+          flex
+          justify-center
+          "
+          >
 
           {
+
             folder &&
 
             (
+
               opened
 
               ?
 
-              <ChevronDown size={16}/>
+              <ChevronDown
+              size={16}
+              />
 
               :
 
-              <ChevronRight size={16}/>
+              <ChevronRight
+              size={16}
+              />
 
             )
+
           }
 
           </span>
 
 
 
-          <span className="w-6">
+
+
+          <span
+          className="
+          w-6
+          flex
+          justify-center
+          "
+          >
 
           {
+
             folder
 
             ?
 
             <Folder
-              size={17}
-              className="text-amber-500"
+            size={17}
+            className="text-amber-500"
             />
 
             :
 
             <FileText
-              size={17}
-              className="text-blue-500"
+            size={17}
+            className="text-blue-500"
             />
 
           }
@@ -183,7 +256,12 @@ export default function EbookExplorer({
           </span>
 
 
-          <span className="truncate">
+
+
+
+          <span
+          className="truncate"
+          >
 
           {node.name}
 
@@ -197,23 +275,30 @@ export default function EbookExplorer({
 
 
 
+
+
           {
+
             folder &&
             opened &&
             node.children &&
+
 
             renderTree(
               node.children,
               level+1
             )
 
+
           }
+
 
 
 
         </div>
 
       );
+
 
     });
 
@@ -224,24 +309,33 @@ export default function EbookExplorer({
 
 
 
+
+
+
 return (
 
 <main
+
 className="
 flex
 h-screen
 bg-gray-50
 overflow-hidden
 "
+
 >
 
 
-{/* MOBILE BUTTON */}
+
+{/* MOBILE MENU */}
 
 
 <button
 
-onClick={()=>setMobileOpen(true)}
+onClick={()=>
+setMobileOpen(true)
+}
+
 
 className="
 md:hidden
@@ -258,9 +352,12 @@ border
 
 >
 
-<Menu size={22}/>
+<Menu
+size={22}
+/>
 
 </button>
+
 
 
 
@@ -270,11 +367,15 @@ border
 
 
 {
+
 mobileOpen &&
+
 
 <div
 
-onClick={()=>setMobileOpen(false)}
+onClick={()=>
+setMobileOpen(false)
+}
 
 className="
 fixed
@@ -286,7 +387,11 @@ md:hidden
 
 />
 
+
 }
+
+
+
 
 
 
@@ -295,9 +400,12 @@ md:hidden
 {/* SIDEBAR */}
 
 
+
 <aside
 
+
 className={`
+
 fixed
 md:static
 z-50
@@ -309,8 +417,10 @@ shadow-xl
 p-5
 overflow-y-auto
 
+
 transition-transform
 duration-300
+
 
 ${
 
@@ -326,39 +436,50 @@ mobileOpen
 
 }
 
+
 `}
+
 
 >
 
 
+
 <div
+
 className="
 flex
 items-center
 justify-between
 mb-8
 "
+
 >
 
 
 <div
+
 className="
 flex
 gap-3
 items-center
 "
+
 >
+
 
 <BookOpen
 className="text-blue-600"
 />
 
 
+
 <h1
+
 className="
 font-semibold
 text-xl
 "
+
 >
 
 Ebook Vault
@@ -366,7 +487,9 @@ Ebook Vault
 </h1>
 
 
+
 </div>
+
 
 
 
@@ -375,11 +498,16 @@ Ebook Vault
 
 className="md:hidden"
 
-onClick={()=>setMobileOpen(false)}
+onClick={()=>
+setMobileOpen(false)
+}
 
 >
 
-<X size={22}/>
+<X
+size={22}
+/>
+
 
 </button>
 
@@ -390,13 +518,16 @@ onClick={()=>setMobileOpen(false)}
 
 
 
+
 <p
+
 className="
 text-xs
 uppercase
 text-gray-400
 mb-3
 "
+
 >
 
 Library
@@ -404,9 +535,14 @@ Library
 </p>
 
 
+
+
+
 {
 renderTree(tree)
 }
+
+
 
 
 </aside>
@@ -415,10 +551,16 @@ renderTree(tree)
 
 
 
+
+
+
 {/* READER */}
 
 
+
+
 <section
+
 
 className="
 flex-1
@@ -435,23 +577,89 @@ overflow-y-auto
 
 selectedFile
 
+
 ?
 
+
+(
+
+
+<div>
+
+
 <h2
+
 className="
 text-xl
 md:text-2xl
 font-semibold
+mb-8
+border-b
+pb-4
 "
+
 >
 
 {selectedFile}
 
 </h2>
 
+
+
+
+
+{
+
+loading
+
+
+?
+
+
+<p className="text-gray-400">
+
+Loading...
+
+</p>
+
+
+
 :
 
+
+<ReactMarkdown
+
+className="
+prose
+max-w-none
+prose-headings:text-gray-900
+prose-p:text-gray-700
+"
+
+>
+
+{content}
+
+
+</ReactMarkdown>
+
+
+}
+
+
+
+</div>
+
+
+)
+
+
+
+:
+
+
 <div
+
 className="
 h-full
 flex
@@ -459,31 +667,57 @@ items-center
 justify-center
 text-gray-400
 "
+
 >
 
-<div className="text-center">
+
+<div
+className="text-center"
+>
+
 
 <BookOpen
+
 size={45}
-className="mx-auto mb-4 opacity-30"
+
+className="
+mx-auto
+mb-4
+opacity-30
+"
+
 />
 
+
+
 <p>
+
 Select a chapter
+
 </p>
 
-</div>
+
 
 </div>
+
+
+
+</div>
+
+
 
 }
+
 
 
 </section>
 
 
 
+
+
 </main>
+
 
 );
 
