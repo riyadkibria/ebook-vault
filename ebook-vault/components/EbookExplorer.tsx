@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import type { TreeNode } from "@/lib/buildTree";
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  FileText,
+  BookOpen
+} from "lucide-react";
 
 
 export default function EbookExplorer({
@@ -11,9 +18,8 @@ export default function EbookExplorer({
 }) {
 
 
-  const [openFolders, setOpenFolders] = useState<
-    Set<string>
-  >(new Set());
+  const [openFolders, setOpenFolders] =
+    useState<Set<string>>(new Set());
 
 
   const [selectedFile, setSelectedFile] =
@@ -25,26 +31,25 @@ export default function EbookExplorer({
 
     setOpenFolders(prev => {
 
-      const newSet = new Set(prev);
+      const next = new Set(prev);
 
 
-      if(newSet.has(path)){
+      if(next.has(path)){
 
-        newSet.delete(path);
+        next.delete(path);
 
       }else{
 
-        newSet.add(path);
+        next.add(path);
 
       }
 
 
-      return newSet;
+      return next;
 
     });
 
   }
-
 
 
 
@@ -54,11 +59,20 @@ export default function EbookExplorer({
   ){
 
 
-    return nodes.map(node => {
+    return nodes.map(node=>{
+
+
+      const isFolder =
+        node.type==="folder";
 
 
       const isOpen =
         openFolders.has(node.path);
+
+
+
+      const isSelected =
+        selectedFile === node.path;
 
 
 
@@ -69,30 +83,15 @@ export default function EbookExplorer({
 
           <div
 
-            className="
-              cursor-pointer
-              hover:bg-gray-100
-              rounded
-              p-1
-            "
-
-            style={{
-              paddingLeft:
-              `${level * 20}px`
-            }}
-
-
             onClick={()=>{
 
 
-              if(node.type==="folder"){
+              if(isFolder){
 
                 toggleFolder(node.path);
 
               }
-
-
-              if(node.type==="file"){
+              else{
 
                 setSelectedFile(
                   node.path
@@ -103,31 +102,86 @@ export default function EbookExplorer({
 
             }}
 
+
+            className={`
+              flex
+              items-center
+              gap-2
+              px-3
+              py-2
+              rounded-lg
+              cursor-pointer
+              transition-all
+              duration-200
+
+              ${
+                isSelected
+                ?
+                "bg-blue-500/20 text-blue-400"
+                :
+                "text-gray-300 hover:bg-white/10"
+              }
+
+            `}
+
+
+            style={{
+              marginLeft:
+              `${level * 18}px`
+            }}
+
           >
 
 
             {
-              node.type==="folder"
+              isFolder
 
               ?
 
               (
                 isOpen
                 ?
-                "📂"
+                <ChevronDown size={16}/>
                 :
-                "📁"
+                <ChevronRight size={16}/>
               )
 
               :
 
-              "📄"
+              <span className="w-4"/>
             }
 
 
-            {" "}
 
-            {node.name}
+            {
+              isFolder
+
+              ?
+
+              <Folder
+                size={17}
+                className="text-yellow-400"
+              />
+
+              :
+
+              <FileText
+                size={17}
+                className="text-blue-400"
+              />
+
+            }
+
+
+
+            <span
+              className="
+              text-sm
+              truncate
+              "
+            >
+              {node.name}
+            </span>
 
 
           </div>
@@ -136,13 +190,34 @@ export default function EbookExplorer({
 
 
           {
-            node.children &&
+            isFolder &&
             isOpen &&
-            renderTree(
-              node.children,
-              level+1
+
+            (
+
+              <div
+                className="
+                animate-in
+                fade-in
+                slide-in-from-top-2
+                duration-200
+                "
+              >
+
+                {
+                  node.children &&
+                  renderTree(
+                    node.children,
+                    level+1
+                  )
+                }
+
+              </div>
+
             )
+
           }
+
 
 
         </div>
@@ -158,76 +233,214 @@ export default function EbookExplorer({
 
 
 
-  return (
+return (
 
-    <main className="flex h-screen">
-
-
-      {/* LEFT */}
-
-      <aside
-        className="
-        w-1/3
-        border-r
-        p-4
-        overflow-auto
-        "
-      >
-
-        <h1 className="text-xl font-bold mb-5">
-          📚 Ebook Library
-        </h1>
+<div
+className="
+flex
+h-screen
+bg-[#0f1117]
+text-white
+overflow-hidden
+"
+>
 
 
-        {
-          renderTree(tree)
-        }
+{/* SIDEBAR */}
 
 
-      </aside>
+<aside
+
+className="
+w-[360px]
+border-r
+border-white/10
+bg-[#111318]
+p-5
+overflow-y-auto
+"
+
+>
+
+
+<div
+className="
+flex
+items-center
+gap-3
+mb-6
+"
+>
+
+<BookOpen
+size={25}
+className="text-blue-400"
+/>
+
+
+<h1
+className="
+text-xl
+font-semibold
+"
+>
+Ebook Vault
+</h1>
+
+
+</div>
 
 
 
-      {/* RIGHT */}
+<div
+className="
+text-xs
+uppercase
+tracking-wider
+text-gray-500
+mb-3
+"
+>
+
+Library
+
+</div>
 
 
-      <section className="flex-1 p-8">
+
+{
+
+renderTree(tree)
+
+}
 
 
-        {
-          selectedFile
-
-          ?
-
-          <div>
-
-            <h2 className="text-xl font-bold">
-              {selectedFile}
-            </h2>
+</aside>
 
 
-            <p className="mt-5">
-              Markdown content loading soon...
-            </p>
 
 
-          </div>
+
+{/* READER */}
 
 
-          :
+<section
 
-          <h2>
-            Select a markdown file
-          </h2>
+className="
+flex-1
+bg-[#0b0d12]
+p-10
+overflow-auto
+"
 
-        }
+>
 
 
-      </section>
+{
+
+selectedFile
+
+?
+
+(
+
+<div>
 
 
-    </main>
+<div
+className="
+border-b
+border-white/10
+pb-5
+mb-8
+"
+>
 
-  );
+
+<h2
+className="
+text-2xl
+font-semibold
+"
+>
+
+{selectedFile}
+
+</h2>
+
+
+</div>
+
+
+
+<div
+className="
+text-gray-400
+leading-8
+"
+>
+
+Markdown content will appear here...
+
+</div>
+
+
+</div>
+
+)
+
+
+:
+
+(
+
+<div
+className="
+h-full
+flex
+items-center
+justify-center
+text-gray-500
+"
+>
+
+<div
+className="text-center"
+>
+
+<BookOpen
+size={50}
+className="
+mx-auto
+mb-4
+opacity-40
+"
+/>
+
+
+<p>
+Select a chapter to start reading
+</p>
+
+
+</div>
+
+
+</div>
+
+)
+
+
+}
+
+
+</section>
+
+
+
+</div>
+
+);
+
 
 }
