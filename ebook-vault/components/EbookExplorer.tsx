@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { TreeNode } from "@/lib/buildTree";
 
 import ReactMarkdown from "react-markdown";
@@ -47,28 +47,128 @@ export default function EbookExplorer({
 
 
 
+  // Floating button position
+
+  const [menuPosition, setMenuPosition] =
+    useState({
+      x: 16,
+      y: 16,
+    });
+
+
+
+  const dragging = useRef(false);
+
+
+  const dragOffset = useRef({
+    x: 0,
+    y: 0,
+  });
+
+
+
+
+
+  function startDrag(
+    e: React.TouchEvent<HTMLButtonElement>
+  ) {
+
+    dragging.current = true;
+
+
+    dragOffset.current = {
+
+      x:
+        e.touches[0].clientX -
+        menuPosition.x,
+
+
+      y:
+        e.touches[0].clientY -
+        menuPosition.y,
+
+    };
+
+  }
+
+
+
+
+
+  function moveDrag(
+    e: React.TouchEvent<HTMLButtonElement>
+  ) {
+
+    if (!dragging.current)
+      return;
+
+
+
+    setMenuPosition({
+
+      x:
+        e.touches[0].clientX -
+        dragOffset.current.x,
+
+
+      y:
+        e.touches[0].clientY -
+        dragOffset.current.y,
+
+    });
+
+
+  }
+
+
+
+
+
+  function stopDrag(){
+
+    dragging.current = false;
+
+  }
+
+
+
+
+
 
 
   function toggleFolder(path:string){
 
+
     setOpenFolders(prev=>{
+
 
       const next = new Set(prev);
 
 
+
       if(next.has(path)){
+
         next.delete(path);
+
       }
       else{
+
         next.add(path);
+
       }
+
 
 
       return next;
 
+
     });
 
+
   }
+
+
+
 
 
 
@@ -76,21 +176,31 @@ export default function EbookExplorer({
 
   async function openFile(path:string){
 
+
     setSelectedFile(path);
+
 
     setMobileOpen(false);
 
+
     setLoading(true);
+
+
 
     const markdown =
       await getFileContent(path);
 
 
+
     setContent(markdown);
+
 
     setLoading(false);
 
+
   }
+
+
 
 
 
@@ -121,25 +231,33 @@ export default function EbookExplorer({
 
 
 
+
+
       return (
 
-        <div key={node.path}>
+        <div
+          key={node.path}
+        >
 
 
           <div
 
+
             onClick={()=>{
+
 
               if(folder){
 
                 toggleFolder(node.path);
 
               }
+
               else{
 
                 openFile(node.path);
 
               }
+
 
             }}
 
@@ -174,6 +292,7 @@ export default function EbookExplorer({
               `${level * 18 + 8}px`
             }}
 
+
           >
 
 
@@ -185,24 +304,30 @@ export default function EbookExplorer({
               "
             >
 
-              {
-                folder &&
+            {
+              folder &&
 
-                (
-                  opened
+              (
+                opened
 
-                  ?
+                ?
 
-                  <ChevronDown size={16}/>
+                <ChevronDown
+                  size={16}
+                />
 
-                  :
+                :
 
-                  <ChevronRight size={16}/>
+                <ChevronRight
+                  size={16}
+                />
 
-                )
-              }
+              )
+            }
+
 
             </span>
+
 
 
 
@@ -215,31 +340,38 @@ export default function EbookExplorer({
               "
             >
 
-              {
-                folder
 
-                ?
+            {
+              folder
 
-                <Folder
-                  size={17}
-                  className="text-amber-500"
-                />
+              ?
 
-                :
+              <Folder
+                size={17}
+                className="text-amber-500"
+              />
 
-                <FileText
-                  size={17}
-                  className="text-blue-500"
-                />
 
-              }
+              :
+
+              <FileText
+                size={17}
+                className="text-blue-500"
+              />
+
+
+            }
+
 
             </span>
 
 
 
 
-            <span className="truncate">
+
+            <span
+              className="truncate"
+            >
 
               {node.name}
 
@@ -253,21 +385,23 @@ export default function EbookExplorer({
 
 
 
-
           {
             folder &&
             opened &&
             node.children &&
 
+
             renderTree(
               node.children,
               level + 1
             )
+
           }
 
 
 
         </div>
+
 
       );
 
@@ -276,6 +410,7 @@ export default function EbookExplorer({
 
 
   }
+
 
 
 
@@ -298,32 +433,67 @@ overflow-hidden
 >
 
 
-{/* MOBILE MENU BUTTON */}
+
+
+
+{/* FLOATING MOBILE MENU */}
 
 
 <button
 
-onClick={() =>
-  setMobileOpen(true)
-}
+
+onClick={()=>setMobileOpen(true)}
+
+
+onTouchStart={startDrag}
+
+
+onTouchMove={moveDrag}
+
+
+onTouchEnd={stopDrag}
+
+
+
+style={{
+
+left:
+menuPosition.x,
+
+
+top:
+menuPosition.y,
+
+}}
+
 
 
 className="
 md:hidden
 fixed
-top-4
-left-4
 z-50
-bg-white
-shadow-lg
+w-9
+h-9
 rounded-full
-p-3
+bg-white/60
+backdrop-blur-md
 border
+border-gray-200
+shadow-md
+flex
+items-center
+justify-center
+active:scale-90
+transition
 "
 
 >
 
-<Menu size={22}/>
+
+<Menu
+size={16}
+/>
+
 
 </button>
 
@@ -332,16 +502,21 @@ border
 
 
 
-{/* OVERLAY */}
+
+
+{/* MOBILE OVERLAY */}
+
 
 {
+
 mobileOpen &&
+
 
 <div
 
-onClick={() =>
-  setMobileOpen(false)
-}
+
+onClick={()=>setMobileOpen(false)}
+
 
 className="
 fixed
@@ -353,7 +528,12 @@ md:hidden
 
 />
 
+
 }
+
+
+
+
 
 
 
@@ -385,21 +565,24 @@ duration-300
 
 
 ${
-  mobileOpen
 
-  ?
+mobileOpen
 
-  "translate-x-0"
+?
 
-  :
+"translate-x-0"
 
-  "-translate-x-full md:translate-x-0"
+:
+
+"-translate-x-full md:translate-x-0"
+
 }
 
 `}
 
 
 >
+
 
 
 <div
@@ -424,10 +607,15 @@ items-center
 
 >
 
+
 <BookOpen
+
 size={24}
+
 className="text-blue-600"
+
 />
+
 
 
 <h1
@@ -444,7 +632,10 @@ Ebook Vault
 </h1>
 
 
+
 </div>
+
+
 
 
 
@@ -453,19 +644,22 @@ Ebook Vault
 
 className="md:hidden"
 
-onClick={() =>
-  setMobileOpen(false)
-}
+onClick={()=>setMobileOpen(false)}
 
 >
 
-<X size={22}/>
+<X
+size={22}
+/>
+
 
 </button>
 
 
 
 </div>
+
+
 
 
 
@@ -489,6 +683,7 @@ Library
 
 
 
+
 {
 renderTree(tree)
 }
@@ -496,7 +691,10 @@ renderTree(tree)
 
 
 
+
 </aside>
+
+
 
 
 
@@ -529,7 +727,6 @@ selectedFile
 
 ?
 
-(
 
 <div>
 
@@ -559,7 +756,9 @@ pb-4
 
 loading
 
+
 ?
+
 
 <p className="text-gray-400">
 
@@ -569,6 +768,7 @@ Loading...
 
 
 :
+
 
 <div
 
@@ -598,8 +798,6 @@ prose-p:text-gray-700
 
 </div>
 
-)
-
 
 
 :
@@ -618,7 +816,9 @@ text-gray-400
 >
 
 
-<div className="text-center">
+<div
+className="text-center"
+>
 
 
 <BookOpen
@@ -641,8 +841,8 @@ Select a chapter
 </p>
 
 
-</div>
 
+</div>
 
 
 </div>
