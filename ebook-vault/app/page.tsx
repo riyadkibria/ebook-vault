@@ -17,19 +17,54 @@ export default async function Home() {
   const files = await getRepoTree();
 
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold mb-6">
-        My Ebook Library
+    <main className="min-h-screen bg-gray-50 p-8">
+
+      <h1 className="text-4xl font-bold mb-8">
+        📚 My Ebook Library
       </h1>
 
-      <div>
+
+      <div className="bg-white rounded-lg shadow p-6">
+
         {files.map((file) => (
-          <div key={file.sha} className="mb-2">
-            {file.type === "tree" ? "📁" : "📄"}{" "}
-            {file.path}
+
+          <div
+            key={file.sha}
+            className="
+              flex
+              items-center
+              gap-3
+              py-2
+              px-3
+              rounded
+              hover:bg-gray-100
+              transition
+              cursor-pointer
+            "
+          >
+
+            <span className="text-xl">
+
+              {file.type === "tree"
+                ? "📁"
+                : "📄"}
+
+            </span>
+
+
+            <span className="text-gray-800">
+
+              {file.path}
+
+            </span>
+
+
           </div>
+
         ))}
+
       </div>
+
     </main>
   );
 }
