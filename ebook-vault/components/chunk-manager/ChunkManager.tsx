@@ -1,215 +1,144 @@
 "use client";
 
 import {
-    useMemo,
-    useState
+  useMemo,
+  useState
 } from "react";
 
 import {
-    Copy,
-    Check,
-    ChevronLeft,
-    ChevronRight
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 
 import {
-    splitIntoChunks
+  splitIntoChunks
 } from "@/lib/chunk";
-
-
-import ChunkStats from "./ChunkStats";
-
-import ChunkSizeSelector from "./ChunkSizeSelector";
-
-import ChunkProgress from "./ChunkProgress";
 
 
 
 
 interface Props {
 
-    content:string;
+content:string;
 
-    filename?:string;
+filename?:string;
+
+}
+
+
+
+export default function ChunkManager({
+
+content,
+
+filename="Document"
+
+}:Props){
+
+
+
+const [chunkSize,setChunkSize]
+=
+useState(1500);
+
+
+
+const [current,setCurrent]
+=
+useState(0);
+
+
+
+const [copied,setCopied]
+=
+useState(false);
+
+
+
+
+
+const chunks =
+useMemo(()=>
+
+
+splitIntoChunks(
+
+content,
+
+chunkSize
+
+)
+
+
+,[content,chunkSize]);
+
+
+
+
+
+const chunk =
+chunks[current];
+
+
+
+
+
+if(!chunk)
+
+return null;
+
+
+
+
+
+
+
+async function copyChunk(){
+
+
+const text=
+
+`
+Book: ${filename}
+
+Chunk ${current+1}/${chunks.length}
+
+${chunk.text}
+`;
+
+
+
+await navigator.clipboard.writeText(text);
+
+
+
+setCopied(true);
+
+
+setTimeout(()=>{
+
+setCopied(false)
+
+},1500);
+
+
 
 }
 
 
 
 
-export default function ChunkManager({
 
-    content,
 
-    filename="Document"
+const progress =
+Math.round(
 
-}:Props){
+((current+1)/chunks.length)*100
 
-
-
-    const [chunkSize,setChunkSize]
-    =
-    useState(1500);
-
-
-
-    const [currentChunk,setCurrentChunk]
-    =
-    useState(0);
-
-
-
-    const [copied,setCopied]
-    =
-    useState(false);
-
-
-
-
-    const chunks =
-    useMemo(()=>{
-
-        return splitIntoChunks(
-
-            content,
-
-            chunkSize
-
-        );
-
-    },[
-        content,
-        chunkSize
-    ]);
-
-
-
-
-
-    const chunk =
-    chunks[currentChunk];
-
-
-
-
-
-    function copyText(text:string){
-
-
-        navigator.clipboard.writeText(text);
-
-
-        setCopied(true);
-
-
-
-        setTimeout(()=>{
-
-            setCopied(false);
-
-        },2000);
-
-
-    }
-
-
-
-
-
-    function copyCurrentChunk(){
-
-
-        if(!chunk)
-            return;
-
-
-
-        const header =
-
-`
-Book: ${filename}
-
-Chunk:
-${currentChunk+1}/${chunks.length}
-
-Words:
-${chunk.words}
-
-----------------------------
-
-`;
-
-
-
-        copyText(
-
-            header + chunk.text
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-    function nextChunk(){
-
-
-        setCurrentChunk(prev=>{
-
-
-            if(prev>=chunks.length-1)
-
-                return prev;
-
-
-            return prev+1;
-
-        });
-
-
-    }
-
-
-
-
-
-    function previousChunk(){
-
-
-        setCurrentChunk(prev=>{
-
-
-            if(prev<=0)
-
-                return 0;
-
-
-            return prev-1;
-
-        });
-
-
-    }
-
-
-
-
-
-
-
-    if(!content){
-
-
-        return null;
-
-
-    }
+);
 
 
 
@@ -218,15 +147,19 @@ ${chunk.words}
 
 return (
 
-
 <div
 
 className="
-border
+sticky
+top-0
+z-20
+mb-6
 rounded-xl
-bg-gray-50
-p-4
-mb-8
+border
+bg-white/90
+backdrop-blur
+shadow-sm
+p-3
 "
 
 >
@@ -240,43 +173,60 @@ flex
 flex-wrap
 items-center
 justify-between
-gap-4
-mb-4
+gap-3
 "
 
 >
 
 
 
-<h3
+<div
+
+className="
+flex
+items-center
+gap-3
+text-sm
+"
+
+>
+
+
+<span
 
 className="
 font-semibold
-text-lg
 "
 
 >
 
-AI Chunk Manager
+AI Chunk
 
-</h3>
-
-
+</span>
 
 
-<ChunkSizeSelector
 
-value={chunkSize}
+<span className="text-gray-500">
 
-onChange={(size)=>{
+{current+1}/{chunks.length}
 
-    setChunkSize(size);
+</span>
 
-    setCurrentChunk(0);
 
-}}
 
-/>
+<span className="text-gray-500">
+
+{chunk.words} words
+
+</span>
+
+
+
+<span className="hidden sm:inline text-gray-500">
+
+~{chunk.estimatedTokens} tokens
+
+</span>
 
 
 
@@ -287,25 +237,110 @@ onChange={(size)=>{
 
 
 
-<ChunkStats
 
-chunk={chunk}
+<select
 
-total={chunks.length}
+
+value={chunkSize}
+
+
+onChange={(e)=>{
+
+
+setChunkSize(
+
+Number(e.target.value)
+
+);
+
+
+setCurrent(0);
+
+
+}}
+
+
+className="
+text-sm
+border
+rounded-lg
+px-2
+py-1
+bg-white
+"
+
+>
+
+
+<option value={500}>
+500
+</option>
+
+<option value={1000}>
+1000
+</option>
+
+<option value={1500}>
+1500
+</option>
+
+<option value={3000}>
+3000
+</option>
+
+<option value={5000}>
+5000
+</option>
+
+
+</select>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div
+
+className="
+h-1.5
+bg-gray-200
+rounded-full
+mt-3
+overflow-hidden
+"
+
+>
+
+
+<div
+
+className="
+h-full
+bg-blue-600
+transition-all
+"
+
+style={{
+
+width:`${progress}%`
+
+}}
+
 
 />
 
 
+</div>
 
 
-
-<ChunkProgress
-
-current={currentChunk}
-
-total={chunks.length}
-
-/>
 
 
 
@@ -317,42 +352,31 @@ total={chunks.length}
 
 className="
 flex
-items-center
 justify-between
-mt-5
-gap-3
+items-center
+mt-3
 "
 
 >
-
 
 
 
 <button
 
-onClick={previousChunk}
+disabled={current===0}
 
-disabled={currentChunk===0}
+onClick={()=>setCurrent(c=>c-1)}
 
 className="
-flex
-items-center
-gap-1
-px-3
-py-2
+p-2
 rounded-lg
 border
-bg-white
-disabled:opacity-40
+disabled:opacity-30
 "
 
 >
 
-
-<ChevronLeft size={16}/>
-
-Previous
-
+<ChevronLeft size={18}/>
 
 </button>
 
@@ -365,7 +389,7 @@ Previous
 
 <button
 
-onClick={copyCurrentChunk}
+onClick={copyChunk}
 
 className="
 flex
@@ -376,6 +400,7 @@ py-2
 rounded-lg
 bg-blue-600
 text-white
+text-sm
 "
 
 >
@@ -389,7 +414,7 @@ copied
 
 <>
 
-<Check size={16}/>
+<Check size={15}/>
 
 Copied
 
@@ -400,14 +425,13 @@ Copied
 
 <>
 
-<Copy size={16}/>
+<Copy size={15}/>
 
 Copy Chunk
 
 </>
 
 }
-
 
 
 </button>
@@ -421,31 +445,20 @@ Copy Chunk
 
 <button
 
-onClick={nextChunk}
+disabled={current===chunks.length-1}
 
-disabled={
-currentChunk>=chunks.length-1
-}
+onClick={()=>setCurrent(c=>c+1)}
 
 className="
-flex
-items-center
-gap-1
-px-3
-py-2
+p-2
 rounded-lg
 border
-bg-white
-disabled:opacity-40
+disabled:opacity-30
 "
 
 >
 
-
-Next
-
-<ChevronRight size={16}/>
-
+<ChevronRight size={18}/>
 
 </button>
 
@@ -453,19 +466,19 @@ Next
 
 
 
-</div>
-
-
-
-
-
 
 
 </div>
 
+
+
+
+
+</div>
 
 
 );
+
 
 
 }
