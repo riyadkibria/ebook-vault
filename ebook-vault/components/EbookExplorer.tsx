@@ -1,11 +1,23 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type { TreeNode } from "@/lib/buildTree";
+import {
+  useRef,
+  useState
+} from "react";
+
+import type {
+  TreeNode
+} from "@/lib/buildTree";
 
 import ReactMarkdown from "react-markdown";
 
-import { getFileContent } from "@/lib/github";
+import {
+  getFileContent
+} from "@/lib/github";
+
+
+import ChunkManager from "@/components/chunk-manager/ChunkManager";
+
 
 import {
   ChevronRight,
@@ -15,69 +27,100 @@ import {
   BookOpen,
   Menu,
   X,
-  Copy,
-  Check,
-  Scissors,
 } from "lucide-react";
 
 
 
+
+
 export default function EbookExplorer({
+
   tree,
+
 }: {
+
   tree: TreeNode[];
+
 }) {
 
 
-  const [openFolders,setOpenFolders] =
-    useState<Set<string>>(new Set());
 
-
-  const [selectedFile,setSelectedFile] =
-    useState("");
-
-
-  const [content,setContent] =
-    useState("");
-
-
-  const [loading,setLoading] =
-    useState(false);
-
-
-  const [mobileOpen,setMobileOpen] =
-    useState(false);
-
-
-  const [copied,setCopied] =
-    useState(false);
-
-
-  const [chunkCopied,setChunkCopied] =
-    useState(false);
+  const [
+    openFolders,
+    setOpenFolders
+  ]
+  =
+  useState<Set<string>>(new Set());
 
 
 
+  const [
+    selectedFile,
+    setSelectedFile
+  ]
+  =
+  useState("");
 
-  // floating menu
 
-  const [menuPosition,setMenuPosition] =
-    useState({
-      x:16,
-      y:16,
-    });
+
+  const [
+    content,
+    setContent
+  ]
+  =
+  useState("");
+
+
+
+  const [
+    loading,
+    setLoading
+  ]
+  =
+  useState(false);
+
+
+
+  const [
+    mobileOpen,
+    setMobileOpen
+  ]
+  =
+  useState(false);
+
+
+
+
+  const [
+    menuPosition,
+    setMenuPosition
+  ]
+  =
+  useState({
+
+    x:16,
+
+    y:16,
+
+  });
+
+
 
 
   const dragging =
-    useRef(false);
+  useRef(false);
+
+
 
 
   const dragOffset =
-    useRef({
-      x:0,
-      y:0,
-    });
+  useRef({
 
+    x:0,
+
+    y:0,
+
+  });
 
 
 
@@ -87,10 +130,13 @@ export default function EbookExplorer({
     e:React.TouchEvent<HTMLButtonElement>
   ){
 
+
     dragging.current=true;
 
 
+
     dragOffset.current={
+
 
       x:
       e.touches[0].clientX -
@@ -101,7 +147,9 @@ export default function EbookExplorer({
       e.touches[0].clientY -
       menuPosition.y,
 
+
     };
+
 
   }
 
@@ -114,8 +162,11 @@ export default function EbookExplorer({
     e:React.TouchEvent<HTMLButtonElement>
   ){
 
+
     if(!dragging.current)
+
       return;
+
 
 
     setMenuPosition({
@@ -129,7 +180,9 @@ export default function EbookExplorer({
       e.touches[0].clientY -
       dragOffset.current.y,
 
+
     });
+
 
   }
 
@@ -149,29 +202,35 @@ export default function EbookExplorer({
 
 
 
-
   function toggleFolder(path:string){
 
+
     setOpenFolders(prev=>{
+
 
       const next =
       new Set(prev);
 
 
+
       if(next.has(path))
+
         next.delete(path);
 
+
       else
+
         next.add(path);
+
 
 
       return next;
 
+
     });
 
+
   }
-
-
 
 
 
@@ -181,6 +240,7 @@ export default function EbookExplorer({
 
   async function openFile(path:string){
 
+
     setSelectedFile(path);
 
     setMobileOpen(false);
@@ -188,147 +248,19 @@ export default function EbookExplorer({
     setLoading(true);
 
 
+
     const markdown =
     await getFileContent(path);
 
 
+
     setContent(markdown);
+
 
     setLoading(false);
 
-  }
 
-
-
-
-
-
-
-
-
-  async function copyMarkdown(){
-
-
-    if(!content)
-      return;
-
-
-    await navigator.clipboard.writeText(
-      content
-    );
-
-
-    setCopied(true);
-
-
-    setTimeout(()=>{
-
-      setCopied(false);
-
-    },2000);
-
-  }
-
-
-
-
-
-
-
-  function getFirstChunk(
-    text:string,
-    limit:number=1500
-  ){
-
-
-    const words =
-    text.split(/\s+/);
-
-
-
-    if(words.length<=limit)
-      return text;
-
-
-
-    let chunk =
-    words
-    .slice(0,limit)
-    .join(" ");
-
-
-
-    const remaining =
-    text.substring(
-      chunk.length
-    );
-
-
-
-    const nextLine =
-    remaining.split("\n")[0];
-
-
-
-    chunk += nextLine;
-
-
-
-    return chunk.trim();
-
-  }
-
-
-
-
-
-
-
-
-  async function copyFirstChunk(){
-
-
-    if(!content)
-      return;
-
-
-
-    const chunk =
-    getFirstChunk(
-      content,
-      1500
-    );
-
-
-
-    await navigator.clipboard.writeText(
-      chunk
-    );
-
-
-
-    setChunkCopied(true);
-
-
-
-    setTimeout(()=>{
-
-      setChunkCopied(false);
-
-    },2000);
-
-
-  }
-
-
-
-
-
-
-
-
-
-  function renderTree(
+  } function renderTree(
     nodes:TreeNode[],
     level=0
   ){
@@ -351,172 +283,237 @@ export default function EbookExplorer({
 
 
 
+
+
       return (
 
+
       <div
+
       key={node.path}
+
       >
 
 
-      <div
 
 
-      onClick={()=>{
+        <div
 
 
-        if(folder)
-
-          toggleFolder(node.path);
+        onClick={()=>{
 
 
-        else
+          if(folder)
 
-          openFile(node.path);
-
-
-      }}
+            toggleFolder(node.path);
 
 
+          else
 
-      className={`
-
-      flex
-      items-center
-      h-10
-      rounded-lg
-      cursor-pointer
-      transition
-      px-2
-      text-sm
+            openFile(node.path);
 
 
-      ${
-        selected
+
+        }}
+
+
+
+
+        className={`
+
+        flex
+        items-center
+        h-10
+        rounded-lg
+        cursor-pointer
+        transition
+        px-2
+        text-sm
+
+
+        ${
+          selected
+
+          ?
+
+          "bg-blue-50 text-blue-700"
+
+          :
+
+          "hover:bg-gray-100 text-gray-700"
+
+        }
+
+
+        `}
+
+
+
+        style={{
+
+          paddingLeft:
+          `${level*18+8}px`
+
+        }}
+
+
+
+
+        >
+
+
+
+
+
+        <span
+
+        className="
+        w-5
+        flex
+        justify-center
+        "
+
+        >
+
+
+        {
+
+
+        folder &&
+
+        (
+
+          opened
+
+          ?
+
+          <ChevronDown size={16}/>
+
+          :
+
+          <ChevronRight size={16}/>
+
+
+        )
+
+
+        }
+
+
+        </span>
+
+
+
+
+
+
+
+
+        <span
+
+        className="
+        w-6
+        flex
+        justify-center
+        "
+
+        >
+
+
+
+        {
+
+
+        folder
+
 
         ?
 
-        "bg-blue-50 text-blue-700"
+
+        <Folder
+
+        size={17}
+
+        className="text-amber-500"
+
+        />
+
+
 
         :
 
-        "hover:bg-gray-100 text-gray-700"
 
-      }
+        <FileText
 
-      `}
+        size={17}
 
+        className="text-blue-500"
 
-      style={{
-        paddingLeft:
-        `${level*18+8}px`
-      }}
+        />
 
 
-
-      >
+        }
 
 
 
-      <span className="
-      w-5
-      flex
-      justify-center
-      ">
-
-      {
-
-      folder &&
-
-      (
-
-      opened
-
-      ?
-
-      <ChevronDown size={16}/>
-
-      :
-
-      <ChevronRight size={16}/>
-
-      )
-
-      }
-
-      </span>
+        </span>
 
 
 
 
 
-      <span className="
-      w-6
-      flex
-      justify-center
-      ">
 
 
-      {
-
-      folder
-
-      ?
-
-      <Folder
-      size={17}
-      className="text-amber-500"
-      />
+        <span className="truncate">
 
 
-      :
-
-      <FileText
-      size={17}
-      className="text-blue-500"
-      />
-
-      }
+        {node.name}
 
 
-      </span>
+        </span>
 
 
 
 
 
-      <span className="truncate">
 
-      {node.name}
 
-      </span>
+        </div>
+
+
+
+
+
+
+
+
+
+        {
+
+
+        folder &&
+
+        opened &&
+
+        node.children &&
+
+
+        renderTree(
+
+          node.children,
+
+          level+1
+
+        )
+
+
+        }
 
 
 
 
       </div>
 
-
-
-
-
-
-      {
-
-      folder &&
-      opened &&
-      node.children &&
-
-
-      renderTree(
-        node.children,
-        level+1
-      )
-
-      }
-
-
-
-      </div>
 
       );
 
@@ -538,6 +535,7 @@ return (
 
 <main
 
+
 className="
 flex
 h-screen
@@ -546,9 +544,6 @@ overflow-hidden
 "
 
 >
-
-
-
 
 
 
@@ -562,6 +557,7 @@ overflow-hidden
 onClick={()=>setMobileOpen(true)}
 
 
+
 onTouchStart={startDrag}
 
 onTouchMove={moveDrag}
@@ -570,11 +566,15 @@ onTouchEnd={stopDrag}
 
 
 
+
 style={{
+
 
 left:menuPosition.x,
 
+
 top:menuPosition.y,
+
 
 }}
 
@@ -612,12 +612,15 @@ transition
 
 
 
+{
+mobileOpen &&
 
-{mobileOpen &&
 
 <div
 
+
 onClick={()=>setMobileOpen(false)}
+
 
 className="
 fixed
@@ -627,11 +630,11 @@ z-40
 md:hidden
 "
 
+
 />
 
+
 }
-
-
 
 
 
@@ -648,6 +651,7 @@ md:hidden
 
 className={`
 
+
 fixed
 md:static
 z-50
@@ -663,61 +667,99 @@ transition-transform
 duration-300
 
 
+
 ${
+
 
 mobileOpen
 
+
 ?
+
 
 "translate-x-0"
 
+
 :
 
+
 "-translate-x-full md:translate-x-0"
+
 
 }
 
 
+
 `}
+
 
 
 >
 
 
 
-<div className="
+<div
+
+
+className="
 flex
 items-center
 justify-between
 mb-8
-">
+"
 
 
-<div className="
+>
+
+
+
+<div
+
+
+className="
 flex
 gap-3
 items-center
-">
+"
+
+
+>
+
 
 
 <BookOpen
+
 size={24}
+
 className="text-blue-600"
+
 />
 
 
 
-<h1 className="
+
+
+<h1
+
+
+className="
 font-semibold
 text-xl
-">
+"
+
+
+>
 
 Ebook Vault
 
 </h1>
 
 
+
 </div>
+
+
+
 
 
 
@@ -725,16 +767,23 @@ Ebook Vault
 
 <button
 
+
 className="md:hidden"
+
 
 onClick={()=>setMobileOpen(false)}
 
+
 >
+
 
 <X size={22}/>
 
 
 </button>
+
+
+
 
 
 </div>
@@ -743,39 +792,49 @@ onClick={()=>setMobileOpen(false)}
 
 
 
-<p className="
+
+
+<p
+
+
+className="
 text-xs
 uppercase
 text-gray-400
 mb-3
-">
+"
+
+
+>
+
 
 Library
+
 
 </p>
 
 
 
 
-{renderTree(tree)}
+
+
+
+
+{
+
+renderTree(tree)
+
+}
+
 
 
 
 </aside>
-
-
-
-
-
-
-
-
-
 {/* READER */}
 
 
-
 <section
+
 
 className="
 flex-1
@@ -785,176 +844,58 @@ md:p-10
 overflow-y-auto
 "
 
+
 >
 
 
 {
+
 
 selectedFile
 
 
 ?
 
+
 <div>
 
 
-<div className="
-flex
-items-center
-justify-between
-gap-3
+
+<div
+
+
+className="
 mb-8
 border-b
 pb-4
-">
+"
 
 
-<h2 className="
+>
+
+
+
+<h2
+
+
+className="
 text-xl
 md:text-2xl
 font-semibold
 truncate
-">
+"
+
+
+>
+
 
 {selectedFile}
+
 
 </h2>
 
 
 
-
-
-
-<div className="
-flex
-gap-2
-">
-
-
-<button
-
-onClick={copyMarkdown}
-
-disabled={!content}
-
-
-className="
-flex
-items-center
-gap-2
-px-3
-py-2
-rounded-lg
-border
-bg-gray-50
-hover:bg-gray-100
-text-sm
-transition
-disabled:opacity-40
-"
-
->
-
-
-{
-
-copied
-
-?
-
-<>
-
-<Check size={16}/>
-
-Copied
-
-</>
-
-
-:
-
-<>
-
-<Copy size={16}/>
-
-Copy
-
-</>
-
-
-}
-
-
-</button>
-
-
-
-
-
-
-
-<button
-
-onClick={copyFirstChunk}
-
-disabled={!content}
-
-
-className="
-flex
-items-center
-gap-2
-px-3
-py-2
-rounded-lg
-border
-bg-blue-50
-hover:bg-blue-100
-text-sm
-transition
-disabled:opacity-40
-"
-
->
-
-
-{
-
-chunkCopied
-
-?
-
-<>
-
-<Check size={16}/>
-
-Copied
-
-</>
-
-
-:
-
-<>
-
-<Scissors size={16}/>
-
-1500
-
-</>
-
-
-}
-
-
-
-</button>
-
-
-
-</div>
-
-
 </div>
 
 
@@ -963,47 +904,88 @@ Copied
 
 
 
+
+
 {
+
 
 loading
 
 
+
 ?
 
-<p className="text-gray-400">
+
+<p
+
+className="text-gray-400"
+
+>
 
 Loading...
 
 </p>
 
 
+
 :
 
+<>
 
-<div className="
+
+
+{/* AI CHUNK MANAGER */}
+
+
+
+<ChunkManager
+
+
+content={content}
+
+
+/>
+
+
+<div
+
+
+className="
 prose
 max-w-none
 prose-headings:text-gray-900
 prose-p:text-gray-700
-">
+"
+
+
+>
+
 
 
 <ReactMarkdown>
 
+
 {content}
+
 
 </ReactMarkdown>
 
 
+
 </div>
+
+
+
+</>
+
 
 
 }
 
 
 
-</div>
 
+</div>
 
 
 
@@ -1011,32 +993,57 @@ prose-p:text-gray-700
 :
 
 
-<div className="
+
+
+<div
+
+
+className="
 h-full
 flex
 items-center
 justify-center
 text-gray-400
-">
+"
 
 
-<div className="text-center">
+>
+
+
+
+<div
+
+className="text-center"
+
+
+>
+
 
 
 <BookOpen
+
+
 size={45}
+
+
 className="
 mx-auto
 mb-4
 opacity-30
 "
+
+
 />
+
+
 
 
 
 <p>
 
+
 Select a chapter
+
 
 </p>
 
@@ -1050,7 +1057,10 @@ Select a chapter
 
 
 
+
+
 }
+
 
 
 
@@ -1060,9 +1070,11 @@ Select a chapter
 
 
 
-
 </main>
 
+
 );
+
+
 
 }
