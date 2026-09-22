@@ -2,31 +2,55 @@
 
 
 import {
+
   useEffect,
+
   useState
+
 } from "react";
 
 
 
-type Status =
+
+
+export type Status =
+
   | "unread"
+
   | "reading"
+
   | "completed";
 
 
 
+
+
 const KEY =
-"ebook-reading-status";
+
+  "ebook-reading-status";
+
+
+
+
 
 
 
 export function useReadingStatus(){
 
 
+
+
+
   const [
+
     statuses,
+
     setStatuses
+
   ] = useState<Record<string,Status>>({});
+
+
+
 
 
 
@@ -35,16 +59,37 @@ export function useReadingStatus(){
 
 
     const saved =
+
       localStorage.getItem(KEY);
+
 
 
     if(saved){
 
-      setStatuses(
-        JSON.parse(saved)
-      );
+
+      try{
+
+
+        setStatuses(
+
+          JSON.parse(saved)
+
+        );
+
+
+      }
+
+      catch{
+
+
+        localStorage.removeItem(KEY);
+
+
+      }
+
 
     }
+
 
 
   },[]);
@@ -53,26 +98,19 @@ export function useReadingStatus(){
 
 
 
-  function updateStatus(
 
-    file:string,
 
-    status:Status
+
+
+  function save(
+
+    data:Record<string,Status>
 
   ){
 
 
-    const updated = {
 
-      ...statuses,
-
-      [file]:status
-
-    };
-
-
-
-    setStatuses(updated);
+    setStatuses(data);
 
 
 
@@ -80,7 +118,7 @@ export function useReadingStatus(){
 
       KEY,
 
-      JSON.stringify(updated)
+      JSON.stringify(data)
 
     );
 
@@ -91,9 +129,135 @@ export function useReadingStatus(){
 
 
 
-  function getStatus(
+
+
+
+
+  function updateStatus(
+
+
+    file:string,
+
+
+    status:Status
+
+
+  ){
+
+
+
+    save({
+
+
+      ...statuses,
+
+
+      [file]:status
+
+
+
+    });
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+  function toggleStatus(
+
 
     file:string
+
+
+  ){
+
+
+
+    const current =
+
+
+      statuses[file]
+
+      ??
+
+      "unread";
+
+
+
+
+
+
+
+    let next:Status;
+
+
+
+
+
+
+    if(current==="unread"){
+
+
+      next="reading";
+
+
+    }
+
+
+    else if(current==="reading"){
+
+
+      next="completed";
+
+
+    }
+
+
+    else{
+
+
+      next="unread";
+
+
+    }
+
+
+
+
+
+
+
+    updateStatus(
+
+      file,
+
+      next
+
+    );
+
+
+  }
+
+
+
+
+
+
+
+
+
+  function getStatus(
+
+
+    file:string
+
 
   ):Status{
 
@@ -115,15 +279,26 @@ export function useReadingStatus(){
 
 
 
+
+
+
   return {
+
 
     statuses,
 
+
     updateStatus,
+
+
+    toggleStatus,
+
 
     getStatus,
 
+
   };
+
 
 
 }
