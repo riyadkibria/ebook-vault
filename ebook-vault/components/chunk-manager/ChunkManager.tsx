@@ -1,10 +1,8 @@
 "use client";
 
-
 import {
   useState
 } from "react";
-
 
 import {
   Copy,
@@ -21,41 +19,34 @@ import type {
 } from "@/lib/chunk";
 
 
+import {
+  increaseCopyCount
+} from "@/lib/chunkProgress";
+
+
 
 interface Props {
 
-
   filename?: string;
-
 
   chunk: Chunk;
 
-
   current:number;
-
 
   total:number;
 
-
   chunkSize:number;
 
-
   setChunkSize:(
-
     value:number
-
   )=>void;
-
 
 
   next:()=>void;
 
-
   previous:()=>void;
 
-
 }
-
 
 
 
@@ -72,6 +63,7 @@ const sizes = [
   5000,
 
 ];
+
 
 
 
@@ -106,6 +98,14 @@ export default function ChunkManager({
 
 
 
+  const [
+    copyCount,
+    setCopyCount
+  ] = useState(0);
+
+
+
+
 
   async function copyChunk(){
 
@@ -122,7 +122,29 @@ ${chunk.text}`;
 
 
 
+
+
     await navigator.clipboard.writeText(text);
+
+
+
+    // Save copy count to Supabase
+
+    await increaseCopyCount(
+
+      "riyad",
+
+      `${filename}-chunk-${chunk.id}`
+
+    );
+
+
+
+    setCopyCount(
+
+      prev => prev + 1
+
+    );
 
 
 
@@ -143,6 +165,8 @@ ${chunk.text}`;
 
 
 
+
+
   const progress =
 
     total === 0
@@ -158,8 +182,8 @@ ${chunk.text}`;
 
 
 
-  return (
 
+  return (
 
 
     <div
@@ -191,7 +215,6 @@ ${chunk.text}`;
 
 
         {/* Header */}
-
 
 
         <div
@@ -250,6 +273,7 @@ ${chunk.text}`;
 
 
 
+
             <span
 
               className="
@@ -269,6 +293,7 @@ ${chunk.text}`;
 
 
 
+
             <span
 
               className="
@@ -284,6 +309,7 @@ ${chunk.text}`;
               {chunk.words} words
 
             </span>
+
 
 
 
@@ -319,6 +345,7 @@ ${chunk.text}`;
 
 
 
+
           <select
 
 
@@ -347,6 +374,7 @@ ${chunk.text}`;
               text-sm
               shadow-sm
             "
+
 
           >
 
@@ -486,12 +514,14 @@ ${chunk.text}`;
               disabled:opacity-30
             "
 
+
           >
 
             <ChevronLeft size={20}/>
 
 
           </button>
+
 
 
 
@@ -520,7 +550,9 @@ ${chunk.text}`;
               text-white
             "
 
+
           >
+
 
 
             {
@@ -533,13 +565,12 @@ ${chunk.text}`;
 
                 <Check size={16}/>
 
-                Copied
+                Copied {copyCount > 0 && copyCount}
 
               </>
 
 
               :
-
 
               <>
 
@@ -553,7 +584,10 @@ ${chunk.text}`;
             }
 
 
+
           </button>
+
+
 
 
 
@@ -583,6 +617,7 @@ ${chunk.text}`;
               disabled:opacity-30
             "
 
+
           >
 
             <ChevronRight size={20}/>
@@ -599,7 +634,10 @@ ${chunk.text}`;
 
 
 
+
       </div>
+
+
 
 
 
