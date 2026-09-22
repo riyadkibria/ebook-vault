@@ -1,8 +1,9 @@
+// File location:
+// components/chunk-manager/ChunkManager.tsx
+
 "use client";
 
-import {
-  useState
-} from "react";
+import { useState } from "react";
 
 import {
   Copy,
@@ -13,16 +14,9 @@ import {
   Hash,
 } from "lucide-react";
 
+import type { Chunk } from "@/lib/chunk";
 
-import type {
-  Chunk
-} from "@/lib/chunk";
-
-
-import {
-  increaseCopyCount
-} from "@/lib/chunkProgress";
-
+import { increaseCopyCount } from "@/lib/chunkProgress";
 
 
 interface Props {
@@ -37,10 +31,7 @@ interface Props {
 
   chunkSize:number;
 
-  setChunkSize:(
-    value:number
-  )=>void;
-
+  setChunkSize:(value:number)=>void;
 
   next:()=>void;
 
@@ -49,23 +40,13 @@ interface Props {
 }
 
 
-
 const sizes = [
-
   500,
-
   1000,
-
   1500,
-
   3000,
-
   5000,
-
 ];
-
-
-
 
 
 export default function ChunkManager({
@@ -86,24 +67,12 @@ export default function ChunkManager({
 
   previous,
 
-
 }:Props){
 
 
+  const [copied,setCopied] = useState(false);
 
-  const [
-    copied,
-    setCopied
-  ] = useState(false);
-
-
-
-  const [
-    copyCount,
-    setCopyCount
-  ] = useState(0);
-
-
+  const [copyCount,setCopyCount] = useState(0);
 
 
 
@@ -122,29 +91,34 @@ ${chunk.text}`;
 
 
 
-
-
     await navigator.clipboard.writeText(text);
 
 
 
-    // Save copy count to Supabase
-
-    await increaseCopyCount(
-
-      "riyad",
-
-      `${filename}-chunk-${chunk.id}`
-
-    );
+    try{
 
 
+      const newCount = await increaseCopyCount(
 
-    setCopyCount(
+        "riyad",
 
-      prev => prev + 1
+        `${filename}-chunk-${chunk.id}`
 
-    );
+      );
+
+
+      setCopyCount(newCount);
+
+
+
+    }catch(error){
+
+      console.error(
+        "Copy count update failed:",
+        error
+      );
+
+    }
 
 
 
@@ -159,11 +133,7 @@ ${chunk.text}`;
     },1500);
 
 
-
   }
-
-
-
 
 
 
@@ -171,9 +141,7 @@ ${chunk.text}`;
 
     total === 0
 
-    ?
-
-    0
+    ? 0
 
     :
 
@@ -181,10 +149,7 @@ ${chunk.text}`;
 
 
 
-
-
   return (
-
 
     <div
 
@@ -198,12 +163,12 @@ ${chunk.text}`;
     >
 
 
-
       <div
 
         className="
           rounded-2xl
           border
+          border-gray-200
           bg-white/80
           backdrop-blur-xl
           shadow-lg
@@ -213,9 +178,7 @@ ${chunk.text}`;
 
 
 
-
         {/* Header */}
-
 
         <div
 
@@ -224,14 +187,12 @@ ${chunk.text}`;
             flex-col
             gap-3
             p-4
-
             md:flex-row
             md:items-center
             md:justify-between
           "
 
         >
-
 
 
           <div
@@ -244,7 +205,6 @@ ${chunk.text}`;
             "
 
           >
-
 
 
             <span
@@ -272,8 +232,6 @@ ${chunk.text}`;
 
 
 
-
-
             <span
 
               className="
@@ -292,8 +250,6 @@ ${chunk.text}`;
 
 
 
-
-
             <span
 
               className="
@@ -309,7 +265,6 @@ ${chunk.text}`;
               {chunk.words} words
 
             </span>
-
 
 
 
@@ -338,10 +293,34 @@ ${chunk.text}`;
 
 
 
+            {/* Copy Counter */}
+
+            <span
+
+              className="
+                inline-flex
+                items-center
+                gap-2
+                rounded-full
+                bg-green-50
+                px-3
+                py-1
+                text-sm
+                font-medium
+                text-green-700
+              "
+
+            >
+
+              <Copy size={14}/>
+
+              {copyCount} copied
+
+            </span>
+
+
 
           </div>
-
-
 
 
 
@@ -373,16 +352,13 @@ ${chunk.text}`;
               py-2
               text-sm
               shadow-sm
+              outline-none
             "
-
 
           >
 
-
-
             {
               sizes.map(size=>(
-
 
                 <option
 
@@ -394,7 +370,6 @@ ${chunk.text}`;
 
                   {size} words
 
-
                 </option>
 
 
@@ -402,9 +377,7 @@ ${chunk.text}`;
             }
 
 
-
           </select>
-
 
 
 
@@ -414,9 +387,7 @@ ${chunk.text}`;
 
 
 
-
         {/* Progress */}
-
 
 
         <div
@@ -450,12 +421,12 @@ ${chunk.text}`;
                 via-indigo-500
                 to-purple-500
                 transition-all
+                duration-500
               "
 
               style={{
 
-                width:
-                `${progress}%`
+                width:`${progress}%`
 
               }}
 
@@ -465,17 +436,13 @@ ${chunk.text}`;
           </div>
 
 
-
         </div>
 
 
 
 
 
-
-
         {/* Controls */}
-
 
 
         <div
@@ -491,12 +458,11 @@ ${chunk.text}`;
 
 
 
-
           <button
 
 
             disabled={
-              current === 0
+              current===0
             }
 
 
@@ -511,19 +477,16 @@ ${chunk.text}`;
               justify-center
               rounded-xl
               border
+              transition
+              hover:bg-gray-100
               disabled:opacity-30
             "
-
 
           >
 
             <ChevronLeft size={20}/>
 
-
           </button>
-
-
-
 
 
 
@@ -548,11 +511,12 @@ ${chunk.text}`;
               text-sm
               font-medium
               text-white
+              shadow-md
+              transition
+              hover:scale-105
             "
 
-
           >
-
 
 
             {
@@ -565,7 +529,7 @@ ${chunk.text}`;
 
                 <Check size={16}/>
 
-                Copied {copyCount > 0 && copyCount}
+                Copied
 
               </>
 
@@ -584,12 +548,7 @@ ${chunk.text}`;
             }
 
 
-
           </button>
-
-
-
-
 
 
 
@@ -599,7 +558,7 @@ ${chunk.text}`;
 
 
             disabled={
-              current === total - 1
+              current===total-1
             }
 
 
@@ -614,18 +573,16 @@ ${chunk.text}`;
               justify-center
               rounded-xl
               border
+              transition
+              hover:bg-gray-100
               disabled:opacity-30
             "
-
 
           >
 
             <ChevronRight size={20}/>
 
-
           </button>
-
-
 
 
 
@@ -633,18 +590,11 @@ ${chunk.text}`;
 
 
 
-
-
       </div>
-
-
-
 
 
     </div>
 
-
   );
-
 
 }

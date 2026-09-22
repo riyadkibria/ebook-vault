@@ -1,6 +1,7 @@
-import {
-  supabase
-} from "./supabase";
+// File location:
+// lib/chunkProgress.ts
+
+import { supabase } from "./supabase";
 
 
 
@@ -10,27 +11,36 @@ export async function increaseCopyCount(
 
   chunkKey:string
 
-){
+):Promise<number>{
+
 
 
   const {
+
     data,
+
     error
 
   } = await supabase
 
     .from("chunk_progress")
 
-    .select("*")
+    .select("id, copy_count")
 
     .eq(
+
       "user_id",
+
       userId
+
     )
 
     .eq(
+
       "chunk_key",
+
       chunkKey
+
     )
 
     .single();
@@ -38,20 +48,27 @@ export async function increaseCopyCount(
 
 
 
-  // যদি database error হয়
-  // (record না থাকলে PGRST116 আসবে)
+
+  // Other database errors
 
   if(
+
     error &&
+
     error.code !== "PGRST116"
+
   ){
 
     console.error(
-      "Supabase error:",
+
+      "Supabase select error:",
+
       error
+
     );
 
-    return;
+
+    return 0;
 
   }
 
@@ -59,12 +76,20 @@ export async function increaseCopyCount(
 
 
 
-  // আগে থেকে row থাকলে count বাড়াবে
+  // Existing chunk
 
   if(data){
 
 
+
+    const newCount =
+
+      data.copy_count + 1;
+
+
+
     const {
+
       error:updateError
 
     } = await supabase
@@ -73,11 +98,9 @@ export async function increaseCopyCount(
 
       .update({
 
-        copy_count:
-          data.copy_count + 1,
+        copy_count:newCount,
 
-        updated_at:
-          new Date()
+        updated_at:new Date()
 
       })
 
@@ -91,13 +114,26 @@ export async function increaseCopyCount(
 
 
 
+
     if(updateError){
 
       console.error(
+
+        "Supabase update error:",
+
         updateError
+
       );
 
+
+      return data.copy_count;
+
     }
+
+
+
+    return newCount;
+
 
 
   }
@@ -106,40 +142,58 @@ export async function increaseCopyCount(
 
 
 
-  // নতুন chunk হলে নতুন row তৈরি করবে
+  // New chunk
 
-  else{
+  const {
+
+    data:insertData,
+
+    error:insertError
+
+  } = await supabase
+
+    .from("chunk_progress")
+
+    .insert({
+
+      user_id:userId,
+
+      chunk_key:chunkKey,
+
+      copy_count:1,
+
+      updated_at:new Date()
+
+    })
+
+    .select("copy_count")
+
+    .single();
 
 
-    const {
-      error:insertError
-
-    } = await supabase
-
-      .from("chunk_progress")
-
-      .insert({
-
-        user_id:userId,
-
-        chunk_key:chunkKey,
-
-        copy_count:1
-
-      });
 
 
 
-    if(insertError){
+  if(insertError){
 
-      console.error(
-        insertError
-      );
+    console.error(
 
-    }
+      "Supabase insert error:",
 
+      insertError
+
+    );
+
+
+    return 0;
 
   }
+
+
+
+
+
+  return insertData.copy_count;
 
 
 }
