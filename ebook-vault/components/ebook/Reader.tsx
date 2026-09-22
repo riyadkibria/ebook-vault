@@ -1,9 +1,20 @@
 "use client";
 
+
 import ReactMarkdown from "react-markdown";
-import { BookOpen } from "lucide-react";
+
+import { 
+  BookOpen 
+} from "lucide-react";
+
 
 import ChunkManager from "@/components/chunk-manager/ChunkManager";
+
+
+import { 
+  useReaderChunks 
+} from "./hooks/useReaderChunks";
+
 
 
 interface Props {
@@ -29,7 +40,31 @@ export default function Reader({
 }:Props){
 
 
+
+  const {
+
+    chunks,
+
+    current,
+
+    currentChunk,
+
+    chunkSize,
+
+    setChunkSize,
+
+    next,
+
+    previous,
+
+  } = useReaderChunks(content);
+
+
+
+
+
   if(!selectedFile){
+
 
     return (
 
@@ -75,6 +110,7 @@ export default function Reader({
 
         </div>
 
+
       </div>
 
     );
@@ -83,9 +119,13 @@ export default function Reader({
 
 
 
+
+
   return (
 
+
     <section
+
 
       className="
         flex-1
@@ -95,10 +135,13 @@ export default function Reader({
         to-white
       "
 
+
     >
 
 
+
       <div
+
 
         className="
           mx-auto
@@ -108,12 +151,18 @@ export default function Reader({
           lg:px-10
         "
 
+
       >
+
+
 
 
         {/* Header */}
 
+
+
         <div
+
 
           className="
             mb-8
@@ -121,9 +170,12 @@ export default function Reader({
             pb-4
           "
 
+
         >
 
+
           <h2
+
 
             className="
               truncate
@@ -132,11 +184,15 @@ export default function Reader({
               md:text-2xl
             "
 
+
           >
+
 
             {selectedFile}
 
+
           </h2>
+
 
 
         </div>
@@ -144,40 +200,90 @@ export default function Reader({
 
 
 
+
+
+
         {
+
+
           loading
+
 
           ?
 
+
           <div
+
 
             className="
               animate-pulse
               text-gray-400
             "
 
+
           >
+
 
             Loading chapter...
 
+
           </div>
+
+
+
 
 
           :
 
 
+
           <>
 
 
-            <ChunkManager
 
-              content={content}
+            {
+              currentChunk && (
 
-            />
+                <ChunkManager
+
+
+                  filename={selectedFile}
+
+
+                  chunk={currentChunk}
+
+
+                  current={current}
+
+
+                  total={chunks.length}
+
+
+                  chunkSize={chunkSize}
+
+
+                  setChunkSize={setChunkSize}
+
+
+                  next={next}
+
+
+                  previous={previous}
+
+
+                />
+
+              )
+            }
+
+
+
+
 
 
 
             <article
+
 
               className="
                 prose
@@ -190,21 +296,39 @@ export default function Reader({
                 prose-p:leading-8
               "
 
+
             >
+
+
 
               <ReactMarkdown>
 
-                {content}
+
+                {
+
+                  currentChunk?.text
+
+                  ??
+
+                  ""
+
+                }
+
 
               </ReactMarkdown>
+
 
 
             </article>
 
 
+
+
           </>
 
+
         }
+
 
 
 
@@ -212,6 +336,7 @@ export default function Reader({
 
 
     </section>
+
 
   );
 
