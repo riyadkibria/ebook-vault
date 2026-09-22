@@ -15,11 +15,7 @@ import {
 
 export type Status =
 
-  | "unread"
-
-  | "reading"
-
-  | "completed";
+  | "reading";
 
 
 
@@ -48,6 +44,7 @@ export function useReadingStatus(){
     setStatuses
 
   ] = useState<Record<string,Status>>({});
+
 
 
 
@@ -133,61 +130,17 @@ export function useReadingStatus(){
 
 
 
-  function updateStatus(
-
-
-    file:string,
-
-
-    status:Status
-
-
-  ){
-
-
-
-    save({
-
-
-      ...statuses,
-
-
-      [file]:status
-
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-
-
   function toggleStatus(
-
 
     file:string
 
-
   ){
 
 
 
-    const current =
+    const exists =
 
-
-      statuses[file]
-
-      ??
-
-      "unread";
+      statuses[file];
 
 
 
@@ -195,35 +148,42 @@ export function useReadingStatus(){
 
 
 
-    let next:Status;
+    const updated = {
+
+
+      ...statuses
+
+
+
+    };
 
 
 
 
 
 
-    if(current==="unread"){
 
 
-      next="reading";
+    if(exists){
+
+
+
+      // remove marker
+
+      delete updated[file];
+
 
 
     }
-
-
-    else if(current==="reading"){
-
-
-      next="completed";
-
-
-    }
-
 
     else{
 
 
-      next="unread";
+
+      // add marker
+
+      updated[file]="reading";
+
 
 
     }
@@ -234,13 +194,8 @@ export function useReadingStatus(){
 
 
 
-    updateStatus(
+    save(updated);
 
-      file,
-
-      next
-
-    );
 
 
   }
@@ -255,22 +210,13 @@ export function useReadingStatus(){
 
   function getStatus(
 
-
     file:string
 
+  ){
 
-  ):Status{
 
 
-    return (
-
-      statuses[file]
-
-      ??
-
-      "unread"
-
-    );
+    return statuses[file] ?? null;
 
 
   }
@@ -286,9 +232,6 @@ export function useReadingStatus(){
 
 
     statuses,
-
-
-    updateStatus,
 
 
     toggleStatus,
