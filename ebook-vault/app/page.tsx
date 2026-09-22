@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 
-import EbookExplorer from "@/components/EbookExplorer";
+import EbookExplorer from "@/components/ebook/EbookExplorer";
 import { getRepoTree } from "@/lib/github";
 import { buildTree } from "@/lib/buildTree";
 
