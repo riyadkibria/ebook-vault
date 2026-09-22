@@ -1,9 +1,15 @@
 // File location:
 // components/chunk-manager/ChunkManager.tsx
 
+
 "use client";
 
-import { useState } from "react";
+
+import {
+  useEffect,
+  useState
+} from "react";
+
 
 import {
   Copy,
@@ -14,9 +20,19 @@ import {
   Hash,
 } from "lucide-react";
 
+
 import type { Chunk } from "@/lib/chunk";
 
-import { increaseCopyCount } from "@/lib/chunkProgress";
+
+import {
+  increaseCopyCount
+} from "@/lib/chunkProgress";
+
+
+import {
+  getCopyCount
+} from "@/lib/getCopyCount";
+
 
 
 interface Props {
@@ -40,13 +56,22 @@ interface Props {
 }
 
 
+
 const sizes = [
+
   500,
+
   1000,
+
   1500,
+
   3000,
+
   5000,
+
 ];
+
+
 
 
 export default function ChunkManager({
@@ -70,13 +95,59 @@ export default function ChunkManager({
 }:Props){
 
 
+
   const [copied,setCopied] = useState(false);
+
 
   const [copyCount,setCopyCount] = useState(0);
 
 
 
+
+
+  /*
+    Load saved copy count
+    from Supabase after opening chunk
+  */
+
+  useEffect(()=>{
+
+
+    async function loadCopyCount(){
+
+
+      const count = await getCopyCount(
+
+        "riyad",
+
+        `${filename}-chunk-${chunk.id}`
+
+      );
+
+
+      setCopyCount(count);
+
+
+    }
+
+
+
+    loadCopyCount();
+
+
+
+  },[
+    filename,
+    chunk.id
+  ]);
+
+
+
+
+
+
   async function copyChunk(){
+
 
 
     const text =
@@ -91,7 +162,11 @@ ${chunk.text}`;
 
 
 
+
+
     await navigator.clipboard.writeText(text);
+
+
 
 
 
@@ -107,18 +182,26 @@ ${chunk.text}`;
       );
 
 
+
       setCopyCount(newCount);
 
 
 
     }catch(error){
 
+
       console.error(
+
         "Copy count update failed:",
+
         error
+
       );
 
+
     }
+
+
 
 
 
@@ -128,12 +211,18 @@ ${chunk.text}`;
 
     setTimeout(()=>{
 
+
       setCopied(false);
+
 
     },1500);
 
 
+
   }
+
+
+
 
 
 
@@ -149,7 +238,13 @@ ${chunk.text}`;
 
 
 
+
+
+
+
   return (
+
+
 
     <div
 
@@ -161,6 +256,7 @@ ${chunk.text}`;
       "
 
     >
+
 
 
       <div
@@ -178,7 +274,10 @@ ${chunk.text}`;
 
 
 
+
         {/* Header */}
+
+
 
         <div
 
@@ -195,6 +294,7 @@ ${chunk.text}`;
         >
 
 
+
           <div
 
             className="
@@ -205,6 +305,8 @@ ${chunk.text}`;
             "
 
           >
+
+
 
 
             <span
@@ -232,6 +334,9 @@ ${chunk.text}`;
 
 
 
+
+
+
             <span
 
               className="
@@ -250,6 +355,9 @@ ${chunk.text}`;
 
 
 
+
+
+
             <span
 
               className="
@@ -265,6 +373,9 @@ ${chunk.text}`;
               {chunk.words} words
 
             </span>
+
+
+
 
 
 
@@ -293,7 +404,14 @@ ${chunk.text}`;
 
 
 
-            {/* Copy Counter */}
+
+
+
+
+
+            {/* Permanent Copy Counter */}
+
+
 
             <span
 
@@ -314,13 +432,22 @@ ${chunk.text}`;
 
               <Copy size={14}/>
 
+
               {copyCount} copied
+
 
             </span>
 
 
 
+
+
           </div>
+
+
+
+
+
 
 
 
@@ -355,10 +482,14 @@ ${chunk.text}`;
               outline-none
             "
 
+
           >
 
+
             {
+
               sizes.map(size=>(
+
 
                 <option
 
@@ -370,14 +501,20 @@ ${chunk.text}`;
 
                   {size} words
 
+
                 </option>
 
 
+
               ))
+
             }
 
 
+
           </select>
+
+
 
 
 
@@ -387,7 +524,13 @@ ${chunk.text}`;
 
 
 
+
+
+
+
         {/* Progress */}
+
+
 
 
         <div
@@ -397,6 +540,7 @@ ${chunk.text}`;
           "
 
         >
+
 
 
           <div
@@ -409,6 +553,7 @@ ${chunk.text}`;
             "
 
           >
+
 
 
             <div
@@ -433,7 +578,9 @@ ${chunk.text}`;
             />
 
 
+
           </div>
+
 
 
         </div>
@@ -442,7 +589,13 @@ ${chunk.text}`;
 
 
 
+
+
+
+
         {/* Controls */}
+
+
 
 
         <div
@@ -458,12 +611,12 @@ ${chunk.text}`;
 
 
 
+
+
           <button
 
 
-            disabled={
-              current===0
-            }
+            disabled={current===0}
 
 
             onClick={previous}
@@ -482,11 +635,18 @@ ${chunk.text}`;
               disabled:opacity-30
             "
 
+
           >
+
 
             <ChevronLeft size={20}/>
 
+
           </button>
+
+
+
+
 
 
 
@@ -516,7 +676,9 @@ ${chunk.text}`;
               hover:scale-105
             "
 
+
           >
+
 
 
             {
@@ -531,10 +693,12 @@ ${chunk.text}`;
 
                 Copied
 
+
               </>
 
 
               :
+
 
               <>
 
@@ -542,10 +706,13 @@ ${chunk.text}`;
 
                 Copy Chunk
 
+
               </>
 
 
+
             }
+
 
 
           </button>
@@ -554,12 +721,14 @@ ${chunk.text}`;
 
 
 
+
+
+
+
           <button
 
 
-            disabled={
-              current===total-1
-            }
+            disabled={current===total-1}
 
 
             onClick={next}
@@ -578,11 +747,18 @@ ${chunk.text}`;
               disabled:opacity-30
             "
 
+
           >
+
+
 
             <ChevronRight size={20}/>
 
+
+
           </button>
+
+
 
 
 
@@ -590,11 +766,18 @@ ${chunk.text}`;
 
 
 
+
+
+
       </div>
+
 
 
     </div>
 
+
+
   );
+
 
 }
