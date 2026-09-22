@@ -1,78 +1,40 @@
 "use client";
 
-
 import {
-
   ChevronDown,
-
   ChevronRight,
-
   Folder,
-
   FileText,
-
   BookOpen,
-
   X,
-
-  Circle,
-
-  CheckCircle2,
-
 } from "lucide-react";
 
+import type { TreeNode } from "@/lib/buildTree";
 
-import type {
-  TreeNode
-} from "@/lib/buildTree";
-
-
-import {
-  useReadingStatus
-} from "./hooks/useReadingStatus";
-
-
+import { useReadingStatus } from "./hooks/useReadingStatus";
 
 
 interface Props {
 
-
   tree: TreeNode[];
-
 
   openFolders: Set<string>;
 
+  selectedFile: string;
 
-  selectedFile:string;
-
-
-
-  toggleFolder:(
-
+  toggleFolder: (
     path:string
+  ) => void;
 
-  )=>void;
-
-
-
-  openFile:(
-
+  openFile: (
     path:string
+  ) => void;
 
-  )=>void;
+  mobileOpen?: boolean;
 
-
-
-  mobileOpen?:boolean;
-
-
-
-  closeMobile?:()=>void;
-
+  closeMobile?: () => void;
 
 }
-
-
 
 
 
@@ -88,47 +50,28 @@ export default function Sidebar({
 
   openFile,
 
-  mobileOpen=false,
+  mobileOpen = false,
 
   closeMobile,
 
-}:Props){
+}: Props){
 
 
 
   const {
-
     getStatus,
-
-    updateStatus,
-
+    toggleStatus,
   } = useReadingStatus();
 
 
 
 
 
-
-
   function handleOpenFile(
-
     path:string
-
   ){
 
-
     openFile(path);
-
-
-
-    updateStatus(
-
-      path,
-
-      "reading"
-
-    );
-
 
   }
 
@@ -139,83 +82,58 @@ export default function Sidebar({
 
 
   function renderStatus(
-
     path:string
-
   ){
 
-
-    const status =
-      getStatus(path);
-
-
-
-
-    if(status==="completed"){
-
-      return (
-
-        <CheckCircle2
-
-          size={15}
-
-          className="
-            text-green-500
-            ml-auto
-          "
-
-        />
-
-      );
-
-    }
-
-
-
-
-
-    if(status==="reading"){
-
-
-      return (
-
-        <span
-
-          className="
-            ml-auto
-            h-2
-            w-2
-            rounded-full
-            bg-blue-500
-          "
-
-        />
-
-      );
-
-
-    }
-
-
+    const status = getStatus(path);
 
 
     return (
 
-      <Circle
+      <button
 
-        size={13}
+        onClick={(e)=>{
 
-        className="
-          text-gray-300
-          ml-auto
-        "
+          e.stopPropagation();
 
-      />
+          toggleStatus(path);
+
+        }}
+
+        className="ml-auto"
+
+        title={
+          status
+          ? "Remove marker"
+          : "Mark as reading"
+        }
+
+      >
+
+        <span
+
+          className={`
+            block
+            h-2.5
+            w-2.5
+            rounded-full
+            transition
+
+            ${
+              status === "reading"
+              ? "bg-blue-500"
+              : "border border-gray-300 bg-white"
+            }
+          `}
+
+        />
+
+      </button>
 
     );
 
-
   }
+
 
 
 
@@ -237,18 +155,16 @@ export default function Sidebar({
 
 
       const isFolder =
-        node.type==="folder";
+        node.type === "folder";
 
 
       const opened =
-        openFolders.has(
-          node.path
-        );
+        openFolders.has(node.path);
 
 
 
       const selected =
-        selectedFile===node.path;
+        selectedFile === node.path;
 
 
 
@@ -257,11 +173,8 @@ export default function Sidebar({
       return (
 
         <div
-
           key={node.path}
-
         >
-
 
 
           <button
@@ -276,16 +189,13 @@ export default function Sidebar({
                   node.path
                 );
 
-
               }
 
               else{
 
-
                 handleOpenFile(
                   node.path
                 );
-
 
               }
 
@@ -293,45 +203,23 @@ export default function Sidebar({
             }}
 
 
-
             className={`
-
               group
-
               flex
-
               w-full
-
               items-center
-
               gap-2
-
               rounded-xl
-
               py-2
-
               pr-3
-
               text-sm
-
               transition
 
-
               ${
-
                 selected
-
-                ?
-
-                "bg-blue-50 text-blue-700"
-
-                :
-
-                "text-gray-700 hover:bg-gray-100"
-
+                ? "bg-blue-50 text-blue-700"
+                : "text-gray-700 hover:bg-gray-100"
               }
-
-
             `}
 
 
@@ -339,8 +227,7 @@ export default function Sidebar({
             style={{
 
               paddingLeft:
-
-              `${level*18+10}px`
+                `${level * 18 + 10}px`
 
             }}
 
@@ -352,22 +239,15 @@ export default function Sidebar({
 
 
             <span
-
               className="
                 flex
                 w-5
                 justify-center
               "
-
             >
 
-
               {
-
-
-                isFolder &&
-
-                (
+                isFolder && (
 
                   opened
 
@@ -380,10 +260,7 @@ export default function Sidebar({
                   <ChevronRight size={16}/>
 
                 )
-
-
               }
-
 
             </span>
 
@@ -391,45 +268,28 @@ export default function Sidebar({
 
 
 
-
-
             {
-
-
               isFolder
-
 
               ?
 
-
               <Folder
-
 
                 size={17}
 
-                className="
-                  text-amber-500
-                "
-
+                className="text-amber-500"
 
               />
-
 
               :
 
-
               <FileText
-
 
                 size={17}
 
-                className="
-                  text-blue-500
-                "
-
+                className="text-blue-500"
 
               />
-
 
             }
 
@@ -437,15 +297,11 @@ export default function Sidebar({
 
 
 
-
-
             <span
-
               className="
                 truncate
                 text-left
               "
-
             >
 
               {node.name}
@@ -456,16 +312,13 @@ export default function Sidebar({
 
 
 
+
             {
-
-
               !isFolder &&
 
               renderStatus(
                 node.path
               )
-
-
             }
 
 
@@ -481,7 +334,6 @@ export default function Sidebar({
 
           {
 
-
             isFolder &&
 
             opened &&
@@ -493,20 +345,19 @@ export default function Sidebar({
 
               node.children,
 
-              level+1
+              level + 1
 
             )
-
 
           }
 
 
 
+
+
         </div>
 
-
       );
-
 
     });
 
@@ -523,13 +374,10 @@ export default function Sidebar({
 
   return (
 
-
-
     <aside
 
 
       className={`
-
 
         fixed
 
@@ -558,24 +406,13 @@ export default function Sidebar({
         duration-300
 
 
-
         ${
-
           mobileOpen
-
-          ?
-
-          "translate-x-0"
-
-          :
-
-          "-translate-x-full md:translate-x-0"
-
+          ? "translate-x-0"
+          : "-translate-x-full md:translate-x-0"
         }
 
-
       `}
-
 
 
     >
@@ -611,9 +448,7 @@ export default function Sidebar({
 
             size={26}
 
-            className="
-              text-blue-600
-            "
+            className="text-blue-600"
 
           />
 
@@ -642,10 +477,7 @@ export default function Sidebar({
 
         {
 
-
-          closeMobile &&
-
-          (
+          closeMobile && (
 
             <button
 
@@ -662,14 +494,13 @@ export default function Sidebar({
 
               <X size={20}/>
 
-
             </button>
-
 
           )
 
-
         }
+
+
 
 
 
@@ -712,13 +543,9 @@ export default function Sidebar({
 
       >
 
-
         {
-
           renderTree(tree)
-
         }
-
 
       </div>
 
@@ -727,7 +554,6 @@ export default function Sidebar({
 
 
     </aside>
-
 
   );
 
