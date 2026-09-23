@@ -1,12 +1,18 @@
+// File: lib/github.ts
+
 import { Octokit } from "octokit";
+
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
+
 const OWNER = "riyadkibria";
 
 const DEFAULT_REPO = "My-ebook-library";
+
+
 
 /* -------------------------------------------------------
    Get Markdown Tree
@@ -15,6 +21,7 @@ const DEFAULT_REPO = "My-ebook-library";
 export async function getRepoTree(
   repo: string = DEFAULT_REPO
 ) {
+
   const response =
     await octokit.rest.git.getTree({
 
@@ -28,16 +35,22 @@ export async function getRepoTree(
 
     });
 
+
   return response.data.tree.filter(
 
     (item) =>
 
       item.type === "blob" &&
 
-      item.path?.toLowerCase().endsWith(".md")
+      item.path
+        ?.toLowerCase()
+        .endsWith(".md")
 
   );
+
 }
+
+
 
 /* -------------------------------------------------------
    Get Markdown File Content
@@ -53,6 +66,7 @@ export async function getFileContent(
 
   try {
 
+
     const response =
       await octokit.rest.repos.getContent({
 
@@ -64,6 +78,8 @@ export async function getFileContent(
 
       });
 
+
+
     if (
 
       !Array.isArray(response.data) &&
@@ -74,23 +90,39 @@ export async function getFileContent(
 
     ) {
 
+
       return Buffer
+
         .from(
+
           response.data.content,
+
           "base64"
+
         )
+
         .toString("utf-8");
+
 
     }
 
+
+
     return "";
 
-  } catch (error) {
+
+
+  } catch(error) {
+
 
     console.error(
+
       "GitHub content fetch error:",
+
       error
+
     );
+
 
     return "";
 
@@ -98,104 +130,106 @@ export async function getFileContent(
 
 }
 
+
+
 /* -------------------------------------------------------
-   Get Public Repositories
+   Get All Public Repositories
 ------------------------------------------------------- */
 
 export async function getRepositories() {
 
-  const response =
-    await octokit.rest.repos.listForUser({
 
-      username: OWNER,
+  try {
 
-      // "public" is NOT a valid type.
-      // Valid values:
-      // owner | member | all
 
-      type: "owner",
+    const response =
 
-      sort: "updated",
+      await octokit.rest.repos.listForUser({
 
-      per_page: 100,
+        username: OWNER,
 
-    });
+        type: "owner",
 
-  const repositories = [];
+        sort: "updated",
 
-  for (const repo of response.data) {
+        per_page: 100,
 
-    try {
+      });
 
-      const defaultBranch =
-        repo.default_branch ?? "main";
 
-      const tree =
-        await octokit.rest.git.getTree({
 
-          owner: OWNER,
+    const repositories = [];
 
-          repo: repo.name,
 
-          tree_sha: defaultBranch,
 
-          recursive: "true",
+    for (const repo of response.data) {
 
-        });
-
-      const hasMarkdown =
-        tree.data.tree.some(
-
-          (item) =>
-
-            item.type === "blob" &&
-
-            item.path
-              ?.toLowerCase()
-              .endsWith(".md")
-
-        );
-
-      if (!hasMarkdown) {
-        continue;
-      }
 
       repositories.push({
 
+
         id: repo.id,
+
 
         name: repo.name,
 
-        fullName: repo.full_name,
+
+        fullName:
+          repo.full_name,
+
 
         description:
           repo.description ?? "",
 
+
         language:
           repo.language ?? "Unknown",
+
 
         stars:
           repo.stargazers_count,
 
+
         updatedAt:
-          repo.updated_at,
+          repo.updated_at ?? "",
+
 
         url:
           repo.html_url,
 
+
+
+        defaultBranch:
+          repo.default_branch ?? "main",
+
+
+
       });
 
-    } catch (error) {
-
-      console.warn(
-        `Skipping repository: ${repo.name}`,
-        error
-      );
 
     }
 
-  }
 
-  return repositories;
+
+    return repositories;
+
+
+
+  } catch(error) {
+
+
+    console.error(
+
+      "Repository fetch error:",
+
+      error
+
+    );
+
+
+    return [];
+
+
+  }
 
 }
