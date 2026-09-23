@@ -1,4 +1,7 @@
+// components/repo/RepoCard.tsx
+
 "use client";
+
 
 import {
   Star,
@@ -8,29 +11,60 @@ import {
   BookOpen,
 } from "lucide-react";
 
+
+
 export interface Repo {
-  id: string;
+
+  id: number;
+
   name: string;
+
   fullName: string;
-  description: string | null;
-  language: string | null;
+
+  description: string;
+
+  language: string;
+
   stars: number;
+
   updatedAt: string;
+
   url: string;
+
+  defaultBranch: string;
+
 }
+
+
 
 interface Props {
+
   repo: Repo;
 
-  onOpen: (repo: Repo) => void;
+  onOpen: (
+
+    repo: Repo
+
+  ) => void;
+
 }
 
+
+
 export default function RepoCard({
+
   repo,
+
   onOpen,
+
 }: Props) {
+
+
+
   return (
+
     <div
+
       className="
         rounded-2xl
         border
@@ -40,69 +74,126 @@ export default function RepoCard({
         transition
         hover:shadow-lg
       "
+
     >
+
+
+
       {/* Title */}
 
+
       <div
+
         className="
           flex
           items-start
           justify-between
           gap-3
         "
+
       >
+
+
         <div>
+
+
           <h2
+
             className="
               text-lg
               font-semibold
             "
+
           >
+
             {repo.name}
+
           </h2>
 
+
+
           <p
+
             className="
               mt-1
               text-sm
               text-gray-500
             "
+
           >
+
             {repo.fullName}
+
           </p>
+
+
         </div>
 
+
+
+
         <a
+
           href={repo.url}
+
           target="_blank"
+
           rel="noopener noreferrer"
+
           className="
             rounded-lg
             p-2
             hover:bg-gray-100
           "
+
         >
-          <ExternalLink size={18} />
+
+          <ExternalLink size={18}/>
+
+
         </a>
+
+
       </div>
+
+
+
+
 
       {/* Description */}
 
+
       <p
+
         className="
           mt-4
           min-h-[48px]
           text-sm
           text-gray-600
         "
+
       >
-        {repo.description ??
-          "No description available."}
+
+        {
+
+          repo.description ||
+
+          "No description available."
+
+        }
+
+
       </p>
+
+
+
+
 
       {/* Metadata */}
 
+
       <div
+
         className="
           mt-5
           flex
@@ -111,47 +202,99 @@ export default function RepoCard({
           text-sm
           text-gray-500
         "
+
       >
-        <span
-          className="
-            inline-flex
-            items-center
-            gap-1
-          "
-        >
-          <Code2 size={15} />
-          {repo.language ?? "Unknown"}
-        </span>
+
 
         <span
+
           className="
             inline-flex
             items-center
             gap-1
           "
+
         >
-          <Star size={15} />
+
+          <Code2 size={15}/>
+
+          {
+
+            repo.language ||
+
+            "Unknown"
+
+          }
+
+
+        </span>
+
+
+
+
+
+        <span
+
+          className="
+            inline-flex
+            items-center
+            gap-1
+          "
+
+        >
+
+          <Star size={15}/>
+
           {repo.stars}
+
+
         </span>
 
+
+
+
+
         <span
+
           className="
             inline-flex
             items-center
             gap-1
           "
+
         >
-          <Calendar size={15} />
-          {new Date(
-            repo.updatedAt
-          ).toLocaleDateString()}
+
+          <Calendar size={15}/>
+
+
+          {
+
+            new Date(
+
+              repo.updatedAt
+
+            ).toLocaleDateString()
+
+          }
+
+
         </span>
+
+
+
       </div>
+
+
+
+
 
       {/* Button */}
 
+
       <button
+
         onClick={() => onOpen(repo)}
+
         className="
           mt-6
           flex
@@ -167,11 +310,23 @@ export default function RepoCard({
           transition
           hover:bg-blue-700
         "
+
       >
-        <BookOpen size={18} />
+
+
+        <BookOpen size={18}/>
+
 
         Open Repository
+
+
       </button>
+
+
+
+
     </div>
+
   );
+
 }

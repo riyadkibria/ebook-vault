@@ -1,3 +1,5 @@
+// app/page.tsx
+
 export const dynamic = "force-dynamic";
 
 export const revalidate = 0;
@@ -7,7 +9,10 @@ import RepoContainer from "@/components/repo/RepoContainer";
 
 import EbookExplorer from "@/components/ebook/EbookExplorer";
 
-import { getRepoTree } from "@/lib/github";
+import { 
+  getRepoTree,
+  getRepositories
+} from "@/lib/github";
 
 import { buildTree } from "@/lib/buildTree";
 
@@ -16,7 +21,14 @@ import { buildTree } from "@/lib/buildTree";
 export default async function Home(){
 
 
+  const repos =
+
+    await getRepositories();
+
+
+
   const files =
+
     await getRepoTree();
 
 
@@ -27,7 +39,11 @@ export default async function Home(){
 
       (file:any)=>
 
-        file.path.endsWith(".md")
+        file.path
+
+          ?.toLowerCase()
+
+          .endsWith(".md")
 
     );
 
@@ -41,6 +57,7 @@ export default async function Home(){
 
   return (
 
+
     <main
 
       className="
@@ -52,7 +69,9 @@ export default async function Home(){
     >
 
 
-      {/* Repository Section */}
+
+      {/* ---------------- Repository Section ---------------- */}
+
 
       <section
 
@@ -63,6 +82,7 @@ export default async function Home(){
         "
 
       >
+
 
         <h1
 
@@ -79,7 +99,12 @@ export default async function Home(){
         </h1>
 
 
-        <RepoContainer />
+
+        <RepoContainer
+
+          repos={repos}
+
+        />
 
 
       </section>
@@ -87,7 +112,9 @@ export default async function Home(){
 
 
 
-      {/* Existing EbookExplorer */}
+
+      {/* ---------------- Ebook Explorer ---------------- */}
+
 
       <section
 
@@ -98,16 +125,20 @@ export default async function Home(){
 
       >
 
+
         <EbookExplorer
 
           tree={tree}
 
         />
 
+
       </section>
 
 
+
     </main>
+
 
   );
 

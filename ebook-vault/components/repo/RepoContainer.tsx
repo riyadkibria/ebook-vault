@@ -1,23 +1,52 @@
+// components/repo/RepoContainer.tsx
+
 "use client";
 
 
-import { useState } from "react";
+import {
+  useState
+} from "react";
+
 
 import RepoList from "./RepoList";
 
-import type { Repo } from "./RepoCard";
 
-
-export default function RepoContainer(){
-
-
-  const [selectedRepo,setSelectedRepo] =
-
-    useState<Repo | null>(null);
+import type {
+  Repo
+} from "./RepoCard";
 
 
 
-  function handleRepoSelect(repo:Repo){
+interface Props {
+
+  repos: Repo[];
+
+}
+
+
+
+export default function RepoContainer({
+
+  repos
+
+}: Props) {
+
+
+
+  const [
+    selectedRepo,
+    setSelectedRepo
+  ] = useState<Repo | null>(null);
+
+
+
+
+  function handleRepoSelect(
+
+    repo: Repo
+
+  ) {
+
 
 
     console.log(
@@ -29,10 +58,13 @@ export default function RepoContainer(){
     );
 
 
+
     setSelectedRepo(repo);
 
 
+
   }
+
 
 
 
@@ -41,7 +73,10 @@ export default function RepoContainer(){
     <div>
 
 
+
       <RepoList
+
+        repos={repos}
 
         onSelect={handleRepoSelect}
 
@@ -49,11 +84,24 @@ export default function RepoContainer(){
 
 
 
+
+
       {
 
         selectedRepo && (
 
-          <p className="mt-4">
+          <p
+
+            className="
+              mt-4
+              rounded-lg
+              bg-blue-50
+              p-3
+              text-sm
+              text-blue-700
+            "
+
+          >
 
             Selected:
 
@@ -61,11 +109,13 @@ export default function RepoContainer(){
 
             {selectedRepo.name}
 
+
           </p>
 
         )
 
       }
+
 
 
     </div>

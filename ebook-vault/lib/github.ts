@@ -4,7 +4,9 @@ import { Octokit } from "octokit";
 
 
 const octokit = new Octokit({
+
   auth: process.env.GITHUB_TOKEN,
+
 });
 
 
@@ -19,34 +21,73 @@ const DEFAULT_REPO = "My-ebook-library";
 ------------------------------------------------------- */
 
 export async function getRepoTree(
+
   repo: string = DEFAULT_REPO
+
 ) {
 
-  const response =
-    await octokit.rest.git.getTree({
 
-      owner: OWNER,
-
-      repo,
-
-      tree_sha: "main",
-
-      recursive: "true",
-
-    });
+  try {
 
 
-  return response.data.tree.filter(
+    const response =
 
-    (item) =>
+      await octokit.rest.git.getTree({
 
-      item.type === "blob" &&
 
-      item.path
-        ?.toLowerCase()
-        .endsWith(".md")
+        owner: OWNER,
 
-  );
+
+        repo,
+
+
+        tree_sha: "main",
+
+
+        recursive: "true",
+
+
+      });
+
+
+
+    return response.data.tree.filter(
+
+
+      (item) =>
+
+
+        item.type === "blob" &&
+
+
+        item.path
+
+          ?.toLowerCase()
+
+          .endsWith(".md")
+
+
+    );
+
+
+
+  } catch(error) {
+
+
+    console.error(
+
+      "GitHub tree fetch error:",
+
+      error
+
+    );
+
+
+    return [];
+
+
+  }
+
 
 }
 
@@ -58,37 +99,56 @@ export async function getRepoTree(
 
 export async function getFileContent(
 
+
   path: string,
+
 
   repo: string = DEFAULT_REPO
 
+
 ) {
+
 
   try {
 
 
+
     const response =
+
       await octokit.rest.repos.getContent({
+
+
 
         owner: OWNER,
 
+
         repo,
 
+
         path,
+
+
 
       });
 
 
 
+
+
     if (
+
 
       !Array.isArray(response.data) &&
 
+
       response.data.type === "file" &&
+
 
       response.data.content
 
+
     ) {
+
 
 
       return Buffer
@@ -104,6 +164,7 @@ export async function getFileContent(
         .toString("utf-8");
 
 
+
     }
 
 
@@ -112,7 +173,9 @@ export async function getFileContent(
 
 
 
+
   } catch(error) {
+
 
 
     console.error(
@@ -124,9 +187,13 @@ export async function getFileContent(
     );
 
 
+
     return "";
 
+
+
   }
+
 
 }
 
@@ -139,22 +206,33 @@ export async function getFileContent(
 export async function getRepositories() {
 
 
+
   try {
+
 
 
     const response =
 
+
       await octokit.rest.repos.listForUser({
+
+
 
         username: OWNER,
 
+
         type: "owner",
+
 
         sort: "updated",
 
+
         per_page: 100,
 
+
+
       });
+
 
 
 
@@ -162,44 +240,61 @@ export async function getRepositories() {
 
 
 
+
     for (const repo of response.data) {
+
 
 
       repositories.push({
 
 
+
         id: repo.id,
+
 
 
         name: repo.name,
 
 
+
         fullName:
+
           repo.full_name,
 
 
+
         description:
+
           repo.description ?? "",
 
 
+
         language:
+
           repo.language ?? "Unknown",
 
 
+
         stars:
-          repo.stargazers_count,
+
+          repo.stargazers_count ?? 0,
+
 
 
         updatedAt:
+
           repo.updated_at ?? "",
 
 
+
         url:
+
           repo.html_url,
 
 
 
         defaultBranch:
+
           repo.default_branch ?? "main",
 
 
@@ -207,7 +302,9 @@ export async function getRepositories() {
       });
 
 
+
     }
+
 
 
 
@@ -215,21 +312,29 @@ export async function getRepositories() {
 
 
 
+
   } catch(error) {
+
 
 
     console.error(
 
+
       "Repository fetch error:",
+
 
       error
 
+
     );
+
 
 
     return [];
 
 
+
   }
+
 
 }
