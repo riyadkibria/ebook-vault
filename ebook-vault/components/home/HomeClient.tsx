@@ -8,7 +8,7 @@ import {
 } from "react";
 
 
-import RepoContainer from "@/components/repo/RepoContainer";
+
 
 import EbookExplorer from "@/components/ebook/EbookExplorer";
 
@@ -154,13 +154,7 @@ export default function HomeClient({
 
 
 
-        <RepoContainer
-
-          repos={repos}
-
-          onTreeLoad={handleTreeLoad}
-
-        />
+        
 
 
 
