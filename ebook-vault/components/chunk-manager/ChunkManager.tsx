@@ -264,10 +264,10 @@ ${chunk.text}`;
         className="
           rounded-2xl
           border
-          border-gray-200
-          bg-white/80
+          border-slate-200/80
+          bg-white/75
           backdrop-blur-xl
-          shadow-lg
+          shadow-[0_8px_30px_rgba(15,23,42,0.08)]
         "
 
       >
@@ -301,7 +301,7 @@ ${chunk.text}`;
               flex
               flex-wrap
               items-center
-              gap-2
+              gap-1.5
             "
 
           >
@@ -314,19 +314,21 @@ ${chunk.text}`;
               className="
                 inline-flex
                 items-center
-                gap-2
+                gap-1.5
                 rounded-full
                 bg-blue-50
                 px-3
                 py-1
-                text-sm
+                text-xs
                 font-semibold
                 text-blue-700
+                ring-1
+                ring-blue-600/10
               "
 
             >
 
-              <FileText size={15}/>
+              <FileText size={13}/>
 
               AI Chunk
 
@@ -341,10 +343,12 @@ ${chunk.text}`;
 
               className="
                 rounded-full
-                bg-gray-100
+                bg-slate-100
                 px-3
                 py-1
-                text-sm
+                text-xs
+                font-medium
+                text-slate-600
               "
 
             >
@@ -362,10 +366,12 @@ ${chunk.text}`;
 
               className="
                 rounded-full
-                bg-gray-100
+                bg-slate-100
                 px-3
                 py-1
-                text-sm
+                text-xs
+                font-medium
+                text-slate-600
               "
 
             >
@@ -388,15 +394,17 @@ ${chunk.text}`;
                 items-center
                 gap-1
                 rounded-full
-                bg-gray-100
+                bg-slate-100
                 px-3
                 py-1
-                text-sm
+                text-xs
+                font-medium
+                text-slate-600
               "
 
             >
 
-              <Hash size={14}/>
+              <Hash size={12}/>
 
               {chunk.estimatedTokens}
 
@@ -418,19 +426,21 @@ ${chunk.text}`;
               className="
                 inline-flex
                 items-center
-                gap-2
+                gap-1.5
                 rounded-full
-                bg-green-50
+                bg-emerald-50
                 px-3
                 py-1
-                text-sm
-                font-medium
-                text-green-700
+                text-xs
+                font-semibold
+                text-emerald-700
+                ring-1
+                ring-emerald-600/10
               "
 
             >
 
-              <Copy size={14}/>
+              <Copy size={13}/>
 
 
               {copyCount} copied
@@ -472,14 +482,22 @@ ${chunk.text}`;
 
 
             className="
-              rounded-xl
+              rounded-lg
               border
+              border-slate-200
               bg-white
               px-3
               py-2
               text-sm
+              font-medium
+              text-slate-700
               shadow-sm
               outline-none
+              transition-colors
+              hover:border-slate-300
+              focus:border-blue-400
+              focus:ring-2
+              focus:ring-blue-100
             "
 
 
@@ -546,10 +564,10 @@ ${chunk.text}`;
           <div
 
             className="
-              h-2
+              h-1.5
               overflow-hidden
               rounded-full
-              bg-gray-200
+              bg-slate-100
             "
 
           >
@@ -563,10 +581,10 @@ ${chunk.text}`;
                 rounded-full
                 bg-gradient-to-r
                 from-blue-500
-                via-indigo-500
-                to-purple-500
+                to-blue-600
                 transition-all
                 duration-500
+                ease-out
               "
 
               style={{
@@ -604,6 +622,7 @@ ${chunk.text}`;
             flex
             items-center
             justify-between
+            gap-3
             p-4
           "
 
@@ -626,13 +645,19 @@ ${chunk.text}`;
               flex
               h-11
               w-11
+              shrink-0
               items-center
               justify-center
               rounded-xl
               border
-              transition
-              hover:bg-gray-100
+              border-slate-200
+              text-slate-600
+              transition-colors
+              hover:border-slate-300
+              hover:bg-slate-50
               disabled:opacity-30
+              disabled:hover:bg-transparent
+              disabled:hover:border-slate-200
             "
 
 
@@ -672,8 +697,12 @@ ${chunk.text}`;
               font-medium
               text-white
               shadow-md
-              transition
-              hover:scale-105
+              shadow-blue-600/20
+              transition-all
+              duration-200
+              hover:shadow-lg
+              hover:shadow-blue-600/30
+              active:scale-[0.98]
             "
 
 
@@ -738,13 +767,19 @@ ${chunk.text}`;
               flex
               h-11
               w-11
+              shrink-0
               items-center
               justify-center
               rounded-xl
               border
-              transition
-              hover:bg-gray-100
+              border-slate-200
+              text-slate-600
+              transition-colors
+              hover:border-slate-300
+              hover:bg-slate-50
               disabled:opacity-30
+              disabled:hover:bg-transparent
+              disabled:hover:border-slate-200
             "
 
 
