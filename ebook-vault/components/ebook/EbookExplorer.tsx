@@ -1,20 +1,36 @@
 "use client";
 
+
 import type { TreeNode } from "@/lib/buildTree";
 
+
 import Sidebar from "./Sidebar";
+
 import Reader from "./Reader";
+
 import MobileMenu from "./MobileMenu";
+
 
 import { useExplorer } from "./hooks/useExplorer";
 
+
+
 interface Props {
+
   tree: TreeNode[];
+
 }
 
+
+
+
 export default function EbookExplorer({
+
   tree,
+
 }: Props) {
+
+
 
   const {
 
@@ -23,6 +39,7 @@ export default function EbookExplorer({
     openFolders,
 
     toggleFolder,
+
 
     // Reader
 
@@ -34,6 +51,7 @@ export default function EbookExplorer({
 
     openFile,
 
+
     // Mobile
 
     mobileOpen,
@@ -41,6 +59,7 @@ export default function EbookExplorer({
     openMobileMenu,
 
     closeMobileMenu,
+
 
     // Floating Button
 
@@ -52,20 +71,29 @@ export default function EbookExplorer({
 
     stopDrag,
 
+
   } = useExplorer();
 
+
+
+
+
   return (
+
 
     <main
 
       className="
         flex
-        h-screen
+        h-full
+        min-h-0
         overflow-hidden
         bg-gray-50
       "
 
     >
+
+
 
       {/* Mobile Floating Menu */}
 
@@ -82,6 +110,8 @@ export default function EbookExplorer({
         stopDrag={stopDrag}
 
       />
+
+
 
 
 
@@ -111,6 +141,10 @@ export default function EbookExplorer({
 
 
 
+
+
+
+
       {/* Sidebar */}
 
       <Sidebar
@@ -133,6 +167,10 @@ export default function EbookExplorer({
 
 
 
+
+
+
+
       {/* Reader */}
 
       <Reader
@@ -144,6 +182,9 @@ export default function EbookExplorer({
         loading={loading}
 
       />
+
+
+
 
     </main>
 
