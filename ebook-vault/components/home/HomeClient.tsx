@@ -133,24 +133,7 @@ export default function HomeClient({
       >
 
 
-        <h1
-
-          className="
-
-            mb-4
-
-            text-2xl
-
-            font-bold
-
-          "
-
-        >
-
-          GitHub Repositories
-
-        </h1>
-
+    
 
 
 
