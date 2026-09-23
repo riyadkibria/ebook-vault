@@ -1,3 +1,5 @@
+// File: components/repo/RepoContainer.tsx
+
 "use client";
 
 
@@ -19,15 +21,24 @@ interface Props {
 
   repos: Repo[];
 
+  onTreeLoad: (
+
+    files:any[]
+
+  ) => void;
+
 }
+
 
 
 
 export default function RepoContainer({
 
-  repos
+  repos,
 
-}:Props){
+  onTreeLoad
+
+}: Props){
 
 
 
@@ -41,27 +52,121 @@ export default function RepoContainer({
 
 
 
+  const [
 
-  function handleRepoSelect(
+    loading,
+
+    setLoading
+
+  ] = useState(false);
+
+
+
+
+
+  async function handleRepoSelect(
 
     repo:Repo
 
   ){
 
 
-    console.log(
-
-      "Selected:",
-
-      repo
-
-    );
-
-
     setSelectedRepo(repo);
 
 
+
+    try {
+
+
+      setLoading(true);
+
+
+
+      const response =
+
+        await fetch(
+
+          `/api/github/tree?repo=${encodeURIComponent(repo.name)}`,
+
+          {
+
+            cache:"no-store"
+
+          }
+
+        );
+
+
+
+      if(!response.ok){
+
+
+        throw new Error(
+
+          "Failed to load repository tree"
+
+        );
+
+
+      }
+
+
+
+
+
+      const files =
+
+        await response.json();
+
+
+
+
+
+      if(!Array.isArray(files)){
+
+
+        throw new Error(
+
+          "Invalid repository response"
+
+        );
+
+
+      }
+
+
+
+
+
+      onTreeLoad(files);
+
+
+
+
+    } catch(error){
+
+
+      console.error(
+
+        "Repository loading error:",
+
+        error
+
+      );
+
+
+
+    } finally {
+
+
+      setLoading(false);
+
+
+    }
+
+
   }
+
 
 
 
@@ -81,33 +186,55 @@ export default function RepoContainer({
 
 
 
-      {
 
-        selectedRepo && (
+      {selectedRepo && (
 
-          <div
+        <div
 
-            className="
-              mt-4
-              rounded-lg
-              bg-blue-50
-              p-3
-            "
+          className="
 
-          >
+            mt-4
 
-            Selected:
+            rounded-lg
 
-            {" "}
+            bg-blue-50
 
-            {selectedRepo.name}
+            p-3
 
+            text-sm
 
-          </div>
+            text-blue-700
 
-        )
+          "
 
-      }
+        >
+
+          {loading ? (
+
+            "Loading repository..."
+
+          ) : (
+
+            <>
+
+              Selected repository:
+
+              {" "}
+
+              <strong>
+
+                {selectedRepo.name}
+
+              </strong>
+
+            </>
+
+          )}
+
+        </div>
+
+      )}
+
 
 
     </div>

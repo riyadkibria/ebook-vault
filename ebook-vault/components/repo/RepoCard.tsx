@@ -1,7 +1,6 @@
-// components/repo/RepoCard.tsx
+// File: components/repo/RepoCard.tsx
 
 "use client";
-
 
 import {
   Star,
@@ -10,7 +9,6 @@ import {
   ExternalLink,
   BookOpen,
 } from "lucide-react";
-
 
 
 export interface Repo {
@@ -42,9 +40,7 @@ interface Props {
   repo: Repo;
 
   onOpen: (
-
     repo: Repo
-
   ) => void;
 
 }
@@ -58,7 +54,6 @@ export default function RepoCard({
   onOpen,
 
 }: Props) {
-
 
 
   return (
@@ -78,9 +73,7 @@ export default function RepoCard({
     >
 
 
-
-      {/* Title */}
-
+      {/* Header */}
 
       <div
 
@@ -93,9 +86,7 @@ export default function RepoCard({
 
       >
 
-
         <div>
-
 
           <h2
 
@@ -109,7 +100,6 @@ export default function RepoCard({
             {repo.name}
 
           </h2>
-
 
 
           <p
@@ -128,7 +118,6 @@ export default function RepoCard({
 
 
         </div>
-
 
 
 
@@ -158,10 +147,7 @@ export default function RepoCard({
 
 
 
-
-
       {/* Description */}
-
 
       <p
 
@@ -188,9 +174,7 @@ export default function RepoCard({
 
 
 
-
       {/* Metadata */}
-
 
       <div
 
@@ -198,7 +182,7 @@ export default function RepoCard({
           mt-5
           flex
           flex-wrap
-          gap-3
+          gap-4
           text-sm
           text-gray-500
         "
@@ -232,7 +216,6 @@ export default function RepoCard({
 
 
 
-
         <span
 
           className="
@@ -245,7 +228,11 @@ export default function RepoCard({
 
           <Star size={15}/>
 
-          {repo.stars}
+          {
+
+            repo.stars
+
+          }
 
 
         </span>
@@ -269,11 +256,17 @@ export default function RepoCard({
 
           {
 
+            repo.updatedAt
+
+              ?
+
             new Date(
-
               repo.updatedAt
-
             ).toLocaleDateString()
+
+              :
+
+            "Unknown"
 
           }
 
@@ -281,15 +274,12 @@ export default function RepoCard({
         </span>
 
 
-
       </div>
 
 
 
 
-
-      {/* Button */}
-
+      {/* Open Repository */}
 
       <button
 
@@ -313,15 +303,12 @@ export default function RepoCard({
 
       >
 
-
         <BookOpen size={18}/>
-
 
         Open Repository
 
 
       </button>
-
 
 
 
