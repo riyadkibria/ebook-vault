@@ -1,5 +1,3 @@
-// components/repo/RepoContainer.tsx
-
 "use client";
 
 
@@ -29,13 +27,16 @@ export default function RepoContainer({
 
   repos
 
-}: Props) {
+}:Props){
 
 
 
   const [
+
     selectedRepo,
+
     setSelectedRepo
+
   ] = useState<Repo | null>(null);
 
 
@@ -43,24 +44,21 @@ export default function RepoContainer({
 
   function handleRepoSelect(
 
-    repo: Repo
+    repo:Repo
 
-  ) {
-
+  ){
 
 
     console.log(
 
-      "Selected repository:",
+      "Selected:",
 
       repo
 
     );
 
 
-
     setSelectedRepo(repo);
-
 
 
   }
@@ -73,7 +71,6 @@ export default function RepoContainer({
     <div>
 
 
-
       <RepoList
 
         repos={repos}
@@ -84,21 +81,17 @@ export default function RepoContainer({
 
 
 
-
-
       {
 
         selectedRepo && (
 
-          <p
+          <div
 
             className="
               mt-4
               rounded-lg
               bg-blue-50
               p-3
-              text-sm
-              text-blue-700
             "
 
           >
@@ -110,12 +103,11 @@ export default function RepoContainer({
             {selectedRepo.name}
 
 
-          </p>
+          </div>
 
         )
 
       }
-
 
 
     </div>
