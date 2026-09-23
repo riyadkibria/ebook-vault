@@ -38,7 +38,7 @@ export default function RepoContainer({
 
   onTreeLoad
 
-}: Props){
+}:Props){
 
 
 
@@ -63,7 +63,6 @@ export default function RepoContainer({
 
 
 
-
   async function handleRepoSelect(
 
     repo:Repo
@@ -71,14 +70,44 @@ export default function RepoContainer({
   ){
 
 
+    console.log(
+
+      "Selected repository:",
+
+      repo
+
+    );
+
+
+
     setSelectedRepo(repo);
 
 
 
-    try {
+    try{
 
 
       setLoading(true);
+
+
+
+      const url =
+
+        `/api/github/tree?repo=${encodeURIComponent(
+
+          repo.name
+
+        )}`;
+
+
+
+      console.log(
+
+        "Fetching:",
+
+        url
+
+      );
 
 
 
@@ -86,9 +115,11 @@ export default function RepoContainer({
 
         await fetch(
 
-          `/api/github/tree?repo=${encodeURIComponent(repo.name)}`,
+          url,
 
           {
+
+            method:"GET",
 
             cache:"no-store"
 
@@ -98,7 +129,35 @@ export default function RepoContainer({
 
 
 
+
+      console.log(
+
+        "API status:",
+
+        response.status
+
+      );
+
+
+
+
       if(!response.ok){
+
+
+        const errorText =
+
+          await response.text();
+
+
+
+        console.error(
+
+          "API Error:",
+
+          errorText
+
+        );
+
 
 
         throw new Error(
@@ -106,7 +165,6 @@ export default function RepoContainer({
           "Failed to load repository tree"
 
         );
-
 
       }
 
@@ -118,6 +176,16 @@ export default function RepoContainer({
 
         await response.json();
 
+
+
+
+      console.log(
+
+        "Repository tree:",
+
+        files
+
+      );
 
 
 
@@ -137,13 +205,18 @@ export default function RepoContainer({
 
 
 
+      onTreeLoad(
 
-      onTreeLoad(files);
+        files
+
+      );
 
 
 
 
-    } catch(error){
+    }
+
+    catch(error){
 
 
       console.error(
@@ -155,8 +228,9 @@ export default function RepoContainer({
       );
 
 
+    }
 
-    } finally {
+    finally{
 
 
       setLoading(false);
@@ -187,53 +261,71 @@ export default function RepoContainer({
 
 
 
-      {selectedRepo && (
 
-        <div
+      {
 
-          className="
+        selectedRepo && (
 
-            mt-4
+          <div
 
-            rounded-lg
+            className="
 
-            bg-blue-50
+              mt-4
 
-            p-3
+              rounded-lg
 
-            text-sm
+              bg-blue-50
 
-            text-blue-700
+              p-3
 
-          "
+              text-sm
 
-        >
+              text-blue-700
 
-          {loading ? (
+            "
 
-            "Loading repository..."
+          >
 
-          ) : (
+            {
 
-            <>
+              loading
 
-              Selected repository:
+              ?
 
-              {" "}
+              (
 
-              <strong>
+                "Loading repository..."
 
-                {selectedRepo.name}
+              )
 
-              </strong>
+              :
 
-            </>
+              (
 
-          )}
+                <>
 
-        </div>
+                  Selected repository:
 
-      )}
+                  {" "}
+
+                  <strong>
+
+                    {selectedRepo.name}
+
+                  </strong>
+
+                </>
+
+              )
+
+            }
+
+
+          </div>
+
+        )
+
+      }
 
 
 
