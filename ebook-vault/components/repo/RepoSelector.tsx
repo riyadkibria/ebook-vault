@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -26,6 +25,7 @@ export default function RepoSelector({
   repos,
   onChange,
 }: Props) {
+
   const [search, setSearch] =
     useState("");
 
@@ -35,75 +35,140 @@ export default function RepoSelector({
   const [sort, setSort] =
     useState<SortOption>("updated");
 
+
+  // ----------------------------------------
+  // Languages
+  // ----------------------------------------
+
   const languages = useMemo(() => {
+
     return [
       "all",
+
       ...Array.from(
+
         new Set(
-          repos
-            .map((repo) => repo.language)
-            .filter(Boolean)
+
+          repos.map(
+
+            (repo) =>
+              repo.language ?? "Unknown"
+
+          )
+
         )
+
       ),
+
     ];
+
   }, [repos]);
 
+
+  // ----------------------------------------
+  // Filter + Sort
+  // ----------------------------------------
+
   const filteredRepos = useMemo(() => {
+
     let result = [...repos];
 
+    // Search
+
     if (search.trim()) {
+
       const keyword =
         search.toLowerCase();
 
       result = result.filter(
+
         (repo) =>
+
           repo.name
             .toLowerCase()
-            .includes(keyword) ||
+            .includes(keyword)
+
+          ||
+
           repo.fullName
             .toLowerCase()
-            .includes(keyword) ||
-          repo.description
-            ?.toLowerCase()
             .includes(keyword)
+
+          ||
+
+          (repo.description ?? "")
+            .toLowerCase()
+            .includes(keyword)
+
       );
+
     }
+
+    // Language
 
     if (language !== "all") {
+
       result = result.filter(
+
         (repo) =>
-          repo.language === language
+
+          (repo.language ?? "Unknown")
+            === language
+
       );
+
     }
 
+    // Sorting
+
     switch (sort) {
+
       case "name":
-        result.sort((a, b) =>
-          a.name.localeCompare(b.name)
+
+        result.sort(
+
+          (a, b) =>
+            a.name.localeCompare(b.name)
+
         );
+
         break;
 
       case "stars":
+
         result.sort(
+
           (a, b) =>
             b.stars - a.stars
+
         );
+
         break;
 
       case "updated":
+
       default:
+
         result.sort(
+
           (a, b) =>
+
             new Date(
               b.updatedAt
-            ).getTime() -
+            ).getTime()
+
+            -
+
             new Date(
               a.updatedAt
             ).getTime()
+
         );
+
     }
 
     return result;
+
   }, [
     repos,
     search,
@@ -111,15 +176,29 @@ export default function RepoSelector({
     sort,
   ]);
 
+
+  // ----------------------------------------
+  // Notify Parent
+  // ----------------------------------------
+
   useEffect(() => {
+
     onChange(filteredRepos);
+
   }, [
     filteredRepos,
     onChange,
   ]);
 
+
+  // ----------------------------------------
+  // UI
+  // ----------------------------------------
+
   return (
+
     <div
+
       className="
         mb-6
         flex
@@ -132,18 +211,27 @@ export default function RepoSelector({
         shadow-sm
         lg:flex-row
       "
+
     >
+
       {/* Search */}
 
       <input
+
         type="text"
+
         placeholder="Search repository..."
+
         value={search}
+
         onChange={(event) =>
+
           setSearch(
             event.target.value
           )
+
         }
+
         className="
           flex-1
           rounded-xl
@@ -154,51 +242,75 @@ export default function RepoSelector({
           focus:ring-2
           focus:ring-blue-500
         "
+
       />
+
 
       {/* Language */}
 
       <select
+
         value={language}
+
         onChange={(event) =>
+
           setLanguage(
             event.target.value
           )
+
         }
+
         className="
           rounded-xl
           border
           px-4
           py-3
         "
+
       >
+
         {languages.map((item) => (
+
           <option
+
             key={item}
+
             value={item}
+
           >
+
             {item}
+
           </option>
+
         ))}
+
       </select>
+
 
       {/* Sort */}
 
       <select
+
         value={sort}
+
         onChange={(event) =>
+
           setSort(
-            event.target
-              .value as SortOption
+            event.target.value as SortOption
           )
+
         }
+
         className="
           rounded-xl
           border
           px-4
           py-3
         "
+
       >
+
         <option value="updated">
           Recently Updated
         </option>
@@ -210,7 +322,11 @@ export default function RepoSelector({
         <option value="name">
           Name (A-Z)
         </option>
+
       </select>
+
     </div>
+
   );
+
 }

@@ -17,6 +17,7 @@ export async function getRepoTree(
 ) {
   const response =
     await octokit.rest.git.getTree({
+
       owner: OWNER,
 
       repo,
@@ -24,12 +25,17 @@ export async function getRepoTree(
       tree_sha: "main",
 
       recursive: "true",
+
     });
 
   return response.data.tree.filter(
+
     (item) =>
+
       item.type === "blob" &&
+
       item.path?.toLowerCase().endsWith(".md")
+
   );
 }
 
@@ -38,40 +44,58 @@ export async function getRepoTree(
 ------------------------------------------------------- */
 
 export async function getFileContent(
+
   path: string,
 
   repo: string = DEFAULT_REPO
+
 ) {
+
   try {
+
     const response =
       await octokit.rest.repos.getContent({
+
         owner: OWNER,
 
         repo,
 
         path,
+
       });
 
     if (
+
       !Array.isArray(response.data) &&
+
       response.data.type === "file" &&
+
       response.data.content
+
     ) {
-      return Buffer.from(
-        response.data.content,
-        "base64"
-      ).toString("utf-8");
+
+      return Buffer
+        .from(
+          response.data.content,
+          "base64"
+        )
+        .toString("utf-8");
+
     }
 
     return "";
+
   } catch (error) {
+
     console.error(
       "GitHub content fetch error:",
       error
     );
 
     return "";
+
   }
+
 }
 
 /* -------------------------------------------------------
@@ -79,40 +103,57 @@ export async function getFileContent(
 ------------------------------------------------------- */
 
 export async function getRepositories() {
+
   const response =
     await octokit.rest.repos.listForUser({
+
       username: OWNER,
 
-      type: "public",
+      // "public" is NOT a valid type.
+      // Valid values:
+      // owner | member | all
+
+      type: "owner",
 
       sort: "updated",
 
       per_page: 100,
+
     });
 
   const repositories = [];
 
   for (const repo of response.data) {
+
     try {
+
+      const defaultBranch =
+        repo.default_branch ?? "main";
+
       const tree =
         await octokit.rest.git.getTree({
+
           owner: OWNER,
 
           repo: repo.name,
 
-          tree_sha:
-            repo.default_branch,
+          tree_sha: defaultBranch,
 
           recursive: "true",
+
         });
 
       const hasMarkdown =
         tree.data.tree.some(
+
           (item) =>
+
             item.type === "blob" &&
+
             item.path
               ?.toLowerCase()
               .endsWith(".md")
+
         );
 
       if (!hasMarkdown) {
@@ -120,6 +161,7 @@ export async function getRepositories() {
       }
 
       repositories.push({
+
         id: repo.id,
 
         name: repo.name,
@@ -127,9 +169,10 @@ export async function getRepositories() {
         fullName: repo.full_name,
 
         description:
-          repo.description,
+          repo.description ?? "",
 
-        language: repo.language,
+        language:
+          repo.language ?? "Unknown",
 
         stars:
           repo.stargazers_count,
@@ -137,13 +180,22 @@ export async function getRepositories() {
         updatedAt:
           repo.updated_at,
 
-        url: repo.html_url,
+        url:
+          repo.html_url,
+
       });
-    } catch {
-      // Ignore repositories
-      // that cannot be inspected.
+
+    } catch (error) {
+
+      console.warn(
+        `Skipping repository: ${repo.name}`,
+        error
+      );
+
     }
+
   }
 
   return repositories;
+
 }
