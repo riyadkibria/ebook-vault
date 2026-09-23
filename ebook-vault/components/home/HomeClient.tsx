@@ -116,37 +116,6 @@ export default function HomeClient({
 
     >
 
-
-
-      <section
-
-        className="
-
-          border-b
-
-          bg-white
-
-          p-6
-
-        "
-
-      >
-
-
-    
-
-
-
-        
-
-
-
-      </section>
-
-
-
-
-
       <section
 
         className="
