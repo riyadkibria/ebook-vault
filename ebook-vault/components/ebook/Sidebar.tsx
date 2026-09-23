@@ -100,7 +100,7 @@ export default function Sidebar({
 
         }}
 
-        className="ml-auto"
+        className="ml-auto shrink-0"
 
         title={
           status
@@ -121,8 +121,8 @@ export default function Sidebar({
 
             ${
               status === "reading"
-              ? "bg-blue-500"
-              : "border border-gray-300 bg-white"
+              ? "bg-blue-500 ring-2 ring-blue-100"
+              : "border border-slate-300 bg-white group-hover:border-slate-400"
             }
           `}
 
@@ -205,20 +205,22 @@ export default function Sidebar({
 
             className={`
               group
+              relative
               flex
               w-full
               items-center
               gap-2
-              rounded-xl
+              rounded-lg
               py-2
               pr-3
               text-sm
-              transition
+              transition-colors
+              duration-150
 
               ${
                 selected
-                ? "bg-blue-50 text-blue-700"
-                : "text-gray-700 hover:bg-gray-100"
+                ? "bg-blue-50/80 text-blue-700 font-medium"
+                : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
               }
             `}
 
@@ -238,11 +240,35 @@ export default function Sidebar({
 
 
 
+            {
+              selected && (
+
+                <span
+                  className="
+                    absolute
+                    left-0
+                    top-1/2
+                    h-4
+                    w-[3px]
+                    -translate-y-1/2
+                    rounded-full
+                    bg-blue-600
+                  "
+                />
+
+              )
+            }
+
+
+
+
             <span
               className="
                 flex
                 w-5
+                shrink-0
                 justify-center
+                text-slate-400
               "
             >
 
@@ -253,11 +279,11 @@ export default function Sidebar({
 
                   ?
 
-                  <ChevronDown size={16}/>
+                  <ChevronDown size={15}/>
 
                   :
 
-                  <ChevronRight size={16}/>
+                  <ChevronRight size={15}/>
 
                 )
               }
@@ -275,9 +301,11 @@ export default function Sidebar({
 
               <Folder
 
-                size={17}
+                size={16}
 
-                className="text-amber-500"
+                strokeWidth={1.75}
+
+                className="shrink-0 text-amber-400/90"
 
               />
 
@@ -285,9 +313,19 @@ export default function Sidebar({
 
               <FileText
 
-                size={17}
+                size={16}
 
-                className="text-blue-500"
+                strokeWidth={1.75}
+
+                className={`
+                  shrink-0
+
+                  ${
+                    selected
+                    ? "text-blue-600"
+                    : "text-slate-400"
+                  }
+                `}
 
               />
 
@@ -395,15 +433,23 @@ export default function Sidebar({
 
         border-r
 
+        border-slate-200
+
         bg-white
 
         p-5
 
-        shadow-xl
+        shadow-2xl
+
+        shadow-slate-900/10
 
         transition-transform
 
         duration-300
+
+        ease-out
+
+        md:shadow-none
 
 
         ${
@@ -444,21 +490,41 @@ export default function Sidebar({
 
         >
 
-          <BookOpen
+          <div
 
-            size={26}
+            className="
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-lg
+              bg-blue-50
+            "
 
-            className="text-blue-600"
+          >
 
-          />
+            <BookOpen
+
+              size={20}
+
+              strokeWidth={2}
+
+              className="text-blue-600"
+
+            />
+
+          </div>
 
 
 
           <h1
 
             className="
-              text-xl
+              text-lg
               font-semibold
+              tracking-tight
+              text-slate-900
             "
 
           >
@@ -486,7 +552,10 @@ export default function Sidebar({
               className="
                 rounded-lg
                 p-2
-                hover:bg-gray-100
+                text-slate-400
+                transition-colors
+                hover:bg-slate-100
+                hover:text-slate-600
                 md:hidden
               "
 
@@ -517,10 +586,10 @@ export default function Sidebar({
 
         className="
           mb-3
+          px-1
           text-xs
-          uppercase
-          tracking-wider
-          text-gray-400
+          font-medium
+          text-slate-400
         "
 
       >
@@ -538,7 +607,7 @@ export default function Sidebar({
       <div
 
         className="
-          space-y-1
+          space-y-0.5
         "
 
       >

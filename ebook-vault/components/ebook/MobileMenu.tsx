@@ -43,18 +43,22 @@ export default function MobileMenu({
         fixed
         z-50
 
-        h-10
-        w-10
+        h-11
+        w-11
 
         rounded-full
 
         border
+        border-white/60
 
-        bg-white/70
+        bg-white/60
 
         backdrop-blur-xl
 
-        shadow-lg
+        shadow-[0_8px_30px_rgba(15,23,42,0.12)]
+
+        ring-1
+        ring-slate-900/5
 
         flex
 
@@ -62,14 +66,20 @@ export default function MobileMenu({
 
         justify-center
 
-        transition
+        text-slate-700
+
+        transition-all
+        duration-200
+        ease-out
 
         active:scale-90
+        active:bg-white/80
 
-        hover:shadow-xl
+        hover:shadow-[0_10px_36px_rgba(15,23,42,0.18)]
+        hover:ring-slate-900/10
       "
     >
-      <Menu size={18} />
+      <Menu size={19} strokeWidth={2.25} />
     </button>
   );
 }

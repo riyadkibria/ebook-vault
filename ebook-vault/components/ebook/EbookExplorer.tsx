@@ -62,7 +62,11 @@ export default function EbookExplorer({
         flex
         h-screen
         overflow-hidden
-        bg-gray-50
+        bg-gradient-to-br
+        from-slate-50
+        via-white
+        to-slate-100
+        antialiased
       "
 
     >
@@ -99,7 +103,11 @@ export default function EbookExplorer({
               fixed
               inset-0
               z-40
-              bg-black/30
+              bg-slate-900/40
+              backdrop-blur-sm
+              transition-opacity
+              duration-300
+              ease-out
               md:hidden
             "
 

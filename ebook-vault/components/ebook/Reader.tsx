@@ -75,7 +75,9 @@ export default function Reader({
           h-full
           items-center
           justify-center
-          text-gray-400
+          bg-gradient-to-b
+          from-slate-50
+          to-white
         "
 
       >
@@ -88,22 +90,52 @@ export default function Reader({
 
         >
 
-          <BookOpen
-
-            size={48}
+          <div
 
             className="
               mx-auto
-              mb-4
-              opacity-30
+              mb-5
+              flex
+              h-20
+              w-20
+              items-center
+              justify-center
+              rounded-full
+              bg-gradient-to-br
+              from-slate-100
+              to-slate-50
+              ring-1
+              ring-slate-900/5
             "
 
-          />
+          >
+
+            <BookOpen
+
+              size={30}
+
+              strokeWidth={1.5}
+
+              className="
+                text-slate-400
+              "
+
+            />
+
+          </div>
 
 
-          <p>
+          <p
 
-            Select a chapter
+            className="
+              text-sm
+              font-medium
+              text-slate-400
+            "
+
+          >
+
+            Select a chapter to begin reading
 
           </p>
 
@@ -147,7 +179,7 @@ export default function Reader({
           mx-auto
           max-w-5xl
           px-6
-          py-8
+          py-10
           lg:px-10
         "
 
@@ -166,8 +198,12 @@ export default function Reader({
 
           className="
             mb-8
+            flex
+            items-baseline
+            gap-3
             border-b
-            pb-4
+            border-slate-200
+            pb-5
           "
 
 
@@ -179,9 +215,11 @@ export default function Reader({
 
             className="
               truncate
-              text-xl
+              text-2xl
               font-semibold
-              md:text-2xl
+              tracking-tight
+              text-slate-900
+              md:text-3xl
             "
 
 
@@ -216,15 +254,23 @@ export default function Reader({
 
 
             className="
+              space-y-3
               animate-pulse
-              text-gray-400
             "
 
 
           >
 
 
-            Loading chapter...
+            <div className="h-4 w-full rounded-full bg-slate-200/70" />
+
+            <div className="h-4 w-11/12 rounded-full bg-slate-200/70" />
+
+            <div className="h-4 w-full rounded-full bg-slate-200/70" />
+
+            <div className="h-4 w-4/5 rounded-full bg-slate-200/70" />
+
+            <div className="h-4 w-10/12 rounded-full bg-slate-200/70" />
 
 
           </div>
@@ -287,13 +333,27 @@ export default function Reader({
 
               className="
                 prose
+                prose-lg
                 max-w-none
 
-                prose-headings:text-gray-900
+                prose-headings:font-semibold
+                prose-headings:tracking-tight
+                prose-headings:text-slate-900
 
-                prose-p:text-gray-700
-
+                prose-p:text-slate-700
                 prose-p:leading-8
+
+                prose-a:text-slate-900
+                prose-a:underline
+                prose-a:decoration-slate-300
+                prose-a:underline-offset-4
+
+                prose-strong:text-slate-900
+
+                prose-blockquote:border-l-slate-300
+                prose-blockquote:text-slate-500
+
+                prose-hr:border-slate-200
               "
 
 
