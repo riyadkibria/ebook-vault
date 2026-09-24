@@ -9,8 +9,7 @@ import {
   useState,
 } from "react";
 
-import RepositorySidebar from "./RepositorySidebar";
-import FileTree from "./FileTree";
+import ExplorerSidebar from "./ExplorerSidebar";
 import MarkdownReader from "./MarkdownReader";
 
 import {
@@ -69,7 +68,6 @@ export default function RepositoryExplorer({
 }: Props) {
 
 
-
   const [
     selectedRepository,
     setSelectedRepository,
@@ -124,12 +122,15 @@ export default function RepositoryExplorer({
     if (!selectedRepository) {
 
       setTree([]);
+
       setSelectedFile(null);
+
       setMarkdown("");
 
       return;
 
     }
+
 
 
     const repo = selectedRepository;
@@ -157,7 +158,7 @@ export default function RepositoryExplorer({
         if (!response.ok) {
 
           throw new Error(
-            "Failed to load tree"
+            "Failed to load repository tree"
           );
 
         }
@@ -217,14 +218,15 @@ export default function RepositoryExplorer({
   // Load Markdown Content
   // =======================================
 
-
   useEffect(() => {
 
 
-
     if (
+
       !selectedRepository ||
+
       !selectedFile
+
     ) {
 
 
@@ -240,6 +242,8 @@ export default function RepositoryExplorer({
     const repo = selectedRepository;
 
     const file = selectedFile;
+
+
 
 
 
@@ -286,18 +290,23 @@ export default function RepositoryExplorer({
 
 
 
+
       } catch(error) {
 
 
 
         console.error(
+
           "Markdown error:",
+
           error
+
         );
 
 
 
         setMarkdown("");
+
 
 
 
@@ -337,7 +346,6 @@ export default function RepositoryExplorer({
 
   return (
 
-
     <main
 
       className="
@@ -352,213 +360,54 @@ export default function RepositoryExplorer({
 
 
       {/* ==================================
-          LEFT : Repository + File Tree
+          LEFT : OBSIDIAN STYLE SIDEBAR
       =================================== */}
 
 
+      <ExplorerSidebar
 
-      <aside
 
-        className="
-          flex
-          w-80
-          shrink-0
-          flex-col
-          border-r
-          bg-white
-        "
+        repositories={repositories}
 
-      >
 
+        selectedRepository={
+          selectedRepository
+        }
 
 
-        {/* Repository Selector */}
+        tree={tree}
 
-        <div
 
-          className="
-            border-b
-            p-4
-          "
+        treeLoading={treeLoading}
 
-        >
 
+        onRepositorySelect={(repo) => {
 
-          <h2
 
-            className="
-              mb-3
-              text-lg
-              font-bold
-            "
+          setSelectedRepository(repo);
 
-          >
 
-            Repositories
+          setSelectedFile(null);
 
-          </h2>
 
+          setMarkdown("");
 
 
-          <RepositorySidebar
+        }}
 
-            repositories={repositories}
 
-            selectedRepository={
-              selectedRepository
-            }
+        onFileSelect={
 
-            onSelect={
-              setSelectedRepository
-            }
+          (file) => {
 
-          />
+            setSelectedFile(file);
 
+          }
 
-        </div>
+        }
 
 
-
-
-
-        {/* File Tree */}
-
-        <div
-
-          className="
-            flex-1
-            overflow-y-auto
-            p-4
-          "
-
-        >
-
-
-
-          {!selectedRepository && (
-
-            <p className="text-sm text-gray-400">
-
-              Select repository
-
-            </p>
-
-          )}
-
-
-
-
-
-
-          {selectedRepository && (
-
-            <>
-
-
-              <div
-
-                className="
-                  mb-4
-                "
-
-              >
-
-                <h3
-
-                  className="
-                    font-semibold
-                  "
-
-                >
-
-                  {selectedRepository.name}
-
-                </h3>
-
-
-                <p
-
-                  className="
-                    text-xs
-                    text-gray-500
-                  "
-
-                >
-
-                  {selectedRepository.fullName}
-
-                </p>
-
-
-              </div>
-
-
-
-
-
-              {treeLoading && (
-
-                <p className="text-gray-500">
-
-                  Loading files...
-
-                </p>
-
-              )}
-
-
-
-
-
-
-              {!treeLoading &&
-                tree.length > 0 && (
-
-
-                <FileTree
-
-                  nodes={tree}
-
-                  onFileSelect={
-                    setSelectedFile
-                  }
-
-                />
-
-
-              )}
-
-
-
-
-
-
-              {!treeLoading &&
-                tree.length === 0 && (
-
-
-                <p className="text-gray-500">
-
-                  No markdown files.
-
-                </p>
-
-
-              )}
-
-
-
-            </>
-
-          )}
-
-
-
-        </div>
-
-
-
-      </aside>
+      />
 
 
 
@@ -567,7 +416,7 @@ export default function RepositoryExplorer({
 
 
       {/* ==================================
-          RIGHT : Markdown Reader
+          RIGHT : MARKDOWN READER
       =================================== */}
 
 
@@ -587,7 +436,6 @@ export default function RepositoryExplorer({
 
         {!selectedFile && (
 
-
           <div
 
             className="
@@ -602,9 +450,7 @@ export default function RepositoryExplorer({
 
             Select a markdown file
 
-
           </div>
-
 
         )}
 
@@ -613,10 +459,7 @@ export default function RepositoryExplorer({
 
 
 
-
-        {selectedFile &&
-          markdownLoading && (
-
+        {selectedFile && markdownLoading && (
 
           <div className="text-gray-500">
 
@@ -624,7 +467,6 @@ export default function RepositoryExplorer({
 
           </div>
 
-
         )}
 
 
@@ -633,9 +475,10 @@ export default function RepositoryExplorer({
 
 
 
-
         {selectedFile &&
+
           !markdownLoading &&
+
           markdown && (
 
 
@@ -655,8 +498,11 @@ export default function RepositoryExplorer({
 
 
 
+
         {selectedFile &&
+
           !markdownLoading &&
+
           !markdown && (
 
 
@@ -668,6 +514,7 @@ export default function RepositoryExplorer({
 
 
         )}
+
 
 
 
