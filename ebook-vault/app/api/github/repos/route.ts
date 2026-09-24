@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const OWNER = process.env.GITHUB_OWNER!;
+const TOKEN = process.env.GITHUB_TOKEN;
 
 interface GithubRepo {
   name: string;
@@ -16,7 +17,7 @@ interface GithubRepo {
 interface GithubTree {
   tree: {
     path: string;
-    type: string;
+    type: "blob" | "tree";
   }[];
 }
 
@@ -24,17 +25,27 @@ async function github<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
+      ...(TOKEN
+        ? {
+            Authorization: `Bearer ${TOKEN}`,
+          }
+        : {}),
     },
-    cache: "no-store",
+
+    next: {
+      revalidate: 300,
+    },
   });
 
   if (!response.ok) {
+    const message = await response.text();
+
     throw new Error(
-      `GitHub API Error ${response.status}`
+      `GitHub API Error ${response.status}: ${message}`
     );
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
 
 async function hasMarkdownFile(
@@ -46,13 +57,14 @@ async function hasMarkdownFile(
       `https://api.github.com/repos/${OWNER}/${repoName}/git/trees/${branch}?recursive=1`
     );
 
-    return tree.tree.some((item) =>
-      item.type === "blob" &&
-      item.path.toLowerCase().endsWith(".md")
+    return tree.tree.some(
+      (item) =>
+        item.type === "blob" &&
+        item.path.toLowerCase().endsWith(".md")
     );
   } catch (error) {
     console.error(
-      `Cannot inspect ${repoName}`,
+      `Unable to inspect repository: ${repoName}`,
       error
     );
 
@@ -66,46 +78,40 @@ export async function GET() {
       `https://api.github.com/users/${OWNER}/repos?per_page=100&sort=updated&type=public`
     );
 
-    const markdownRepos = [];
-
-    for (const repo of repos) {
-      const containsMarkdown =
-        await hasMarkdownFile(
+    const markdownRepos = await Promise.all(
+      repos.map(async (repo) => {
+        const containsMarkdown = await hasMarkdownFile(
           repo.name,
           repo.default_branch
         );
 
-      if (!containsMarkdown) {
-        continue;
-      }
+        if (!containsMarkdown) {
+          return null;
+        }
 
-      markdownRepos.push({
-        id: repo.full_name,
+        return {
+          id: repo.full_name,
+          name: repo.name,
+          fullName: repo.full_name,
+          description: repo.description,
+          language: repo.language,
+          stars: repo.stargazers_count,
+          updatedAt: repo.updated_at,
+          defaultBranch: repo.default_branch,
+          url: repo.html_url,
+        };
+      })
+    );
 
-        name: repo.name,
-
-        fullName: repo.full_name,
-
-        description: repo.description,
-
-        language: repo.language,
-
-        stars: repo.stargazers_count,
-
-        updatedAt: repo.updated_at,
-
-        url: repo.html_url,
-      });
-    }
-
-    return NextResponse.json(markdownRepos);
+    return NextResponse.json(
+      markdownRepos.filter(Boolean)
+    );
   } catch (error) {
-    console.error(error);
+    console.error("GitHub API Error:", error);
 
     return NextResponse.json(
       {
-        message:
-          "Failed to fetch GitHub repositories.",
+        message: "Failed to fetch GitHub repositories.",
       },
       {
         status: 500,
