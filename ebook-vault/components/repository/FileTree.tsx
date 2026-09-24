@@ -1,9 +1,23 @@
+// ===========================================================
+// File: components/repository/FileTree.tsx
+// ===========================================================
+
+
 "use client";
 
 
 import {
   useState,
 } from "react";
+
+
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  FolderOpen,
+  FileText,
+} from "lucide-react";
 
 
 import {
@@ -14,15 +28,20 @@ import {
 
 
 
+
+
 interface Props {
 
   nodes: TreeNode[];
 
   onFileSelect: (
-    path:string
+    path: string
   ) => void;
 
+  selectedFile?: string | null;
+
 }
+
 
 
 
@@ -35,21 +54,30 @@ export default function FileTree({
 
   onFileSelect,
 
+  selectedFile,
+
 }: Props) {
 
 
 
   return (
 
+
+
     <div
+
       className="
         space-y-1
+        text-sm
       "
+
     >
+
 
 
       {
         nodes.map((node)=>(
+
 
           <TreeItem
 
@@ -57,21 +85,29 @@ export default function FileTree({
 
             node={node}
 
-            onFileSelect={
-              onFileSelect
-            }
+            onFileSelect={onFileSelect}
+
+            selectedFile={selectedFile}
 
           />
+
 
         ))
       }
 
 
+
+
+
     </div>
+
+
 
   );
 
 }
+
+
 
 
 
@@ -86,7 +122,12 @@ interface TreeItemProps {
     path:string
   ) => void;
 
+  selectedFile?: string | null;
+
 }
+
+
+
 
 
 
@@ -98,7 +139,10 @@ function TreeItem({
 
   onFileSelect,
 
+  selectedFile,
+
 }: TreeItemProps) {
+
 
 
 
@@ -114,18 +158,30 @@ function TreeItem({
 
 
 
-  function handleClick(){
+
+  const isSelected =
+    selectedFile === node.path;
+
+
+
+
+
+
+
+
+  function handleClick() {
 
 
 
     if(node.type === "folder"){
 
 
-      setOpen(!open);
+      setOpen(
+        previous => !previous
+      );
 
 
     }
-
 
     else {
 
@@ -145,51 +201,119 @@ function TreeItem({
 
 
 
+
+
+
   return (
 
+
+
     <div>
+
 
 
       <button
 
         onClick={handleClick}
 
-        className="
+        className={`
           flex
           w-full
           items-center
           gap-2
           rounded-md
-          px-3
-          py-2
+          px-2
+          py-1.5
           text-left
-          hover:bg-gray-100
-        "
+          transition
+
+          ${
+            isSelected
+            ? "bg-blue-50 text-blue-700"
+            : "hover:bg-gray-100"
+          }
+        `}
 
       >
 
 
-        <span>
 
-          {
-            node.type === "folder"
+        {
+          node.type === "folder"
+          ? (
 
-            ? open
-              ? "📂"
-              : "📁"
+            open
 
-            : "📄"
-          }
+            ? <ChevronDown
+                size={16}
+              />
 
-        </span>
+            : <ChevronRight
+                size={16}
+              />
+
+          )
+
+          : (
+
+            <span className="w-4" />
+
+          )
+        }
 
 
 
-        <span>
+
+
+
+
+        {
+          node.type === "folder"
+
+          ? (
+
+              open
+
+              ? <FolderOpen
+                  size={17}
+                />
+
+              : <Folder
+                  size={17}
+                />
+
+            )
+
+          : (
+
+              <FileText
+                size={17}
+              />
+
+            )
+        }
+
+
+
+
+
+
+
+        <span
+
+          className="
+            truncate
+          "
+
+        >
 
           {node.name}
 
+
         </span>
+
+
+
 
 
       </button>
@@ -198,27 +322,37 @@ function TreeItem({
 
 
 
+
+
+
+
       {
         node.type === "folder"
-        &&
-        open
-        &&
-        node.children
-        &&
-        (
+
+        && open
+
+        && node.children
+
+        && (
 
           <div
+
             className="
               ml-5
               border-l
+              border-gray-200
               pl-2
             "
+
           >
+
+
+
 
 
             {
               node.children.map(
-                child=>(
+                child => (
 
 
                   <TreeItem
@@ -235,23 +369,37 @@ function TreeItem({
                       onFileSelect
                     }
 
+                    selectedFile={
+                      selectedFile
+                    }
+
+
                   />
 
 
                 )
+
               )
             }
+
+
+
 
 
           </div>
 
 
         )
+
       }
 
 
 
+
+
     </div>
+
+
 
   );
 

@@ -2,241 +2,136 @@
 // File: components/repository/RepositoryContent.tsx
 // ===========================================================
 
-
 "use client";
-
 
 import {
   useEffect,
   useState,
 } from "react";
 
-
 import FileTree from "./FileTree";
-
 import MarkdownReader from "./MarkdownReader";
-
 
 import {
   buildTree,
   TreeNode,
 } from "@/lib/buildTree";
 
-
-
-
-
 interface Repository {
-
   id: number;
-
   name: string;
-
   fullName: string;
-
   description: string | null;
-
   language: string | null;
-
   stars: number;
-
   updatedAt: string;
-
   defaultBranch: string;
-
   url: string;
-
 }
-
-
-
-
 
 interface GithubTreeItem {
-
   path: string;
-
   type: "blob" | "tree";
-
 }
-
-
-
-
 
 interface Props {
-
   repository: Repository | null;
-
 }
 
-
-
-
-
 export default function RepositoryContent({
-
   repository,
-
 }: Props) {
 
+  const [tree, setTree] =
+    useState<TreeNode[]>([]);
 
-
-  const [tree, setTree] = useState<TreeNode[]>([]);
-
-
-
-  const [loading, setLoading] = useState(false);
-
-
+  const [loading, setLoading] =
+    useState(false);
 
   const [selectedFile, setSelectedFile] =
     useState<string | null>(null);
 
-
-
   const [content, setContent] =
     useState("");
-
-
 
   const [contentLoading, setContentLoading] =
     useState(false);
 
 
 
-
-
-
-
   // =====================================================
-  // Load Repository File Tree
+  // Load Repository Tree
   // =====================================================
-
 
   useEffect(() => {
-
-
 
     if (!repository) {
 
       setTree([]);
-
       setSelectedFile(null);
-
       setContent("");
 
       return;
 
     }
 
+    // ✅ Fix TypeScript
+    const repo = repository;
 
-
-    const currentRepository = repository;
-
-
-
-    async function loadRepositoryTree() {
-
-
+    async function loadTree() {
 
       try {
 
-
         setLoading(true);
 
-
-
         const response = await fetch(
-
-          `/api/github/tree?repo=${currentRepository.name}&branch=${currentRepository.defaultBranch}`
-
+          `/api/github/tree?repo=${repo.name}&branch=${repo.defaultBranch}`
         );
 
-
-
-
         if (!response.ok) {
-
           throw new Error(
             "Failed to fetch repository tree"
           );
-
         }
-
-
-
 
         const data: GithubTreeItem[] =
           await response.json();
 
-
-
-
         const structuredTree =
           buildTree(data);
 
-
-
         setTree(structuredTree);
 
-
-
-      } catch(error) {
-
-
+      } catch (error) {
 
         console.error(
-          "Repository tree error:",
+          "Tree error:",
           error
         );
 
-
-
         setTree([]);
-
-
 
       } finally {
 
-
-
         setLoading(false);
-
-
 
       }
 
-
     }
 
-
-
-    loadRepositoryTree();
-
-
+    loadTree();
 
   }, [repository]);
 
 
 
-
-
-
-
-
-
-
   // =====================================================
-  // Load Selected Markdown File
+  // Load Markdown Content
   // =====================================================
-
 
   useEffect(() => {
 
-
-
-    if (!selectedFile || !repository) {
+    if (!repository || !selectedFile) {
 
       setContent("");
 
@@ -244,127 +139,64 @@ export default function RepositoryContent({
 
     }
 
+    // ✅ Fix TypeScript
+    const repo = repository;
+    const file = selectedFile;
 
-
-
-    const currentRepository = repository;
-
-    const currentFile = selectedFile;
-
-
-
-
-
-    async function loadFileContent() {
-
-
+    async function loadContent() {
 
       try {
 
-
-
         setContentLoading(true);
 
-
-
-
         const response = await fetch(
-
-          `/api/github/content?repo=${currentRepository.name}&path=${encodeURIComponent(currentFile)}`
-
+          `/api/github/content?repo=${repo.name}&path=${encodeURIComponent(file)}`
         );
 
-
-
-
         if (!response.ok) {
-
           throw new Error(
-            "Failed to fetch markdown content"
+            "Failed to fetch markdown"
           );
-
         }
 
-
-
-
-        const data = await response.json();
-
-
-
+        const data =
+          await response.json();
 
         setContent(
           data.content ?? ""
         );
 
-
-
-
-
-      } catch(error) {
-
-
+      } catch (error) {
 
         console.error(
-          "Markdown content error:",
+          "Markdown error:",
           error
         );
 
-
-
         setContent("");
-
-
-
 
       } finally {
 
-
-
         setContentLoading(false);
-
-
 
       }
 
-
     }
 
-
-
-
-
-    loadFileContent();
-
-
-
-
+    loadContent();
 
   }, [
-
-    selectedFile,
-
     repository,
-
+    selectedFile,
   ]);
-
-
-
-
-
-
 
 
 
   if (!repository) {
 
-
-
     return (
 
-
       <section
-
         className="
           flex
           flex-1
@@ -372,367 +204,191 @@ export default function RepositoryContent({
           justify-center
           text-gray-400
         "
-
       >
 
         Select a repository
 
-
       </section>
-
 
     );
 
-
   }
 
-
-
-
-
-
+  // ✅ Fix TypeScript everywhere below
+  const repo = repository;
 
 
 
   return (
 
-
-
     <section
-
       className="
+        flex
         flex-1
-        overflow-y-auto
-        p-8
+        h-screen
+        overflow-hidden
+        bg-gray-50
       "
-
     >
 
+      {/* ===================================
+          LEFT SIDEBAR
+      ==================================== */}
 
-
-
-      <div
-
+      <aside
         className="
-          rounded-xl
-          border
+          w-80
+          shrink-0
+          overflow-y-auto
+          border-r
           bg-white
-          p-6
-          shadow-sm
+          p-4
         "
-
       >
 
+        <div className="mb-5">
 
-
-
-        {/* Repository Header */}
-
-
-        <h2
-
-          className="
-            text-3xl
-            font-bold
-          "
-
-        >
-
-          {repository.name}
-
-
-        </h2>
-
-
-
-
-
-        <p
-
-          className="
-            mt-2
-            text-sm
-            text-gray-500
-          "
-
-        >
-
-          {repository.fullName}
-
-
-        </p>
-
-
-
-
-
-        <p
-
-          className="
-            mt-5
-            text-gray-700
-          "
-
-        >
-
-          {
-            repository.description ??
-            "No description provided."
-          }
-
-
-        </p>
-
-
-
-
-
-
-
-
-
-        {/* File Explorer */}
-
-
-
-        <div
-
-          className="
-            mt-8
-            border-t
-            pt-6
-          "
-
-        >
-
-
-
-
-          <h3
-
+          <h2
             className="
-              mb-4
               text-xl
-              font-semibold
+              font-bold
             "
-
           >
+            {repo.name}
+          </h2>
 
-            Repository Explorer
-
-
-          </h3>
-
-
-
-
-
-
-          {
-            loading && (
-
-              <p className="text-gray-500">
-
-                Loading files...
-
-              </p>
-
-
-            )
-          }
-
-
-
-
-
-
-
-          {
-            !loading &&
-            tree.length === 0 && (
-
-              <p className="text-gray-500">
-
-                No markdown files found.
-
-              </p>
-
-
-            )
-          }
-
-
-
-
-
-
-
-          {
-            !loading &&
-            tree.length > 0 && (
-
-
-              <FileTree
-
-                nodes={tree}
-
-                onFileSelect={
-                  setSelectedFile
-                }
-
-              />
-
-
-            )
-          }
-
-
-
-
+          <p
+            className="
+              text-xs
+              text-gray-500
+            "
+          >
+            {repo.fullName}
+          </p>
 
         </div>
 
+        {loading && (
+
+          <p className="text-gray-500">
+
+            Loading files...
+
+          </p>
+
+        )}
+
+        {!loading && tree.length > 0 && (
+
+          <FileTree
+
+            nodes={tree}
+
+            onFileSelect={setSelectedFile}
+
+          />
+
+        )}
+
+        {!loading && tree.length === 0 && (
+
+          <p className="text-gray-500">
+
+            No markdown files found.
+
+          </p>
+
+        )}
+
+      </aside>
 
 
 
+      {/* ===================================
+          MARKDOWN READER
+      ==================================== */}
 
+      <main
+        className="
+          flex-1
+          overflow-y-auto
+          p-10
+        "
+      >
 
+        {!selectedFile && (
 
+          <div
+            className="
+              flex
+              h-full
+              items-center
+              justify-center
+              text-gray-400
+            "
+          >
 
+            Select a markdown file
 
-        {/* Markdown Reader */}
+          </div>
 
+        )}
 
+        {selectedFile && contentLoading && (
 
+          <div
+            className="
+              rounded-xl
+              border
+              bg-white
+              p-6
+              text-gray-500
+            "
+          >
 
-        {
-          selectedFile && (
+            Loading markdown...
 
+          </div>
+
+        )}
+
+        {selectedFile &&
+          !contentLoading &&
+          content.length > 0 && (
+
+            <MarkdownReader
+
+              content={content}
+
+              fileName={selectedFile}
+
+            />
+
+          )}
+
+        {selectedFile &&
+          !contentLoading &&
+          content.length === 0 && (
 
             <div
-
               className="
-                mt-8
+                rounded-xl
+                border
+                bg-white
+                p-6
+                text-gray-500
               "
-
             >
 
-
-
-
-              {
-                contentLoading && (
-
-
-                  <div
-
-                    className="
-                      rounded-xl
-                      border
-                      bg-gray-50
-                      p-6
-                      text-gray-500
-                    "
-
-                  >
-
-                    Loading markdown...
-
-
-                  </div>
-
-
-                )
-
-              }
-
-
-
-
-
-
-
-
-              {
-                !contentLoading &&
-                content && (
-
-
-                  <MarkdownReader
-
-                    content={content}
-
-                    fileName={selectedFile}
-
-                  />
-
-
-                )
-              }
-
-
-
-
-
-
-
-
-              {
-                !contentLoading &&
-                !content && (
-
-
-                  <div
-
-                    className="
-                      rounded-xl
-                      border
-                      bg-gray-50
-                      p-6
-                      text-gray-500
-                    "
-
-                  >
-
-                    No content found.
-
-
-                  </div>
-
-
-                )
-
-              }
-
-
-
-
-
-
+              No content found.
 
             </div>
 
+          )}
 
-          )
-
-        }
-
-
-
-
-
-
-
-
-      </div>
-
-
-
-
+      </main>
 
     </section>
-
-
 
   );
 
