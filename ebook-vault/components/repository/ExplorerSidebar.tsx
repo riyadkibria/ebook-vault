@@ -4,13 +4,11 @@
 
 "use client";
 
-
 import FileTree from "./FileTree";
 
 import {
   TreeNode,
 } from "@/lib/buildTree";
-
 
 
 interface Repository {
@@ -36,7 +34,6 @@ interface Repository {
 }
 
 
-
 interface Props {
 
   repositories: Repository[];
@@ -56,7 +53,6 @@ interface Props {
   ) => void;
 
 }
-
 
 
 export default function ExplorerSidebar({
@@ -92,11 +88,9 @@ export default function ExplorerSidebar({
     >
 
 
-
-      {/* =========================
-          Repository Selector
-      ========================== */}
-
+      {/* =====================================
+          TOP : Repository Selector
+      ====================================== */}
 
       <div
 
@@ -108,71 +102,129 @@ export default function ExplorerSidebar({
       >
 
 
-        <h2
+        {!selectedRepository ? (
 
-          className="
-            mb-3
-            text-lg
-            font-bold
-          "
+          <>
 
-        >
+            <h2
 
-          Repositories
-
-        </h2>
-
-
-
-        <div
-
-          className="
-            space-y-1
-          "
-
-        >
-
-
-          {repositories.map((repo) => (
-
-            <button
-
-              key={repo.id}
-
-              onClick={() =>
-                onRepositorySelect(repo)
-              }
-
-              className={`
-                w-full
-                rounded-md
-                px-3
-                py-2
-                text-left
-                text-sm
-                transition
-
-                ${
-                  selectedRepository?.id === repo.id
-
-                  ? "bg-gray-200 font-semibold"
-
-                  : "hover:bg-gray-100"
-                }
-              `}
+              className="
+                mb-3
+                text-lg
+                font-bold
+              "
 
             >
 
-              {repo.name}
+              Repositories
 
+            </h2>
+
+
+            <div
+
+              className="
+                max-h-72
+                space-y-1
+                overflow-y-auto
+              "
+
+            >
+
+              {
+                repositories.map((repo)=>(
+
+                  <button
+
+                    key={repo.id}
+
+                    onClick={() =>
+                      onRepositorySelect(repo)
+                    }
+
+                    className="
+                      w-full
+                      rounded-md
+                      px-3
+                      py-2
+                      text-left
+                      text-sm
+                      hover:bg-gray-100
+                    "
+
+                  >
+
+                    {repo.name}
+
+                  </button>
+
+                ))
+              }
+
+
+            </div>
+
+          </>
+
+
+        ) : (
+
+          <div>
+
+
+            <button
+
+              onClick={() =>
+                onRepositorySelect(selectedRepository)
+              }
+
+              className="
+                mb-2
+                text-xs
+                text-gray-500
+                hover:text-black
+              "
+
+            >
+
+              Change repository
 
             </button>
 
-          ))}
+
+            <h2
+
+              className="
+                text-lg
+                font-semibold
+              "
+
+            >
+
+              {selectedRepository.name}
+
+            </h2>
 
 
+            <p
 
-        </div>
+              className="
+                mt-1
+                truncate
+                text-xs
+                text-gray-500
+              "
+
+            >
+
+              {selectedRepository.fullName}
+
+            </p>
+
+
+          </div>
+
+        )}
 
 
       </div>
@@ -181,9 +233,9 @@ export default function ExplorerSidebar({
 
 
 
-      {/* =========================
-          File Tree
-      ========================== */}
+      {/* =====================================
+          BOTTOM : File Tree
+      ====================================== */}
 
 
       <div
@@ -197,7 +249,6 @@ export default function ExplorerSidebar({
       >
 
 
-
         {!selectedRepository && (
 
           <p
@@ -209,7 +260,7 @@ export default function ExplorerSidebar({
 
           >
 
-            Select repository
+            Select repository first
 
           </p>
 
@@ -217,119 +268,64 @@ export default function ExplorerSidebar({
 
 
 
+        {selectedRepository && treeLoading && (
 
+          <p
 
+            className="
+              text-sm
+              text-gray-500
+            "
 
-        {selectedRepository && (
+          >
 
-          <>
+            Loading files...
 
-
-            <div
-
-              className="
-                mb-3
-              "
-
-            >
-
-              <p
-
-                className="
-                  text-sm
-                  font-semibold
-                "
-
-              >
-
-                {selectedRepository.fullName}
-
-              </p>
-
-
-            </div>
-
-
-
-
-
-
-            {treeLoading && (
-
-              <p
-
-                className="
-                  text-sm
-                  text-gray-500
-                "
-
-              >
-
-                Loading files...
-
-              </p>
-
-            )}
-
-
-
-
-
-
-
-            {!treeLoading &&
-              tree.length > 0 && (
-
-
-              <FileTree
-
-                nodes={tree}
-
-                onFileSelect={
-                  onFileSelect
-                }
-
-              />
-
-
-            )}
-
-
-
-
-
-
-
-            {!treeLoading &&
-              tree.length === 0 && (
-
-
-              <p
-
-                className="
-                  text-sm
-                  text-gray-500
-                "
-
-              >
-
-                No markdown files
-
-              </p>
-
-
-            )}
-
-
-
-          </>
+          </p>
 
         )}
 
 
 
-      </div>
+        {selectedRepository &&
+          !treeLoading &&
+          tree.length > 0 && (
 
+            <FileTree
+
+              nodes={tree}
+
+              onFileSelect={
+                onFileSelect
+              }
+
+            />
+
+        )}
+
+
+
+        {selectedRepository &&
+          !treeLoading &&
+          tree.length === 0 && (
+
+            <p
+
+              className="
+                text-sm
+                text-gray-500
+              "
+
+            >
+
+              No markdown files
+
+            </p>
+
+        )}
+
+
+      </div>
 
 
     </aside>
