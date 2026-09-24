@@ -1,6 +1,10 @@
+// ===========================================================
 // File: lib/github.ts
+// ===========================================================
+
 
 import { Octokit } from "octokit";
+
 
 
 const octokit = new Octokit({
@@ -10,21 +14,70 @@ const octokit = new Octokit({
 });
 
 
-const OWNER = "riyadkibria";
+
+const OWNER = process.env.GITHUB_OWNER!;
 
 const DEFAULT_REPO = "My-ebook-library";
 
 
 
+
+
 /* -------------------------------------------------------
-   Get Markdown Tree
+   Types
 ------------------------------------------------------- */
+
+
+export interface GithubTreeItem {
+
+  path: string;
+
+  type: "blob" | "tree";
+
+}
+
+
+
+export interface Repository {
+
+  id: number;
+
+  name: string;
+
+  fullName: string;
+
+  description: string | null;
+
+  language: string | null;
+
+  stars: number;
+
+  updatedAt: string;
+
+  url: string;
+
+  defaultBranch: string;
+
+}
+
+
+
+
+
+
+
+/* -------------------------------------------------------
+   Get Complete Repository Tree
+------------------------------------------------------- */
+
 
 export async function getRepoTree(
 
-  repo: string = DEFAULT_REPO
+  repo: string = DEFAULT_REPO,
 
-) {
+  branch: string = "main"
+
+): Promise<GithubTreeItem[]> {
 
 
   try {
@@ -34,40 +87,53 @@ export async function getRepoTree(
 
       await octokit.rest.git.getTree({
 
-
         owner: OWNER,
-
 
         repo,
 
-
-        tree_sha: "main",
-
+        tree_sha: branch,
 
         recursive: "true",
-
 
       });
 
 
 
-    return response.data.tree.filter(
+    return response.data.tree
 
+      .filter(
 
-      (item) =>
+        (item) =>
 
+          item.path &&
 
-        item.type === "blob" &&
+          (
 
+            item.type === "blob" ||
 
-        item.path
+            item.type === "tree"
 
-          ?.toLowerCase()
+          )
 
-          .endsWith(".md")
+      )
 
+      .map(
 
-    );
+        (item) => ({
+
+          path: item.path!,
+
+          type:
+
+            item.type === "tree"
+
+              ? "tree"
+
+              : "blob",
+
+        })
+
+      );
 
 
 
@@ -85,70 +151,56 @@ export async function getRepoTree(
 
     return [];
 
-
   }
-
 
 }
 
 
 
+
+
+
+
 /* -------------------------------------------------------
-   Get Markdown File Content
+   Get Markdown/File Content
 ------------------------------------------------------- */
+
 
 export async function getFileContent(
 
-
   path: string,
-
 
   repo: string = DEFAULT_REPO
 
-
-) {
+): Promise<string> {
 
 
   try {
-
 
 
     const response =
 
       await octokit.rest.repos.getContent({
 
-
-
         owner: OWNER,
-
 
         repo,
 
-
         path,
-
-
 
       });
 
 
 
-
-
     if (
-
 
       !Array.isArray(response.data) &&
 
-
       response.data.type === "file" &&
-
 
       response.data.content
 
-
     ) {
-
 
 
       return Buffer
@@ -164,7 +216,6 @@ export async function getFileContent(
         .toString("utf-8");
 
 
-
     }
 
 
@@ -173,9 +224,7 @@ export async function getFileContent(
 
 
 
-
   } catch(error) {
-
 
 
     console.error(
@@ -187,15 +236,15 @@ export async function getFileContent(
     );
 
 
-
     return "";
-
-
 
   }
 
-
 }
+
+
+
+
 
 
 
@@ -203,58 +252,44 @@ export async function getFileContent(
    Get All Public Repositories
 ------------------------------------------------------- */
 
-export async function getRepositories() {
 
+export async function getRepositories():
+
+Promise<Repository[]> {
 
 
   try {
 
 
-
     const response =
-
 
       await octokit.rest.repos.listForUser({
 
-
-
         username: OWNER,
-
 
         type: "owner",
 
-
         sort: "updated",
 
-
         per_page: 100,
-
-
 
       });
 
 
 
+    return response.data.map(
 
-    const repositories = [];
-
-
-
-
-    for (const repo of response.data) {
+      (repo) => ({
 
 
+        id:
 
-      repositories.push({
-
-
-
-        id: repo.id,
+          repo.id,
 
 
+        name:
 
-        name: repo.name,
-
+          repo.name,
 
 
         fullName:
@@ -262,17 +297,14 @@ export async function getRepositories() {
           repo.full_name,
 
 
-
         description:
 
-          repo.description ?? "",
-
+          repo.description ?? null,
 
 
         language:
 
-          repo.language ?? "Unknown",
-
+          repo.language ?? null,
 
 
         stars:
@@ -280,11 +312,9 @@ export async function getRepositories() {
           repo.stargazers_count ?? 0,
 
 
-
         updatedAt:
 
           repo.updated_at ?? "",
-
 
 
         url:
@@ -292,49 +322,31 @@ export async function getRepositories() {
           repo.html_url,
 
 
-
         defaultBranch:
 
           repo.default_branch ?? "main",
 
 
+      })
 
-      });
-
-
-
-    }
-
-
-
-
-    return repositories;
-
+    );
 
 
 
   } catch(error) {
 
 
-
     console.error(
-
 
       "Repository fetch error:",
 
-
       error
-
 
     );
 
 
-
     return [];
 
-
-
   }
-
 
 }

@@ -1,13 +1,22 @@
+// ===========================================================
 // File: app/api/github/tree/route.ts
+// ===========================================================
+
 
 import {
+
   NextResponse
+
 } from "next/server";
 
 
 import {
+
   getRepoTree
+
 } from "@/lib/github";
+
+
 
 
 
@@ -17,11 +26,15 @@ export const revalidate = 0;
 
 
 
+
+
+
+
 export async function GET(
 
   request: Request
 
-){
+) {
 
 
   try {
@@ -41,16 +54,30 @@ export async function GET(
 
 
 
+    const branch =
+
+      searchParams.get("branch") ?? "main";
+
+
+
+
+
     if(!repo){
+
 
       return NextResponse.json(
 
         {
-          error: "Repository name is required"
+
+          error:
+            "Repository name is required"
+
         },
 
         {
+
           status:400
+
         }
 
       );
@@ -59,9 +86,23 @@ export async function GET(
 
 
 
+
+
+
+
     const files =
 
-      await getRepoTree(repo);
+      await getRepoTree(
+
+        repo,
+
+        branch
+
+      );
+
+
+
+
 
 
 
@@ -70,13 +111,19 @@ export async function GET(
       files,
 
       {
+
         status:200
+
       }
 
     );
 
 
-  } catch(error){
+
+
+
+  } catch(error) {
+
 
 
     console.error(
@@ -89,17 +136,25 @@ export async function GET(
 
 
 
+
+
     return NextResponse.json(
 
       {
-        error:"Failed to fetch repository tree"
+
+        error:
+          "Failed to fetch repository tree"
+
       },
 
       {
+
         status:500
+
       }
 
     );
+
 
 
   }
