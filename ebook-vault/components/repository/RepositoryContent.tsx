@@ -12,6 +12,19 @@ import {
 } from "react";
 
 
+import FileTree from "./FileTree";
+
+import MarkdownReader from "./MarkdownReader";
+
+
+import {
+  buildTree,
+  TreeNode,
+} from "@/lib/buildTree";
+
+
+
+
 
 interface Repository {
 
@@ -37,13 +50,17 @@ interface Repository {
 
 
 
-interface TreeItem {
+
+
+interface GithubTreeItem {
 
   path: string;
 
   type: "blob" | "tree";
 
 }
+
+
 
 
 
@@ -65,34 +82,49 @@ export default function RepositoryContent({
 
 
 
-  const [
-
-    files,
-
-    setFiles,
-
-  ] = useState<TreeItem[]>([]);
+  const [tree, setTree] = useState<TreeNode[]>([]);
 
 
 
-  const [
-
-    loading,
-
-    setLoading,
-
-  ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
 
+  const [selectedFile, setSelectedFile] =
+    useState<string | null>(null);
+
+
+
+  const [content, setContent] =
+    useState("");
+
+
+
+  const [contentLoading, setContentLoading] =
+    useState(false);
+
+
+
+
+
+
+
+  // =====================================================
+  // Load Repository File Tree
+  // =====================================================
 
 
   useEffect(() => {
 
 
+
     if (!repository) {
 
-      setFiles([]);
+      setTree([]);
+
+      setSelectedFile(null);
+
+      setContent("");
 
       return;
 
@@ -100,15 +132,15 @@ export default function RepositoryContent({
 
 
 
-    const selectedRepository = repository;
+    const currentRepository = repository;
 
 
 
     async function loadRepositoryTree() {
 
 
-      try {
 
+      try {
 
 
         setLoading(true);
@@ -117,33 +149,36 @@ export default function RepositoryContent({
 
         const response = await fetch(
 
-          `/api/github/tree?repo=${selectedRepository.name}&branch=${selectedRepository.defaultBranch}`
+          `/api/github/tree?repo=${currentRepository.name}&branch=${currentRepository.defaultBranch}`
 
         );
 
 
 
+
         if (!response.ok) {
 
-
           throw new Error(
-
-            "Failed to load repository tree"
-
+            "Failed to fetch repository tree"
           );
-
 
         }
 
 
 
-        const data: TreeItem[] =
 
+        const data: GithubTreeItem[] =
           await response.json();
 
 
 
-        setFiles(data);
+
+        const structuredTree =
+          buildTree(data);
+
+
+
+        setTree(structuredTree);
 
 
 
@@ -152,16 +187,13 @@ export default function RepositoryContent({
 
 
         console.error(
-
           "Repository tree error:",
-
           error
-
         );
 
 
 
-        setFiles([]);
+        setTree([]);
 
 
 
@@ -192,26 +224,153 @@ export default function RepositoryContent({
 
 
 
+
+
+
+  // =====================================================
+  // Load Selected Markdown File
+  // =====================================================
+
+
+  useEffect(() => {
+
+
+
+    if (!selectedFile || !repository) {
+
+      setContent("");
+
+      return;
+
+    }
+
+
+
+
+    const currentRepository = repository;
+
+    const currentFile = selectedFile;
+
+
+
+
+
+    async function loadFileContent() {
+
+
+
+      try {
+
+
+
+        setContentLoading(true);
+
+
+
+
+        const response = await fetch(
+
+          `/api/github/content?repo=${currentRepository.name}&path=${encodeURIComponent(currentFile)}`
+
+        );
+
+
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Failed to fetch markdown content"
+          );
+
+        }
+
+
+
+
+        const data = await response.json();
+
+
+
+
+        setContent(
+          data.content ?? ""
+        );
+
+
+
+
+
+      } catch(error) {
+
+
+
+        console.error(
+          "Markdown content error:",
+          error
+        );
+
+
+
+        setContent("");
+
+
+
+
+      } finally {
+
+
+
+        setContentLoading(false);
+
+
+
+      }
+
+
+    }
+
+
+
+
+
+    loadFileContent();
+
+
+
+
+
+  }, [
+
+    selectedFile,
+
+    repository,
+
+  ]);
+
+
+
+
+
+
+
+
+
   if (!repository) {
 
 
 
     return (
 
+
       <section
 
         className="
-
           flex
-
           flex-1
-
           items-center
-
           justify-center
-
           text-gray-400
-
         "
 
       >
@@ -221,9 +380,13 @@ export default function RepositoryContent({
 
       </section>
 
+
     );
 
+
   }
+
+
 
 
 
@@ -234,50 +397,43 @@ export default function RepositoryContent({
   return (
 
 
+
     <section
 
       className="
-
         flex-1
-
         overflow-y-auto
-
         p-8
-
       "
 
     >
 
 
 
+
       <div
 
         className="
-
           rounded-xl
-
           border
-
           bg-white
-
           p-6
-
           shadow-sm
-
         "
 
       >
 
 
 
+
+        {/* Repository Header */}
+
+
         <h2
 
           className="
-
             text-3xl
-
             font-bold
-
           "
 
         >
@@ -294,13 +450,9 @@ export default function RepositoryContent({
         <p
 
           className="
-
             mt-2
-
             text-sm
-
             text-gray-500
-
           "
 
         >
@@ -314,37 +466,59 @@ export default function RepositoryContent({
 
 
 
+        <p
+
+          className="
+            mt-5
+            text-gray-700
+          "
+
+        >
+
+          {
+            repository.description ??
+            "No description provided."
+          }
+
+
+        </p>
+
+
+
+
+
+
+
+
+
+        {/* File Explorer */}
+
+
+
         <div
 
           className="
-
-            mt-6
-
+            mt-8
             border-t
-
-            pt-5
-
+            pt-6
           "
 
         >
 
 
 
+
           <h3
 
             className="
-
               mb-4
-
               text-xl
-
               font-semibold
-
             "
 
           >
 
-            Repository Files
+            Repository Explorer
 
 
           </h3>
@@ -353,113 +527,66 @@ export default function RepositoryContent({
 
 
 
-          {loading && (
 
-            <p className="text-gray-500">
+          {
+            loading && (
 
-              Loading files...
+              <p className="text-gray-500">
 
-            </p>
+                Loading files...
 
-          )}
+              </p>
 
 
+            )
+          }
 
 
 
 
 
-          {!loading && files.length === 0 && (
 
-            <p className="text-gray-500">
 
-              No files found.
+          {
+            !loading &&
+            tree.length === 0 && (
 
-            </p>
+              <p className="text-gray-500">
 
-          )}
+                No markdown files found.
 
+              </p>
 
 
+            )
+          }
 
 
 
 
-          {!loading && files.length > 0 && (
 
-            <div
 
-              className="
 
-                space-y-2
+          {
+            !loading &&
+            tree.length > 0 && (
 
-              "
 
-            >
+              <FileTree
 
+                nodes={tree}
 
+                onFileSelect={
+                  setSelectedFile
+                }
 
-              {files.map((file) => (
+              />
 
 
+            )
+          }
 
-                <div
 
-                  key={file.path}
-
-                  className="
-
-                    flex
-
-                    items-center
-
-                    rounded-lg
-
-                    px-3
-
-                    py-2
-
-                    transition
-
-                    hover:bg-gray-50
-
-                  "
-
-                >
-
-
-
-                  <span className="mr-3">
-
-                    {file.type === "tree"
-
-                      ? "📁"
-
-                      : "📄"}
-
-                  </span>
-
-
-
-                  <span className="text-sm">
-
-                    {file.path}
-
-                  </span>
-
-
-
-                </div>
-
-
-
-              ))}
-
-
-
-            </div>
-
-          )}
 
 
 
@@ -467,11 +594,144 @@ export default function RepositoryContent({
 
 
 
+
+
+
+
+
+
+        {/* Markdown Reader */}
+
+
+
+
+        {
+          selectedFile && (
+
+
+            <div
+
+              className="
+                mt-8
+              "
+
+            >
+
+
+
+
+              {
+                contentLoading && (
+
+
+                  <div
+
+                    className="
+                      rounded-xl
+                      border
+                      bg-gray-50
+                      p-6
+                      text-gray-500
+                    "
+
+                  >
+
+                    Loading markdown...
+
+
+                  </div>
+
+
+                )
+
+              }
+
+
+
+
+
+
+
+
+              {
+                !contentLoading &&
+                content && (
+
+
+                  <MarkdownReader
+
+                    content={content}
+
+                    fileName={selectedFile}
+
+                  />
+
+
+                )
+              }
+
+
+
+
+
+
+
+
+              {
+                !contentLoading &&
+                !content && (
+
+
+                  <div
+
+                    className="
+                      rounded-xl
+                      border
+                      bg-gray-50
+                      p-6
+                      text-gray-500
+                    "
+
+                  >
+
+                    No content found.
+
+
+                  </div>
+
+
+                )
+
+              }
+
+
+
+
+
+
+
+            </div>
+
+
+          )
+
+        }
+
+
+
+
+
+
+
+
       </div>
 
 
 
+
+
     </section>
+
 
 
   );
