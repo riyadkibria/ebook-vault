@@ -12,6 +12,7 @@ import {
 import {
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 
 import ExplorerSidebar from "./ExplorerSidebar";
@@ -426,7 +427,10 @@ export default function RepositoryExplorer({
         flex
         h-screen
         overflow-hidden
-        bg-[#f8fafc]
+        bg-gradient-to-br
+        from-slate-50
+        via-white
+        to-slate-50
       "
 
     >
@@ -448,10 +452,13 @@ export default function RepositoryExplorer({
           flex
           h-14
           items-center
+          gap-3
           border-b
-          bg-white/90
+          border-slate-200/70
+          bg-white/80
           px-4
-          backdrop-blur
+          shadow-sm
+          backdrop-blur-md
           md:hidden
         "
 
@@ -467,32 +474,71 @@ export default function RepositoryExplorer({
           className="
             rounded-lg
             p-2
-            hover:bg-gray-100
+            text-slate-600
+            transition-colors
+            duration-150
+            hover:bg-slate-100
+            hover:text-slate-900
           "
 
         >
 
-          <Menu size={22}/>
+          <Menu size={20}/>
 
 
         </button>
 
 
 
-        <h1
+        <div
 
           className="
-            ml-3
-            text-sm
-            font-semibold
-            text-gray-700
+            flex
+            items-center
+            gap-2
           "
 
         >
 
-          Ebook Library
+          <div
 
-        </h1>
+            className="
+              flex
+              h-6
+              w-6
+              items-center
+              justify-center
+              rounded-md
+              bg-gradient-to-br
+              from-slate-800
+              to-slate-600
+            "
+
+          >
+
+            <BookOpen
+              size={12}
+              className="text-white"
+            />
+
+          </div>
+
+          <h1
+
+            className="
+              text-sm
+              font-semibold
+              tracking-tight
+              text-slate-800
+            "
+
+          >
+
+            Ebook Library
+
+          </h1>
+
+        </div>
 
 
       </div>
@@ -517,6 +563,7 @@ export default function RepositoryExplorer({
           z-40
           transition-transform
           duration-300
+          ease-in-out
 
           md:static
           md:translate-x-0
@@ -540,6 +587,10 @@ export default function RepositoryExplorer({
 
           className="
             relative
+            h-full
+            shadow-2xl
+            shadow-slate-900/10
+            md:shadow-none
           "
 
         >
@@ -557,14 +608,22 @@ export default function RepositoryExplorer({
               top-3
               z-50
               rounded-lg
-              p-2
-              hover:bg-gray-100
+              border
+              border-slate-200
+              bg-white
+              p-1.5
+              text-slate-500
+              shadow-sm
+              transition-colors
+              duration-150
+              hover:bg-slate-100
+              hover:text-slate-900
               md:hidden
             "
 
           >
 
-            <X size={20}/>
+            <X size={18}/>
 
 
           </button>
@@ -633,7 +692,8 @@ export default function RepositoryExplorer({
               fixed
               inset-0
               z-30
-              bg-black/20
+              bg-slate-900/20
+              backdrop-blur-[2px]
               md:hidden
             "
 
@@ -688,15 +748,52 @@ export default function RepositoryExplorer({
               className="
                 flex
                 h-full
+                flex-col
                 items-center
                 justify-center
-                text-sm
-                text-gray-400
+                gap-3
+                text-center
               "
 
             >
 
-              Select a markdown file
+              <div
+
+                className="
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  bg-white
+                  shadow-sm
+                  ring-1
+                  ring-slate-200/70
+                "
+
+              >
+
+                <BookOpen
+                  size={20}
+                  className="text-slate-300"
+                />
+
+              </div>
+
+              <p
+
+                className="
+                  text-sm
+                  font-medium
+                  text-slate-400
+                "
+
+              >
+
+                Select a markdown file
+
+              </p>
 
 
             </div>
@@ -714,14 +811,35 @@ export default function RepositoryExplorer({
             <div
 
               className="
-                rounded-xl
+                flex
+                items-center
+                gap-3
+                rounded-2xl
                 border
+                border-slate-200/70
                 bg-white
                 p-6
-                text-gray-500
+                text-sm
+                font-medium
+                text-slate-500
+                shadow-sm
               "
 
             >
+
+              <span
+
+                className="
+                  h-4
+                  w-4
+                  animate-spin
+                  rounded-full
+                  border-2
+                  border-slate-300
+                  border-t-slate-700
+                "
+
+              />
 
               Loading markdown...
 
@@ -769,11 +887,15 @@ export default function RepositoryExplorer({
               <div
 
                 className="
-                  rounded-xl
+                  rounded-2xl
                   border
+                  border-slate-200/70
                   bg-white
                   p-6
-                  text-gray-500
+                  text-sm
+                  font-medium
+                  text-slate-400
+                  shadow-sm
                 "
 
               >

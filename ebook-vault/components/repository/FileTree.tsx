@@ -51,7 +51,7 @@ export default function FileTree({
 
     <div
       className="
-        space-y-1
+        space-y-0.5
         text-sm
       "
     >
@@ -154,6 +154,8 @@ function TreeItem({
 
         className={`
 
+          group
+
           flex
 
           w-full
@@ -170,17 +172,17 @@ function TreeItem({
 
           text-left
 
-          transition
+          transition-all
 
-          duration-200
+          duration-150
 
 
           ${
             isSelected
 
-            ? "bg-blue-50 text-blue-700 font-medium"
+            ? "bg-slate-900 text-white shadow-sm shadow-slate-900/20"
 
-            : "text-gray-700 hover:bg-gray-100"
+            : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
 
           }
 
@@ -199,8 +201,12 @@ function TreeItem({
               ? (
 
                 <ChevronDown
-                  size={15}
-                  className="shrink-0"
+                  size={14}
+                  className={`
+                    shrink-0
+                    transition-colors
+                    ${isSelected ? "text-white/70" : "text-slate-400"}
+                  `}
                 />
 
               )
@@ -208,8 +214,12 @@ function TreeItem({
               : (
 
                 <ChevronRight
-                  size={15}
-                  className="shrink-0"
+                  size={14}
+                  className={`
+                    shrink-0
+                    transition-colors
+                    ${isSelected ? "text-white/70" : "text-slate-400"}
+                  `}
                 />
 
               )
@@ -218,7 +228,7 @@ function TreeItem({
 
           : (
 
-              <span className="w-[15px]" />
+              <span className="w-[14px] shrink-0" />
 
           )
 
@@ -239,7 +249,10 @@ function TreeItem({
 
                 <FolderOpen
                   size={16}
-                  className="shrink-0 text-blue-500"
+                  className={`
+                    shrink-0
+                    ${isSelected ? "text-amber-300" : "text-amber-500"}
+                  `}
                 />
 
               )
@@ -248,7 +261,10 @@ function TreeItem({
 
                 <Folder
                   size={16}
-                  className="shrink-0 text-blue-500"
+                  className={`
+                    shrink-0
+                    ${isSelected ? "text-amber-300" : "text-amber-500"}
+                  `}
                 />
 
               )
@@ -258,8 +274,11 @@ function TreeItem({
           : (
 
               <FileText
-                size={16}
-                className="shrink-0 text-gray-400"
+                size={15}
+                className={`
+                  shrink-0
+                  ${isSelected ? "text-white/70" : "text-slate-400"}
+                `}
               />
 
           )
@@ -271,9 +290,10 @@ function TreeItem({
 
 
         <span
-          className="
+          className={`
             truncate
-          "
+            ${isSelected ? "font-medium" : "font-normal"}
+          `}
         >
 
           {node.name}
@@ -302,13 +322,17 @@ function TreeItem({
 
             className="
 
-              ml-4
+              ml-[10px]
 
               border-l
 
-              border-gray-200
+              border-slate-200/80
 
-              pl-2
+              pl-3
+
+              mt-0.5
+
+              space-y-0.5
 
             "
 

@@ -6,6 +6,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { FileText } from "lucide-react";
 
 
 
@@ -41,7 +42,8 @@ export default function MarkdownReader({
           items-center
           justify-center
           text-sm
-          text-gray-400
+          font-medium
+          text-slate-400
         "
 
       >
@@ -66,10 +68,13 @@ export default function MarkdownReader({
         max-w-5xl
         rounded-2xl
         border
-        border-gray-200
+        border-slate-200/70
         bg-white
         p-6
         shadow-sm
+        shadow-slate-900/[0.03]
+        ring-1
+        ring-slate-900/[0.02]
         sm:p-10
       "
 
@@ -84,12 +89,40 @@ export default function MarkdownReader({
 
             className="
               mb-8
+              flex
+              items-center
+              gap-3
               border-b
-              border-gray-100
+              border-slate-100
               pb-5
             "
 
           >
+
+            <div
+
+              className="
+                flex
+                h-9
+                w-9
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-slate-100
+              "
+
+            >
+
+              <FileText
+
+                size={16}
+
+                className="text-slate-500"
+
+              />
+
+            </div>
 
             <h1
 
@@ -97,7 +130,8 @@ export default function MarkdownReader({
                 truncate
                 text-xl
                 font-semibold
-                text-gray-800
+                tracking-tight
+                text-slate-800
                 sm:text-2xl
               "
 
@@ -121,28 +155,40 @@ export default function MarkdownReader({
 
         className="
           prose
-          prose-gray
+          prose-slate
           max-w-none
 
           prose-headings:font-semibold
-          prose-headings:text-gray-900
+          prose-headings:tracking-tight
+          prose-headings:text-slate-900
 
-          prose-p:text-gray-700
+          prose-p:text-slate-600
           prose-p:leading-8
 
-          prose-a:text-blue-600
+          prose-a:text-slate-900
+          prose-a:underline
+          prose-a:decoration-slate-300
+          prose-a:underline-offset-4
+          hover:prose-a:decoration-slate-500
 
-          prose-blockquote:border-blue-200
-          prose-blockquote:text-gray-600
+          prose-strong:text-slate-800
+
+          prose-blockquote:border-slate-300
+          prose-blockquote:text-slate-500
 
           prose-code:rounded
-          prose-code:bg-gray-100
+          prose-code:bg-slate-100
           prose-code:px-1
           prose-code:py-0.5
           prose-code:text-sm
 
           prose-pre:rounded-xl
-          prose-pre:bg-gray-900
+          prose-pre:bg-slate-900
+
+          prose-img:rounded-xl
+          prose-img:shadow-sm
+
+          prose-hr:border-slate-100
 
           sm:prose-lg
         "
@@ -175,7 +221,8 @@ export default function MarkdownReader({
                   mb-5
                   text-3xl
                   font-bold
-                  text-gray-900
+                  tracking-tight
+                  text-slate-900
                   sm:text-4xl
                 "
 
@@ -201,11 +248,12 @@ export default function MarkdownReader({
                   mt-10
                   mb-4
                   border-b
-                  border-gray-100
+                  border-slate-100
                   pb-2
                   text-2xl
                   font-semibold
-                  text-gray-900
+                  tracking-tight
+                  text-slate-900
                 "
 
               >
@@ -231,7 +279,7 @@ export default function MarkdownReader({
                   mb-3
                   text-xl
                   font-semibold
-                  text-gray-800
+                  text-slate-800
                 "
 
               >
@@ -255,7 +303,7 @@ export default function MarkdownReader({
                 className="
                   my-5
                   leading-8
-                  text-gray-700
+                  text-slate-600
                 "
 
               >
@@ -280,12 +328,12 @@ export default function MarkdownReader({
                   my-6
                   rounded-r-lg
                   border-l-4
-                  border-gray-300
-                  bg-gray-50
+                  border-slate-300
+                  bg-slate-50
                   px-5
                   py-3
                   italic
-                  text-gray-600
+                  text-slate-500
                 "
 
               >
@@ -310,11 +358,12 @@ export default function MarkdownReader({
                   my-6
                   overflow-x-auto
                   rounded-xl
-                  bg-gray-900
+                  bg-slate-900
                   p-5
                   text-sm
-                  text-white
-                  shadow-sm
+                  text-slate-50
+                  shadow-md
+                  shadow-slate-900/10
                 "
 
               >
@@ -337,11 +386,11 @@ export default function MarkdownReader({
 
                 className="
                   rounded-md
-                  bg-gray-100
+                  bg-slate-100
                   px-1.5
                   py-1
                   text-sm
-                  text-gray-800
+                  text-slate-800
                 "
 
               >
@@ -367,7 +416,7 @@ export default function MarkdownReader({
                   list-disc
                   space-y-2
                   pl-6
-                  text-gray-700
+                  text-slate-600
                 "
 
               >
@@ -393,7 +442,7 @@ export default function MarkdownReader({
                   list-decimal
                   space-y-2
                   pl-6
-                  text-gray-700
+                  text-slate-600
                 "
 
               >
@@ -439,6 +488,9 @@ export default function MarkdownReader({
                 className="
                   my-6
                   overflow-x-auto
+                  rounded-xl
+                  border
+                  border-slate-200
                 "
 
               >
@@ -472,12 +524,14 @@ export default function MarkdownReader({
               <th
 
                 className="
-                  border
-                  bg-gray-50
+                  border-b
+                  border-slate-200
+                  bg-slate-50
                   px-4
-                  py-2
+                  py-2.5
                   text-left
                   font-semibold
+                  text-slate-700
                 "
 
               >
@@ -499,9 +553,11 @@ export default function MarkdownReader({
               <td
 
                 className="
-                  border
+                  border-b
+                  border-slate-100
                   px-4
-                  py-2
+                  py-2.5
+                  text-slate-600
                 "
 
               >
