@@ -2,14 +2,11 @@
 // File: components/repository/FileTree.tsx
 // ===========================================================
 
-
 "use client";
-
 
 import {
   useState,
 } from "react";
-
 
 import {
   ChevronRight,
@@ -19,14 +16,9 @@ import {
   FileText,
 } from "lucide-react";
 
-
 import {
   TreeNode,
 } from "@/lib/buildTree";
-
-
-
-
 
 
 
@@ -44,10 +36,6 @@ interface Props {
 
 
 
-
-
-
-
 export default function FileTree({
 
   nodes,
@@ -59,25 +47,17 @@ export default function FileTree({
 }: Props) {
 
 
-
   return (
 
-
-
     <div
-
       className="
         space-y-1
         text-sm
       "
-
     >
 
-
-
       {
-        nodes.map((node)=>(
-
+        nodes.map((node) => (
 
           <TreeItem
 
@@ -91,24 +71,14 @@ export default function FileTree({
 
           />
 
-
         ))
       }
 
-
-
-
-
     </div>
-
-
 
   );
 
 }
-
-
-
 
 
 
@@ -119,15 +89,12 @@ interface TreeItemProps {
   node: TreeNode;
 
   onFileSelect: (
-    path:string
+    path: string
   ) => void;
 
   selectedFile?: string | null;
 
 }
-
-
-
 
 
 
@@ -144,18 +111,7 @@ function TreeItem({
 }: TreeItemProps) {
 
 
-
-
-  const [
-
-    open,
-
-    setOpen,
-
-  ] = useState(false);
-
-
-
+  const [open, setOpen] = useState(false);
 
 
 
@@ -164,52 +120,32 @@ function TreeItem({
 
 
 
-
-
+  const hasChildren =
+    node.children &&
+    node.children.length > 0;
 
 
 
   function handleClick() {
 
 
+    if (node.type === "folder") {
 
-    if(node.type === "folder"){
+      setOpen((prev) => !prev);
 
+    } else {
 
-      setOpen(
-        previous => !previous
-      );
-
-
-    }
-
-    else {
-
-
-      onFileSelect(
-        node.path
-      );
-
+      onFileSelect(node.path);
 
     }
-
 
   }
 
 
 
-
-
-
-
-
-
   return (
 
-
-
     <div>
-
 
 
       <button
@@ -217,54 +153,40 @@ function TreeItem({
         onClick={handleClick}
 
         className={`
+
           flex
+
           w-full
+
           items-center
+
           gap-2
-          rounded-md
+
+          rounded-lg
+
           px-2
+
           py-1.5
+
           text-left
+
           transition
+
+          duration-200
+
 
           ${
             isSelected
-            ? "bg-blue-50 text-blue-700"
-            : "hover:bg-gray-100"
+
+            ? "bg-blue-50 text-blue-700 font-medium"
+
+            : "text-gray-700 hover:bg-gray-100"
+
           }
+
         `}
 
       >
-
-
-
-        {
-          node.type === "folder"
-          ? (
-
-            open
-
-            ? <ChevronDown
-                size={16}
-              />
-
-            : <ChevronRight
-                size={16}
-              />
-
-          )
-
-          : (
-
-            <span className="w-4" />
-
-          )
-        }
-
-
-
-
-
 
 
         {
@@ -274,46 +196,89 @@ function TreeItem({
 
               open
 
-              ? <FolderOpen
-                  size={17}
+              ? (
+
+                <ChevronDown
+                  size={15}
+                  className="shrink-0"
                 />
 
-              : <Folder
-                  size={17}
+              )
+
+              : (
+
+                <ChevronRight
+                  size={15}
+                  className="shrink-0"
                 />
 
-            )
+              )
+
+          )
+
+          : (
+
+              <span className="w-[15px]" />
+
+          )
+
+        }
+
+
+
+
+        {
+
+          node.type === "folder"
+
+          ? (
+
+              open
+
+              ? (
+
+                <FolderOpen
+                  size={16}
+                  className="shrink-0 text-blue-500"
+                />
+
+              )
+
+              : (
+
+                <Folder
+                  size={16}
+                  className="shrink-0 text-blue-500"
+                />
+
+              )
+
+          )
 
           : (
 
               <FileText
-                size={17}
+                size={16}
+                className="shrink-0 text-gray-400"
               />
 
-            )
+          )
+
         }
 
 
 
 
 
-
-
         <span
-
           className="
             truncate
           "
-
         >
 
           {node.name}
 
-
         </span>
-
-
-
 
 
       </button>
@@ -323,83 +288,61 @@ function TreeItem({
 
 
 
-
-
-
       {
+
         node.type === "folder"
 
         && open
 
-        && node.children
+        && hasChildren
 
         && (
 
           <div
 
             className="
-              ml-5
+
+              ml-4
+
               border-l
+
               border-gray-200
+
               pl-2
+
             "
 
           >
 
-
-
-
-
             {
-              node.children.map(
-                child => (
 
+              node.children!.map((child) => (
 
-                  <TreeItem
+                <TreeItem
 
-                    key={
-                      child.path
-                    }
+                  key={child.path}
 
-                    node={
-                      child
-                    }
+                  node={child}
 
-                    onFileSelect={
-                      onFileSelect
-                    }
+                  onFileSelect={onFileSelect}
 
-                    selectedFile={
-                      selectedFile
-                    }
+                  selectedFile={selectedFile}
 
+                />
 
-                  />
+              ))
 
-
-                )
-
-              )
             }
 
 
-
-
-
           </div>
-
 
         )
 
       }
 
 
-
-
-
     </div>
-
-
 
   );
 

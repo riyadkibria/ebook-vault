@@ -9,6 +9,11 @@ import {
   useState,
 } from "react";
 
+import {
+  Menu,
+  X,
+} from "lucide-react";
+
 import ExplorerSidebar from "./ExplorerSidebar";
 import MarkdownReader from "./MarkdownReader";
 
@@ -68,45 +73,75 @@ export default function RepositoryExplorer({
 }: Props) {
 
 
+
   const [
+
     selectedRepository,
+
     setSelectedRepository,
+
   ] = useState<Repository | null>(null);
 
 
 
   const [
+
     tree,
+
     setTree,
+
   ] = useState<TreeNode[]>([]);
 
 
 
   const [
+
     treeLoading,
+
     setTreeLoading,
+
   ] = useState(false);
 
 
 
   const [
+
     selectedFile,
+
     setSelectedFile,
+
   ] = useState<string | null>(null);
 
 
 
   const [
+
     markdown,
+
     setMarkdown,
+
   ] = useState("");
 
 
 
   const [
+
     markdownLoading,
+
     setMarkdownLoading,
+
   ] = useState(false);
+
+
+
+  const [
+
+    mobileSidebarOpen,
+
+    setMobileSidebarOpen,
+
+  ] = useState(false);
+
 
 
 
@@ -115,6 +150,7 @@ export default function RepositoryExplorer({
   // =======================================
   // Load Repository Tree
   // =======================================
+
 
   useEffect(() => {
 
@@ -146,7 +182,6 @@ export default function RepositoryExplorer({
         setTreeLoading(true);
 
 
-
         const response = await fetch(
 
           `/api/github/tree?repo=${repo.name}&branch=${repo.defaultBranch}`
@@ -166,12 +201,15 @@ export default function RepositoryExplorer({
 
 
         const data: GithubTreeItem[] =
+
           await response.json();
 
 
 
         setTree(
+
           buildTree(data)
+
         );
 
 
@@ -180,8 +218,11 @@ export default function RepositoryExplorer({
 
 
         console.error(
+
           "Tree error:",
+
           error
+
         );
 
 
@@ -218,7 +259,9 @@ export default function RepositoryExplorer({
   // Load Markdown Content
   // =======================================
 
+
   useEffect(() => {
+
 
 
     if (
@@ -236,6 +279,8 @@ export default function RepositoryExplorer({
 
 
     }
+
+
 
 
 
@@ -269,16 +314,22 @@ export default function RepositoryExplorer({
 
         if (!response.ok) {
 
+
           throw new Error(
+
             "Failed to fetch markdown"
+
           );
+
 
         }
 
 
 
         const data =
+
           await response.json();
+
 
 
 
@@ -326,6 +377,7 @@ export default function RepositoryExplorer({
 
 
 
+
     loadMarkdown();
 
 
@@ -344,80 +396,261 @@ export default function RepositoryExplorer({
 
 
 
+  function handleRepositorySelect(
+    repo: Repository
+  ) {
+
+    setSelectedRepository(repo);
+
+    setSelectedFile(null);
+
+    setMarkdown("");
+
+    setMobileSidebarOpen(false);
+
+  }
+
+
+
+
+
+
   return (
+
+
 
     <main
 
       className="
+        relative
         flex
         h-screen
         overflow-hidden
-        bg-gray-50
+        bg-[#f8fafc]
       "
 
     >
 
 
 
-      {/* ==================================
-          LEFT : OBSIDIAN STYLE SIDEBAR
-      =================================== */}
+
+      {/* Mobile Header */}
 
 
-      <ExplorerSidebar
+      <div
+
+        className="
+          fixed
+          left-0
+          right-0
+          top-0
+          z-30
+          flex
+          h-14
+          items-center
+          border-b
+          bg-white/90
+          px-4
+          backdrop-blur
+          md:hidden
+        "
+
+      >
 
 
-        repositories={repositories}
+        <button
+
+          onClick={() =>
+            setMobileSidebarOpen(true)
+          }
+
+          className="
+            rounded-lg
+            p-2
+            hover:bg-gray-100
+          "
+
+        >
+
+          <Menu size={22}/>
 
 
-        selectedRepository={
-          selectedRepository
-        }
+        </button>
 
 
-        tree={tree}
+
+        <h1
+
+          className="
+            ml-3
+            text-sm
+            font-semibold
+            text-gray-700
+          "
+
+        >
+
+          Ebook Library
+
+        </h1>
 
 
-        treeLoading={treeLoading}
+      </div>
 
 
-        onRepositorySelect={(repo) => {
 
 
-          setSelectedRepository(repo);
 
 
-          setSelectedFile(null);
+
+      {/* Sidebar */}
 
 
-          setMarkdown("");
 
+      <div
 
-        }}
+        className={`
 
+          fixed
+          inset-y-0
+          left-0
+          z-40
+          transition-transform
+          duration-300
 
-        onFileSelect={
+          md:static
+          md:translate-x-0
 
-          (file) => {
+          ${
+            mobileSidebarOpen
 
-            setSelectedFile(file);
+            ? "translate-x-0"
+
+            : "-translate-x-full"
 
           }
 
-        }
+        `}
 
-
-      />
-
-
+      >
 
 
 
+        <div
+
+          className="
+            relative
+          "
+
+        >
 
 
-      {/* ==================================
-          RIGHT : MARKDOWN READER
-      =================================== */}
+          <button
+
+            onClick={() =>
+              setMobileSidebarOpen(false)
+            }
+
+            className="
+              absolute
+              right-3
+              top-3
+              z-50
+              rounded-lg
+              p-2
+              hover:bg-gray-100
+              md:hidden
+            "
+
+          >
+
+            <X size={20}/>
+
+
+          </button>
+
+
+
+          <ExplorerSidebar
+
+
+            repositories={repositories}
+
+
+            selectedRepository={
+              selectedRepository
+            }
+
+
+            tree={tree}
+
+
+            treeLoading={treeLoading}
+
+
+            onRepositorySelect={
+              handleRepositorySelect
+            }
+
+
+            onFileSelect={(file)=>{
+
+              setSelectedFile(file);
+
+              setMobileSidebarOpen(false);
+
+            }}
+
+
+          />
+
+
+        </div>
+
+
+      </div>
+
+
+
+
+
+
+
+      {/* Mobile Overlay */}
+
+
+      {
+
+        mobileSidebarOpen && (
+
+          <div
+
+            onClick={() =>
+              setMobileSidebarOpen(false)
+            }
+
+            className="
+              fixed
+              inset-0
+              z-30
+              bg-black/20
+              md:hidden
+            "
+
+          />
+
+        )
+
+      }
+
+
+
+
+
+
+
+
+      {/* Markdown Reader */}
 
 
 
@@ -426,102 +659,140 @@ export default function RepositoryExplorer({
         className="
           flex-1
           overflow-y-auto
-          bg-white
-          p-10
+          pt-14
+          md:pt-0
         "
 
       >
 
 
 
-        {!selectedFile && (
+        <div
 
-          <div
+          className="
+            mx-auto
+            min-h-full
+            max-w-5xl
+            p-5
+            md:p-10
+          "
 
-            className="
-              flex
-              h-full
-              items-center
-              justify-center
-              text-gray-400
-            "
-
-          >
-
-            Select a markdown file
-
-          </div>
-
-        )}
+        >
 
 
 
+          {!selectedFile && (
+
+            <div
+
+              className="
+                flex
+                h-full
+                items-center
+                justify-center
+                text-sm
+                text-gray-400
+              "
+
+            >
+
+              Select a markdown file
 
 
-
-        {selectedFile && markdownLoading && (
-
-          <div className="text-gray-500">
-
-            Loading markdown...
-
-          </div>
-
-        )}
+            </div>
 
 
-
-
-
-
-
-        {selectedFile &&
-
-          !markdownLoading &&
-
-          markdown && (
-
-
-          <MarkdownReader
-
-            fileName={selectedFile}
-
-            content={markdown}
-
-          />
-
-
-        )}
+          )}
 
 
 
 
 
 
+          {selectedFile && markdownLoading && (
 
-        {selectedFile &&
+            <div
 
-          !markdownLoading &&
+              className="
+                rounded-xl
+                border
+                bg-white
+                p-6
+                text-gray-500
+              "
 
-          !markdown && (
+            >
 
-
-          <div className="text-gray-500">
-
-            No content found.
-
-          </div>
-
-
-        )}
-
+              Loading markdown...
 
 
+            </div>
+
+
+          )}
+
+
+
+
+
+
+          {selectedFile &&
+
+            !markdownLoading &&
+
+            markdown && (
+
+
+              <MarkdownReader
+
+                fileName={selectedFile}
+
+                content={markdown}
+
+              />
+
+
+          )}
+
+
+
+
+
+
+          {selectedFile &&
+
+            !markdownLoading &&
+
+            !markdown && (
+
+
+              <div
+
+                className="
+                  rounded-xl
+                  border
+                  bg-white
+                  p-6
+                  text-gray-500
+                "
+
+              >
+
+                No content found.
+
+
+              </div>
+
+
+          )}
+
+
+
+        </div>
 
 
 
       </section>
-
 
 
 
