@@ -28,50 +28,197 @@ export default async function RepositoriesPage() {
 
   return (
 
-    <main className="mx-auto max-w-7xl p-8">
+    <main className="
+      flex
+      min-h-screen
+      bg-gray-50
+    ">
 
-      <h1 className="mb-8 text-4xl font-bold">
-        GitHub Repositories
-      </h1>
+      {/* =========================
+          Left Sidebar
+      ========================== */}
 
-
-      <div className="
-        grid
-        gap-6
-        md:grid-cols-2
-        xl:grid-cols-3
+      <aside className="
+        w-80
+        border-r
+        bg-white
+        p-5
+        shadow-sm
       ">
 
 
-        {repositories.map((repo) => (
+        <div className="
+          mb-6
+        ">
 
-          <article
-            key={repo.id}
-            className="
-              rounded-xl
-              border
-              bg-white
-              p-6
-              shadow-sm
-              transition
-              hover:shadow-lg
-            "
-          >
-
-            <div className="space-y-3">
+          <h1 className="
+            text-xl
+            font-bold
+          ">
+            GitHub Library
+          </h1>
 
 
-              <h2 className="text-xl font-semibold">
-                {repo.name}
-              </h2>
+          <p className="
+            mt-1
+            text-sm
+            text-gray-500
+          ">
+            {repositories.length} repositories
+          </p>
 
 
-              <p className="text-sm text-gray-500">
-                {repo.fullName}
+        </div>
+
+
+
+        <div className="
+          space-y-2
+          overflow-y-auto
+          max-h-[calc(100vh-150px)]
+        ">
+
+
+          {repositories.map((repo) => (
+
+            <a
+              key={repo.id}
+              href={`#${repo.name}`}
+              className="
+                group
+                block
+                rounded-lg
+                border
+                border-transparent
+                p-3
+                transition
+
+                hover:border-gray-200
+                hover:bg-gray-50
+              "
+            >
+
+
+              <div className="
+                flex
+                items-center
+                justify-between
+              ">
+
+
+                <h2 className="
+                  truncate
+                  font-medium
+                  text-gray-900
+                  group-hover:text-black
+                ">
+                  📁 {repo.name}
+                </h2>
+
+
+                <span className="
+                  text-xs
+                  text-gray-400
+                ">
+                  ⭐ {repo.stars}
+                </span>
+
+
+              </div>
+
+
+
+              <p className="
+                mt-1
+                truncate
+                text-xs
+                text-gray-500
+              ">
+                {repo.language ?? "Unknown"}
               </p>
 
 
-              <p className="min-h-12 text-gray-700">
+            </a>
+
+          ))}
+
+
+        </div>
+
+
+      </aside>
+
+
+
+      {/* =========================
+          Main Content
+      ========================== */}
+
+      <section className="
+        flex-1
+        p-8
+      ">
+
+
+        <header className="
+          mb-8
+        ">
+
+
+          <h2 className="
+            text-3xl
+            font-bold
+          ">
+            Repositories
+          </h2>
+
+
+          <p className="
+            mt-2
+            text-gray-500
+          ">
+            Select a repository from the sidebar
+          </p>
+
+
+        </header>
+
+
+
+        <div className="
+          space-y-6
+        ">
+
+
+          {repositories.map((repo)=>(
+
+
+            <article
+              id={repo.name}
+              key={repo.id}
+              className="
+                rounded-xl
+                border
+                bg-white
+                p-6
+                shadow-sm
+              "
+            >
+
+
+              <h3 className="
+                text-xl
+                font-semibold
+              ">
+                {repo.name}
+              </h3>
+
+
+
+              <p className="
+                mt-2
+                text-gray-600
+              ">
                 {
                   repo.description ??
                   "No description provided."
@@ -79,12 +226,13 @@ export default async function RepositoriesPage() {
               </p>
 
 
+
               <div className="
+                mt-4
                 flex
-                flex-wrap
-                gap-4
+                gap-5
                 text-sm
-                text-gray-600
+                text-gray-500
               ">
 
                 <span>
@@ -97,20 +245,29 @@ export default async function RepositoriesPage() {
                 </span>
 
 
+                <span>
+                  Branch:
+                  {" "}
+                  {repo.defaultBranch}
+                </span>
+
+
               </div>
 
 
 
-              <p className="text-xs text-gray-500">
-
-                Updated{" "}
-
+              <p className="
+                mt-3
+                text-xs
+                text-gray-400
+              ">
+                Updated:
+                {" "}
                 {
                   new Date(
                     repo.updatedAt
                   ).toLocaleDateString()
                 }
-
               </p>
 
 
@@ -120,29 +277,31 @@ export default async function RepositoriesPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
+                  mt-4
                   inline-block
-                  rounded-md
+                  rounded-lg
                   bg-black
                   px-4
                   py-2
+                  text-sm
                   text-white
-                  transition
                   hover:bg-gray-800
                 "
               >
-                View Repository
+                Open GitHub
               </a>
 
 
-            </div>
+            </article>
 
 
-          </article>
-
-        ))}
+          ))}
 
 
-      </div>
+        </div>
+
+
+      </section>
 
 
     </main>
