@@ -1,6 +1,5 @@
 "use client";
 
-
 import {
   useState,
 } from "react";
@@ -52,9 +51,25 @@ export default function RepositoryExplorer({
   const [
     selectedRepository,
     setSelectedRepository,
-  ] = useState<Repository | null>(
-    null
-  );
+  ] = useState<Repository | null>(null);
+
+
+
+  function handleRepositorySelect(
+    repository: Repository
+  ) {
+
+    console.log(
+      "Selected Repository:",
+      repository
+    );
+
+
+    setSelectedRepository(
+      repository
+    );
+
+  }
 
 
 
@@ -80,7 +95,7 @@ export default function RepositoryExplorer({
         }
 
         onSelect={
-          setSelectedRepository
+          handleRepositorySelect
         }
 
       />
@@ -99,4 +114,5 @@ export default function RepositoryExplorer({
     </main>
 
   );
+
 }
