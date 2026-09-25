@@ -12,6 +12,7 @@ import { markdownComponents } from "./MarkdownComponents";
 import ChunkManager from "@/components/chunk-manager/ChunkManager";
 
 import { splitIntoChunks } from "@/lib/chunk";
+import { normalizeMarkdown } from "@/lib/normalizeMarkdown";
 
 
 interface Props {
@@ -24,25 +25,6 @@ export default function MarkdownReader({
   content,
   fileName,
 }: Props) {
-
-
-  if (!content) {
-    return (
-      <div
-        className="
-          flex
-          h-full
-          items-center
-          justify-center
-          text-sm
-          font-medium
-          text-slate-400
-        "
-      >
-        No content available.
-      </div>
-    );
-  }
 
 
   const [chunkSize, setChunkSize] = useState(500);
@@ -64,6 +46,38 @@ export default function MarkdownReader({
   const selectedChunk = chunks[currentChunk];
 
 
+  const cleanedMarkdown = useMemo(() => {
+
+    return normalizeMarkdown(
+      String(selectedChunk?.text ?? "")
+    );
+
+  }, [
+    selectedChunk,
+  ]);
+
+
+
+  if (!content) {
+    return (
+      <div
+        className="
+          flex
+          h-full
+          items-center
+          justify-center
+          text-sm
+          font-medium
+          text-slate-400
+        "
+      >
+        No content available.
+      </div>
+    );
+  }
+
+
+
   return (
     <article
       className="
@@ -82,6 +96,7 @@ export default function MarkdownReader({
         sm:p-10
       "
     >
+
 
       {fileName && (
         <div
@@ -133,7 +148,7 @@ export default function MarkdownReader({
 
 
 
-      {/* Chunk Control - OUTSIDE prose */}
+
       {selectedChunk && (
         <ChunkManager
           filename={fileName}
@@ -166,18 +181,22 @@ export default function MarkdownReader({
 
 
 
-      {/* Markdown Content */}
+
+
       <div
-  className="
-    max-w-none
-  "
->
+        className="
+          max-w-none
+          font-normal
+        "
+      >
 
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          remarkPlugins={[
+            remarkGfm,
+          ]}
           components={markdownComponents}
         >
-          {String(selectedChunk?.text ?? "")}
+          {cleanedMarkdown}
         </ReactMarkdown>
 
 
