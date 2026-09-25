@@ -1,15 +1,12 @@
 // File location:
 // components/chunk-manager/ChunkManager.tsx
 
-
 "use client";
-
 
 import {
   useEffect,
   useState
 } from "react";
-
 
 import {
   Copy,
@@ -20,18 +17,12 @@ import {
   Hash,
 } from "lucide-react";
 
-
 import type { Chunk } from "@/lib/chunk";
 
-
 import {
-  increaseCopyCount
-} from "@/lib/chunkProgress";
-
-
-import {
+  saveCopiedChunk,
   getCopyCount
-} from "@/lib/getCopyCount";
+} from "@/lib/chunkProgress";
 
 
 
@@ -58,17 +49,11 @@ interface Props {
 
 
 const sizes = [
-
   500,
-
   1000,
-
   1500,
-
   3000,
-
   5000,
-
 ];
 
 
@@ -95,45 +80,32 @@ export default function ChunkManager({
 }:Props){
 
 
-
   const [copied,setCopied] = useState(false);
-
 
   const [copyCount,setCopyCount] = useState(0);
 
 
 
-
-
   /*
-    Load saved copy count
-    from Supabase after opening chunk
+    Load copy count
   */
 
   useEffect(()=>{
 
 
-    async function loadCopyCount(){
-
+    async function loadCount(){
 
       const count = await getCopyCount(
-
-        "riyad",
-
-        `${filename}-chunk-${chunk.id}`
-
+        filename,
+        chunk.id
       );
 
-
       setCopyCount(count);
-
 
     }
 
 
-
-    loadCopyCount();
-
+    loadCount();
 
 
   },[
@@ -146,11 +118,11 @@ export default function ChunkManager({
 
 
 
+
   async function copyChunk(){
 
 
-
-    const text =
+    const chunkText =
 
 `Book: ${filename}
 
@@ -162,45 +134,69 @@ ${chunk.text}`;
 
 
 
+    /*
+      1. Copy to clipboard
+    */
+
+    await navigator.clipboard.writeText(
+      chunkText
+    );
 
 
-    await navigator.clipboard.writeText(text);
 
 
+    /*
+      2. Save to Supabase
 
+      Rule:
+      Same book + same chunk id
+      will NOT create duplicate
 
+    */
 
     try{
 
 
-      const newCount = await increaseCopyCount(
+      const result = await saveCopiedChunk({
 
-        "riyad",
+        bookName: filename,
 
-        `${filename}-chunk-${chunk.id}`
+        chunkId: chunk.id,
 
-      );
+        chunkNumber: current + 1,
+
+        totalChunks: total,
+
+        words: chunk.words,
+
+        estimatedTokens:
+          chunk.estimatedTokens,
+
+        content:
+          chunk.text
+
+      });
 
 
 
-      setCopyCount(newCount);
+      if(result){
+
+        setCopyCount(
+          result.copyCount
+        );
+
+      }
 
 
 
     }catch(error){
 
-
       console.error(
-
-        "Copy count update failed:",
-
+        "Chunk save failed:",
         error
-
       );
 
-
     }
-
 
 
 
@@ -208,15 +204,11 @@ ${chunk.text}`;
     setCopied(true);
 
 
-
     setTimeout(()=>{
-
 
       setCopied(false);
 
-
     },1500);
-
 
 
   }
@@ -242,542 +234,468 @@ ${chunk.text}`;
 
 
 
-  return (
+return (
 
 
+<div
 
-    <div
+className="
+sticky
+top-3
+z-20
+mb-6
+"
 
-      className="
-        sticky
-        top-3
-        z-20
-        mb-6
-      "
+>
 
-    >
 
+<div
 
+className="
+rounded-2xl
+border
+border-gray-200
+bg-white/80
+backdrop-blur-xl
+shadow-lg
+"
 
-      <div
+>
 
-        className="
-          rounded-2xl
-          border
-          border-gray-200
-          bg-white/80
-          backdrop-blur-xl
-          shadow-lg
-        "
 
-      >
 
+<div
 
+className="
+flex
+flex-col
+gap-3
+p-4
+md:flex-row
+md:items-center
+md:justify-between
+"
 
+>
 
-        {/* Header */}
 
 
+<div
 
-        <div
+className="
+flex
+flex-wrap
+items-center
+gap-2
+"
 
-          className="
-            flex
-            flex-col
-            gap-3
-            p-4
-            md:flex-row
-            md:items-center
-            md:justify-between
-          "
+>
 
-        >
 
 
+<span
 
-          <div
+className="
+inline-flex
+items-center
+gap-2
+rounded-full
+bg-blue-50
+px-3
+py-1
+text-sm
+font-semibold
+text-blue-700
+"
 
-            className="
-              flex
-              flex-wrap
-              items-center
-              gap-2
-            "
+>
 
-          >
+<FileText size={15}/>
 
+AI Chunk
 
+</span>
 
 
-            <span
 
-              className="
-                inline-flex
-                items-center
-                gap-2
-                rounded-full
-                bg-blue-50
-                px-3
-                py-1
-                text-sm
-                font-semibold
-                text-blue-700
-              "
 
-            >
+<span
 
-              <FileText size={15}/>
+className="
+rounded-full
+bg-gray-100
+px-3
+py-1
+text-sm
+"
 
-              AI Chunk
+>
 
-            </span>
+{current + 1} / {total}
 
+</span>
 
 
 
 
 
-            <span
+<span
 
-              className="
-                rounded-full
-                bg-gray-100
-                px-3
-                py-1
-                text-sm
-              "
+className="
+rounded-full
+bg-gray-100
+px-3
+py-1
+text-sm
+"
 
-            >
+>
 
-              {current + 1} / {total}
+{chunk.words} words
 
-            </span>
+</span>
 
 
 
 
 
+<span
 
-            <span
+className="
+hidden
+sm:inline-flex
+items-center
+gap-1
+rounded-full
+bg-gray-100
+px-3
+py-1
+text-sm
+"
 
-              className="
-                rounded-full
-                bg-gray-100
-                px-3
-                py-1
-                text-sm
-              "
+>
 
-            >
+<Hash size={14}/>
 
-              {chunk.words} words
+{chunk.estimatedTokens}
 
-            </span>
+</span>
 
 
 
 
 
 
+<span
 
-            <span
+className="
+inline-flex
+items-center
+gap-2
+rounded-full
+bg-green-50
+px-3
+py-1
+text-sm
+font-medium
+text-green-700
+"
 
-              className="
-                hidden
-                sm:inline-flex
-                items-center
-                gap-1
-                rounded-full
-                bg-gray-100
-                px-3
-                py-1
-                text-sm
-              "
+>
 
-            >
+<Copy size={14}/>
 
-              <Hash size={14}/>
+{copyCount} saved
 
-              {chunk.estimatedTokens}
+</span>
 
-            </span>
 
 
+</div>
 
 
 
 
 
 
-            {/* Permanent Copy Counter */}
 
+<select
 
 
-            <span
+value={chunkSize}
 
-              className="
-                inline-flex
-                items-center
-                gap-2
-                rounded-full
-                bg-green-50
-                px-3
-                py-1
-                text-sm
-                font-medium
-                text-green-700
-              "
 
-            >
+onChange={(e)=>
 
-              <Copy size={14}/>
+setChunkSize(
 
+Number(
+e.target.value
+)
 
-              {copyCount} copied
+)
 
 
-            </span>
+}
 
 
+className="
+rounded-xl
+border
+bg-white
+px-3
+py-2
+text-sm
+shadow-sm
+outline-none
+"
 
+>
 
 
-          </div>
+{
 
+sizes.map(size=>(
 
+<option
 
+key={size}
 
+value={size}
 
+>
 
+{size} words
 
+</option>
 
 
-          <select
+))
 
+}
 
-            value={chunkSize}
 
+</select>
 
-            onChange={(e)=>
 
-              setChunkSize(
 
-                Number(
-                  e.target.value
-                )
 
-              )
 
-            }
 
+</div>
 
-            className="
-              rounded-xl
-              border
-              bg-white
-              px-3
-              py-2
-              text-sm
-              shadow-sm
-              outline-none
-            "
 
 
-          >
 
 
-            {
 
-              sizes.map(size=>(
+<div
 
+className="
+px-4
+"
 
-                <option
+>
 
-                  key={size}
+<div
 
-                  value={size}
+className="
+h-2
+overflow-hidden
+rounded-full
+bg-gray-200
+"
 
-                >
+>
 
-                  {size} words
 
+<div
 
-                </option>
+className="
+h-full
+rounded-full
+bg-gradient-to-r
+from-blue-500
+via-indigo-500
+to-purple-500
+transition-all
+duration-500
+"
 
+style={{
 
+width:`${progress}%`
 
-              ))
+}}
 
-            }
 
+/>
 
 
-          </select>
+</div>
 
 
+</div>
 
 
 
-        </div>
 
 
 
 
 
 
+<div
 
+className="
+flex
+items-center
+justify-between
+p-4
+"
 
+>
 
-        {/* Progress */}
 
 
 
+<button
 
-        <div
+disabled={current===0}
 
-          className="
-            px-4
-          "
+onClick={previous}
 
-        >
+className="
+flex
+h-11
+w-11
+items-center
+justify-center
+rounded-xl
+border
+transition
+hover:bg-gray-100
+disabled:opacity-30
+"
 
+>
 
+<ChevronLeft size={20}/>
 
-          <div
+</button>
 
-            className="
-              h-2
-              overflow-hidden
-              rounded-full
-              bg-gray-200
-            "
 
-          >
 
 
 
-            <div
 
-              className="
-                h-full
-                rounded-full
-                bg-gradient-to-r
-                from-blue-500
-                via-indigo-500
-                to-purple-500
-                transition-all
-                duration-500
-              "
 
-              style={{
 
-                width:`${progress}%`
+<button
 
-              }}
+onClick={copyChunk}
 
-            />
+className="
+inline-flex
+items-center
+gap-2
+rounded-xl
+bg-gradient-to-r
+from-blue-600
+to-indigo-600
+px-5
+py-2.5
+text-sm
+font-medium
+text-white
+shadow-md
+transition
+hover:scale-105
+"
 
+>
 
 
-          </div>
+{
 
+copied
 
+?
 
-        </div>
+<>
 
+<Check size={16}/>
 
+Saved
 
+</>
 
 
+:
 
+<>
 
+<Copy size={16}/>
 
+Copy Chunk
 
-        {/* Controls */}
+</>
 
 
+}
 
 
-        <div
 
-          className="
-            flex
-            items-center
-            justify-between
-            p-4
-          "
+</button>
 
-        >
 
 
 
 
 
-          <button
 
+<button
 
-            disabled={current===0}
+disabled={current===total-1}
 
+onClick={next}
 
-            onClick={previous}
+className="
+flex
+h-11
+w-11
+items-center
+justify-center
+rounded-xl
+border
+transition
+hover:bg-gray-100
+disabled:opacity-30
+"
 
+>
 
-            className="
-              flex
-              h-11
-              w-11
-              items-center
-              justify-center
-              rounded-xl
-              border
-              transition
-              hover:bg-gray-100
-              disabled:opacity-30
-            "
 
+<ChevronRight size={20}/>
 
-          >
 
+</button>
 
-            <ChevronLeft size={20}/>
 
 
-          </button>
 
 
+</div>
 
 
 
+</div>
 
 
+</div>
 
 
-          <button
-
-
-            onClick={copyChunk}
-
-
-            className="
-              inline-flex
-              items-center
-              gap-2
-              rounded-xl
-              bg-gradient-to-r
-              from-blue-600
-              to-indigo-600
-              px-5
-              py-2.5
-              text-sm
-              font-medium
-              text-white
-              shadow-md
-              transition
-              hover:scale-105
-            "
-
-
-          >
-
-
-
-            {
-
-              copied
-
-              ?
-
-              <>
-
-                <Check size={16}/>
-
-                Copied
-
-
-              </>
-
-
-              :
-
-
-              <>
-
-                <Copy size={16}/>
-
-                Copy Chunk
-
-
-              </>
-
-
-
-            }
-
-
-
-          </button>
-
-
-
-
-
-
-
-
-
-          <button
-
-
-            disabled={current===total-1}
-
-
-            onClick={next}
-
-
-            className="
-              flex
-              h-11
-              w-11
-              items-center
-              justify-center
-              rounded-xl
-              border
-              transition
-              hover:bg-gray-100
-              disabled:opacity-30
-            "
-
-
-          >
-
-
-
-            <ChevronRight size={20}/>
-
-
-
-          </button>
-
-
-
-
-
-        </div>
-
-
-
-
-
-
-      </div>
-
-
-
-    </div>
-
-
-
-  );
+);
 
 
 }

@@ -1,46 +1,55 @@
-// File location:
-// lib/chunkProgress.ts
-
-import { supabase } from "./supabase";
+import { supabase } from "@/lib/supabase";
 
 
+interface SaveChunkInput {
 
-export async function increaseCopyCount(
+  bookName:string;
 
-  userId:string,
+  chunkId:string | number;
 
-  chunkKey:string
+  chunkNumber:number;
 
-):Promise<number>{
+  totalChunks:number;
+
+  words:number;
+
+  estimatedTokens:number;
+
+  content:string;
+
+}
 
 
 
-  const {
+export async function saveCopiedChunk(
+  data:SaveChunkInput
+){
 
-    data,
 
-    error
+  /*
+    Unique rule:
+    book_name + chunk_id
 
-  } = await supabase
+    Same chunk copied again:
+    update copy_count only
 
-    .from("chunk_progress")
+  */
 
-    .select("id, copy_count")
+
+  const { data:existing } = await supabase
+
+    .from("copied_chunks")
+
+    .select("*")
 
     .eq(
-
-      "user_id",
-
-      userId
-
+      "book_name",
+      data.bookName
     )
 
     .eq(
-
-      "chunk_key",
-
-      chunkKey
-
+      "chunk_id",
+      String(data.chunkId)
     )
 
     .single();
@@ -48,144 +57,48 @@ export async function increaseCopyCount(
 
 
 
+  if(existing){
 
-  // Other database errors
 
-  if(
+    const {data:updated,error}=
 
-    error &&
+    await supabase
 
-    error.code !== "PGRST116"
+    .from("copied_chunks")
 
-  ){
+    .update({
 
-    console.error(
+      copy_count:
+        existing.copy_count + 1,
 
-      "Supabase select error:",
-
-      error
-
-    );
-
-
-    return 0;
-
-  }
-
-
-
-
-
-  // Existing chunk
-
-  if(data){
-
-
-
-    const newCount =
-
-      data.copy_count + 1;
-
-
-
-    const {
-
-      error:updateError
-
-    } = await supabase
-
-      .from("chunk_progress")
-
-      .update({
-
-        copy_count:newCount,
-
-        updated_at:new Date()
-
-      })
-
-      .eq(
-
-        "id",
-
-        data.id
-
-      );
-
-
-
-
-    if(updateError){
-
-      console.error(
-
-        "Supabase update error:",
-
-        updateError
-
-      );
-
-
-      return data.copy_count;
-
-    }
-
-
-
-    return newCount;
-
-
-
-  }
-
-
-
-
-
-  // New chunk
-
-  const {
-
-    data:insertData,
-
-    error:insertError
-
-  } = await supabase
-
-    .from("chunk_progress")
-
-    .insert({
-
-      user_id:userId,
-
-      chunk_key:chunkKey,
-
-      copy_count:1,
-
-      updated_at:new Date()
+      updated_at:
+        new Date()
 
     })
 
-    .select("copy_count")
+    .eq(
+      "id",
+      existing.id
+    )
+
+    .select()
 
     .single();
 
 
 
+    if(error)
+      throw error;
 
 
-  if(insertError){
 
-    console.error(
+    return {
 
-      "Supabase insert error:",
+      copyCount:
+        updated.copy_count
 
-      insertError
+    };
 
-    );
-
-
-    return 0;
 
   }
 
@@ -193,7 +106,97 @@ export async function increaseCopyCount(
 
 
 
-  return insertData.copy_count;
+  const {data:created,error}=
+
+  await supabase
+
+  .from("copied_chunks")
+
+  .insert({
+
+    book_name:
+      data.bookName,
+
+    chunk_id:
+      String(data.chunkId),
+
+    chunk_number:
+      data.chunkNumber,
+
+    total_chunks:
+      data.totalChunks,
+
+    words:
+      data.words,
+
+    estimated_tokens:
+      data.estimatedTokens,
+
+    content:
+      data.content,
+
+    copy_count:1
+
+  })
+
+  .select()
+
+  .single();
+
+
+
+
+  if(error)
+    throw error;
+
+
+
+  return {
+
+    copyCount:
+      created.copy_count
+
+  };
+
+
+}
+
+
+
+
+
+
+
+export async function getCopyCount(
+
+bookName:string,
+
+chunkId:string | number
+
+){
+
+
+const {data}=await supabase
+
+.from("copied_chunks")
+
+.select("copy_count")
+
+.eq(
+"book_name",
+bookName
+)
+
+.eq(
+"chunk_id",
+String(chunkId)
+)
+
+.single();
+
+
+
+return data?.copy_count ?? 0;
 
 
 }
