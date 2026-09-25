@@ -1,46 +1,66 @@
+// File location:
+// lib/chunkProgress.ts
+
+
 import { supabase } from "@/lib/supabase";
+
 
 
 interface SaveChunkInput {
 
-  bookName:string;
+  bookName: string;
 
-  chunkId:string | number;
+  chunkId: string | number;
 
-  chunkNumber:number;
+  chunkNumber: number;
 
-  totalChunks:number;
+  totalChunks: number;
 
-  words:number;
+  words: number;
 
-  estimatedTokens:number;
+  estimatedTokens: number;
 
-  content:string;
+  content: string;
 
 }
 
 
 
+
+
+
 export async function saveCopiedChunk(
-  data:SaveChunkInput
-){
+  data: SaveChunkInput
+) {
 
 
   /*
-    Unique rule:
+    Unique identity:
+
     book_name + chunk_id
 
-    Same chunk copied again:
-    update copy_count only
+    First copy:
+    create row
 
+    Same chunk copied again:
+    only increase copy_count
+
+    No duplicate chunk
   */
 
 
-  const { data:existing } = await supabase
+
+  const {
+    data: existing,
+    error: findError
+
+  } = await supabase
 
     .from("copied_chunks")
 
-    .select("*")
+    .select(
+      "id, copy_count"
+    )
 
     .eq(
       "book_name",
@@ -52,43 +72,66 @@ export async function saveCopiedChunk(
       String(data.chunkId)
     )
 
-    .single();
+    .maybeSingle();
 
 
 
+
+
+  if(findError){
+
+    throw findError;
+
+  }
+
+
+
+
+
+  // Existing chunk found
 
   if(existing){
 
 
-    const {data:updated,error}=
 
-    await supabase
+    const {
+      data: updated,
+      error
 
-    .from("copied_chunks")
+    } = await supabase
 
-    .update({
+      .from("copied_chunks")
 
-      copy_count:
-        existing.copy_count + 1,
+      .update({
 
-      updated_at:
-        new Date()
+        copy_count:
+          existing.copy_count + 1,
 
-    })
+        updated_at:
+          new Date().toISOString()
 
-    .eq(
-      "id",
-      existing.id
-    )
+      })
 
-    .select()
+      .eq(
+        "id",
+        existing.id
+      )
 
-    .single();
+      .select(
+        "copy_count"
+      )
+
+      .single();
 
 
 
-    if(error)
+
+
+    if(error){
+
       throw error;
+
+    }
 
 
 
@@ -106,48 +149,63 @@ export async function saveCopiedChunk(
 
 
 
-  const {data:created,error}=
-
-  await supabase
-
-  .from("copied_chunks")
-
-  .insert({
-
-    book_name:
-      data.bookName,
-
-    chunk_id:
-      String(data.chunkId),
-
-    chunk_number:
-      data.chunkNumber,
-
-    total_chunks:
-      data.totalChunks,
-
-    words:
-      data.words,
-
-    estimated_tokens:
-      data.estimatedTokens,
-
-    content:
-      data.content,
-
-    copy_count:1
-
-  })
-
-  .select()
-
-  .single();
 
 
 
+  // First time copy
 
-  if(error)
+
+  const {
+    data: created,
+    error
+
+  } = await supabase
+
+    .from("copied_chunks")
+
+    .insert({
+
+      book_name:
+        data.bookName,
+
+      chunk_id:
+        String(data.chunkId),
+
+      chunk_number:
+        data.chunkNumber,
+
+      total_chunks:
+        data.totalChunks,
+
+      words:
+        data.words,
+
+      estimated_tokens:
+        data.estimatedTokens,
+
+      content:
+        data.content,
+
+      copy_count:
+        1
+
+    })
+
+    .select(
+      "copy_count"
+    )
+
+    .single();
+
+
+
+
+
+  if(error){
+
     throw error;
+
+  }
 
 
 
@@ -167,36 +225,68 @@ export async function saveCopiedChunk(
 
 
 
+
 export async function getCopyCount(
 
-bookName:string,
+  bookName: string,
 
-chunkId:string | number
+  chunkId: string | number
 
 ){
 
 
-const {data}=await supabase
 
-.from("copied_chunks")
+  const {
 
-.select("copy_count")
+    data,
 
-.eq(
-"book_name",
-bookName
-)
+    error
 
-.eq(
-"chunk_id",
-String(chunkId)
-)
-
-.single();
+  } = await supabase
 
 
+    .from("copied_chunks")
 
-return data?.copy_count ?? 0;
+
+    .select(
+      "copy_count"
+    )
+
+
+    .eq(
+      "book_name",
+      bookName
+    )
+
+
+    .eq(
+      "chunk_id",
+      String(chunkId)
+    )
+
+
+    .maybeSingle();
+
+
+
+
+
+  if(error){
+
+    console.error(
+      "Get copy count error:",
+      error
+    );
+
+
+    return 0;
+
+  }
+
+
+
+
+  return data?.copy_count ?? 0;
 
 
 }
