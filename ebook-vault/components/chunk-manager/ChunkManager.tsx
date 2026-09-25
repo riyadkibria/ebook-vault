@@ -1,12 +1,15 @@
 // File location:
 // components/chunk-manager/ChunkManager.tsx
 
+
 "use client";
+
 
 import {
   useEffect,
   useState
 } from "react";
+
 
 import {
   Copy,
@@ -17,12 +20,16 @@ import {
   Hash,
 } from "lucide-react";
 
+
 import type { Chunk } from "@/lib/chunk";
+
 
 import {
   saveCopiedChunk,
   getCopyCount
 } from "@/lib/chunkProgress";
+
+
 
 
 
@@ -48,13 +55,24 @@ interface Props {
 
 
 
+
+
 const sizes = [
+
   500,
+
   1000,
+
   1500,
+
   3000,
+
   5000,
+
 ];
+
+
+
 
 
 
@@ -80,32 +98,56 @@ export default function ChunkManager({
 }:Props){
 
 
+
   const [copied,setCopied] = useState(false);
+
 
   const [copyCount,setCopyCount] = useState(0);
 
 
 
-  /*
-    Load copy count
-  */
+
 
   useEffect(()=>{
 
 
     async function loadCount(){
 
-      const count = await getCopyCount(
-        filename,
-        chunk.id
-      );
 
-      setCopyCount(count);
+      try{
+
+
+        const count = await getCopyCount(
+
+          filename,
+
+          chunk.id
+
+        );
+
+
+        setCopyCount(count);
+
+
+
+      }catch(error){
+
+
+        console.error(
+          "Load copy count failed:",
+          error
+        );
+
+
+      }
+
 
     }
 
 
+
     loadCount();
+
 
 
   },[
@@ -119,7 +161,15 @@ export default function ChunkManager({
 
 
 
+
   async function copyChunk(){
+
+
+
+    console.log(
+      "COPY CLICKED"
+    );
+
 
 
     const chunkText =
@@ -134,69 +184,132 @@ ${chunk.text}`;
 
 
 
-    /*
-      1. Copy to clipboard
-    */
 
-    await navigator.clipboard.writeText(
-      chunkText
-    );
-
-
-
-
-    /*
-      2. Save to Supabase
-
-      Rule:
-      Same book + same chunk id
-      will NOT create duplicate
-
-    */
 
     try{
 
 
+      /*
+        1. Copy clipboard
+      */
+
+
+      await navigator.clipboard.writeText(
+        chunkText
+      );
+
+
+
+
+      console.log(
+        "Sending to Supabase",
+        {
+          book: filename,
+          chunkId: chunk.id
+        }
+      );
+
+
+
+
+
+
+
+      /*
+        2. Save chunk
+      */
+
+
       const result = await saveCopiedChunk({
 
-        bookName: filename,
 
-        chunkId: chunk.id,
+        bookName:
 
-        chunkNumber: current + 1,
+          filename,
 
-        totalChunks: total,
 
-        words: chunk.words,
+
+        chunkId:
+
+          chunk.id,
+
+
+
+        chunkNumber:
+
+          current + 1,
+
+
+
+        totalChunks:
+
+          total,
+
+
+
+        words:
+
+          chunk.words,
+
+
 
         estimatedTokens:
+
           chunk.estimatedTokens,
 
+
+
         content:
+
           chunk.text
+
+
 
       });
 
 
 
-      if(result){
 
-        setCopyCount(
-          result.copyCount
-        );
 
-      }
+
+      console.log(
+        "SUPABASE RESULT",
+        result
+      );
+
+
+
+
+
+
+      setCopyCount(
+
+        result.copyCount
+
+      );
+
+
 
 
 
     }catch(error){
 
+
+
       console.error(
+
         "Chunk save failed:",
+
         error
+
       );
 
+
+
     }
+
+
+
 
 
 
@@ -204,14 +317,20 @@ ${chunk.text}`;
     setCopied(true);
 
 
+
     setTimeout(()=>{
 
+
       setCopied(false);
+
 
     },1500);
 
 
+
+
   }
+
 
 
 
@@ -234,7 +353,9 @@ ${chunk.text}`;
 
 
 
-return (
+
+  return (
+
 
 
 <div
@@ -247,6 +368,7 @@ mb-6
 "
 
 >
+
 
 
 <div
@@ -264,6 +386,10 @@ shadow-lg
 
 
 
+
+
+
+
 <div
 
 className="
@@ -277,6 +403,8 @@ md:justify-between
 "
 
 >
+
+
 
 
 
@@ -319,6 +447,8 @@ AI Chunk
 
 
 
+
+
 <span
 
 className="
@@ -339,6 +469,7 @@ text-sm
 
 
 
+
 <span
 
 className="
@@ -354,6 +485,8 @@ text-sm
 {chunk.words} words
 
 </span>
+
+
 
 
 
@@ -386,6 +519,7 @@ text-sm
 
 
 
+
 <span
 
 className="
@@ -411,7 +545,9 @@ text-green-700
 
 
 
+
 </div>
+
 
 
 
@@ -435,7 +571,6 @@ e.target.value
 
 )
 
-
 }
 
 
@@ -453,9 +588,11 @@ outline-none
 >
 
 
+
 {
 
 sizes.map(size=>(
+
 
 <option
 
@@ -470,9 +607,11 @@ value={size}
 </option>
 
 
+
 ))
 
 }
+
 
 
 </select>
@@ -481,8 +620,9 @@ value={size}
 
 
 
-
 </div>
+
+
 
 
 
@@ -508,7 +648,6 @@ bg-gray-200
 
 >
 
-
 <div
 
 className="
@@ -532,7 +671,9 @@ width:`${progress}%`
 />
 
 
+
 </div>
+
 
 
 </div>
@@ -559,11 +700,17 @@ p-4
 
 
 
+
+
+
 <button
+
 
 disabled={current===0}
 
+
 onClick={previous}
+
 
 className="
 flex
@@ -578,6 +725,7 @@ hover:bg-gray-100
 disabled:opacity-30
 "
 
+
 >
 
 <ChevronLeft size={20}/>
@@ -591,9 +739,13 @@ disabled:opacity-30
 
 
 
+
+
 <button
 
+
 onClick={copyChunk}
+
 
 className="
 inline-flex
@@ -612,6 +764,7 @@ shadow-md
 transition
 hover:scale-105
 "
+
 
 >
 
@@ -633,6 +786,7 @@ Saved
 
 :
 
+
 <>
 
 <Copy size={16}/>
@@ -640,6 +794,7 @@ Saved
 Copy Chunk
 
 </>
+
 
 
 }
@@ -654,11 +809,16 @@ Copy Chunk
 
 
 
+
+
 <button
+
 
 disabled={current===total-1}
 
+
 onClick={next}
+
 
 className="
 flex
@@ -673,6 +833,7 @@ hover:bg-gray-100
 disabled:opacity-30
 "
 
+
 >
 
 
@@ -685,6 +846,15 @@ disabled:opacity-30
 
 
 
+
+
+</div>
+
+
+
+
+
+
 </div>
 
 
@@ -692,10 +862,8 @@ disabled:opacity-30
 </div>
 
 
-</div>
 
-
-);
+  );
 
 
 }
