@@ -13,15 +13,19 @@ import ChunkManager from "@/components/chunk-manager/ChunkManager";
 
 import { splitIntoChunks } from "@/lib/chunk";
 
+
 interface Props {
   content: string;
   fileName?: string;
 }
 
+
 export default function MarkdownReader({
   content,
   fileName,
 }: Props) {
+
+
   if (!content) {
     return (
       <div
@@ -40,9 +44,11 @@ export default function MarkdownReader({
     );
   }
 
+
   const [chunkSize, setChunkSize] = useState(500);
 
   const [currentChunk, setCurrentChunk] = useState(0);
+
 
   const chunks = useMemo(() => {
     return splitIntoChunks(
@@ -54,8 +60,9 @@ export default function MarkdownReader({
     chunkSize,
   ]);
 
-  const selectedChunk =
-    chunks[currentChunk];
+
+  const selectedChunk = chunks[currentChunk];
+
 
   return (
     <article
@@ -75,6 +82,7 @@ export default function MarkdownReader({
         sm:p-10
       "
     >
+
       {fileName && (
         <div
           className="
@@ -87,6 +95,7 @@ export default function MarkdownReader({
             pb-5
           "
         >
+
           <div
             className="
               flex
@@ -105,6 +114,7 @@ export default function MarkdownReader({
             />
           </div>
 
+
           <h1
             className="
               truncate
@@ -117,21 +127,61 @@ export default function MarkdownReader({
           >
             {fileName}
           </h1>
+
         </div>
       )}
 
+
+
+      {/* Chunk Control - OUTSIDE prose */}
+      {selectedChunk && (
+        <ChunkManager
+          filename={fileName}
+          chunk={selectedChunk}
+          current={currentChunk}
+          total={chunks.length}
+          chunkSize={chunkSize}
+          setChunkSize={(value) => {
+            setChunkSize(value);
+            setCurrentChunk(0);
+          }}
+          next={() => {
+            setCurrentChunk((current) =>
+              Math.min(
+                current + 1,
+                chunks.length - 1
+              )
+            );
+          }}
+          previous={() => {
+            setCurrentChunk((current) =>
+              Math.max(
+                current - 1,
+                0
+              )
+            );
+          }}
+        />
+      )}
+
+
+
+      {/* Markdown Content */}
       <div
         className="
           prose
           prose-slate
           max-w-none
 
+          prose-p:font-normal
+          prose-p:text-slate-600
+          prose-p:leading-8
+
+          prose-li:font-normal
+
           prose-headings:font-semibold
           prose-headings:tracking-tight
           prose-headings:text-slate-900
-
-          prose-p:text-slate-600
-          prose-p:leading-8
 
           prose-a:text-slate-900
           prose-a:underline
@@ -161,43 +211,18 @@ export default function MarkdownReader({
           sm:prose-lg
         "
       >
-        {selectedChunk && (
-          <ChunkManager
-            filename={fileName}
-            chunk={selectedChunk}
-            current={currentChunk}
-            total={chunks.length}
-            chunkSize={chunkSize}
-            setChunkSize={(value) => {
-              setChunkSize(value);
-              setCurrentChunk(0);
-            }}
-            next={() => {
-              setCurrentChunk((current) =>
-                Math.min(
-                  current + 1,
-                  chunks.length - 1
-                )
-              );
-            }}
-            previous={() => {
-              setCurrentChunk((current) =>
-                Math.max(
-                  current - 1,
-                  0
-                )
-              );
-            }}
-          />
-        )}
 
         <ReactMarkdown
-  remarkPlugins={[remarkGfm]}
-  components={markdownComponents}
->
-  {String(selectedChunk?.text ?? "")}
-</ReactMarkdown>
+          remarkPlugins={[remarkGfm]}
+          components={markdownComponents}
+        >
+          {String(selectedChunk?.text ?? "")}
+        </ReactMarkdown>
+
+
       </div>
+
+
     </article>
   );
 }
