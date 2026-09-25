@@ -1,41 +1,30 @@
-// ===========================================================
-// File: components/repository/MarkdownReader.tsx
-// ===========================================================
-
 "use client";
+
+import { useMemo, useState } from "react";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
 import { FileText } from "lucide-react";
 
+import { markdownComponents } from "./MarkdownComponents";
 
+import ChunkManager from "@/components/chunk-manager/ChunkManager";
+
+import { splitIntoChunks } from "@/lib/chunk";
 
 interface Props {
-
   content: string;
-
   fileName?: string;
-
 }
 
-
-
 export default function MarkdownReader({
-
   content,
-
   fileName,
-
 }: Props) {
-
-
-
   if (!content) {
-
     return (
-
       <div
-
         className="
           flex
           h-full
@@ -45,23 +34,31 @@ export default function MarkdownReader({
           font-medium
           text-slate-400
         "
-
       >
-
         No content available.
-
       </div>
-
     );
-
   }
 
+  const [chunkSize, setChunkSize] = useState(500);
 
+  const [currentChunk, setCurrentChunk] = useState(0);
+
+  const chunks = useMemo(() => {
+    return splitIntoChunks(
+      content,
+      chunkSize
+    );
+  }, [
+    content,
+    chunkSize,
+  ]);
+
+  const selectedChunk =
+    chunks[currentChunk];
 
   return (
-
     <article
-
       className="
         mx-auto
         w-full
@@ -77,82 +74,53 @@ export default function MarkdownReader({
         ring-slate-900/[0.02]
         sm:p-10
       "
-
     >
-
-
-
-      {
-        fileName && (
-
+      {fileName && (
+        <div
+          className="
+            mb-8
+            flex
+            items-center
+            gap-3
+            border-b
+            border-slate-100
+            pb-5
+          "
+        >
           <div
-
             className="
-              mb-8
               flex
+              h-9
+              w-9
+              shrink-0
               items-center
-              gap-3
-              border-b
-              border-slate-100
-              pb-5
+              justify-center
+              rounded-xl
+              bg-slate-100
             "
-
           >
-
-            <div
-
-              className="
-                flex
-                h-9
-                w-9
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-                bg-slate-100
-              "
-
-            >
-
-              <FileText
-
-                size={16}
-
-                className="text-slate-500"
-
-              />
-
-            </div>
-
-            <h1
-
-              className="
-                truncate
-                text-xl
-                font-semibold
-                tracking-tight
-                text-slate-800
-                sm:text-2xl
-              "
-
-            >
-
-              {fileName}
-
-            </h1>
-
-
+            <FileText
+              size={16}
+              className="text-slate-500"
+            />
           </div>
 
-        )
-      }
-
-
-
-
+          <h1
+            className="
+              truncate
+              text-xl
+              font-semibold
+              tracking-tight
+              text-slate-800
+              sm:text-2xl
+            "
+          >
+            {fileName}
+          </h1>
+        </div>
+      )}
 
       <div
-
         className="
           prose
           prose-slate
@@ -192,398 +160,44 @@ export default function MarkdownReader({
 
           sm:prose-lg
         "
-
       >
-
+        {selectedChunk && (
+          <ChunkManager
+            filename={fileName}
+            chunk={selectedChunk}
+            current={currentChunk}
+            total={chunks.length}
+            chunkSize={chunkSize}
+            setChunkSize={(value) => {
+              setChunkSize(value);
+              setCurrentChunk(0);
+            }}
+            next={() => {
+              setCurrentChunk((current) =>
+                Math.min(
+                  current + 1,
+                  chunks.length - 1
+                )
+              );
+            }}
+            previous={() => {
+              setCurrentChunk((current) =>
+                Math.max(
+                  current - 1,
+                  0
+                )
+              );
+            }}
+          />
+        )}
 
         <ReactMarkdown
-
-          remarkPlugins={[
-
-            remarkGfm,
-
-          ]}
-
-          components={{
-
-
-
-            h1: ({
-
-              children,
-
-            }) => (
-
-              <h1
-
-                className="
-                  mt-10
-                  mb-5
-                  text-3xl
-                  font-bold
-                  tracking-tight
-                  text-slate-900
-                  sm:text-4xl
-                "
-
-              >
-
-                {children}
-
-              </h1>
-
-            ),
-
-
-
-            h2: ({
-
-              children,
-
-            }) => (
-
-              <h2
-
-                className="
-                  mt-10
-                  mb-4
-                  border-b
-                  border-slate-100
-                  pb-2
-                  text-2xl
-                  font-semibold
-                  tracking-tight
-                  text-slate-900
-                "
-
-              >
-
-                {children}
-
-              </h2>
-
-            ),
-
-
-
-            h3: ({
-
-              children,
-
-            }) => (
-
-              <h3
-
-                className="
-                  mt-8
-                  mb-3
-                  text-xl
-                  font-semibold
-                  text-slate-800
-                "
-
-              >
-
-                {children}
-
-              </h3>
-
-            ),
-
-
-
-            p: ({
-
-              children,
-
-            }) => (
-
-              <p
-
-                className="
-                  my-5
-                  leading-8
-                  text-slate-600
-                "
-
-              >
-
-                {children}
-
-              </p>
-
-            ),
-
-
-
-            blockquote: ({
-
-              children,
-
-            }) => (
-
-              <blockquote
-
-                className="
-                  my-6
-                  rounded-r-lg
-                  border-l-4
-                  border-slate-300
-                  bg-slate-50
-                  px-5
-                  py-3
-                  italic
-                  text-slate-500
-                "
-
-              >
-
-                {children}
-
-              </blockquote>
-
-            ),
-
-
-
-            pre: ({
-
-              children,
-
-            }) => (
-
-              <pre
-
-                className="
-                  my-6
-                  overflow-x-auto
-                  rounded-xl
-                  bg-slate-900
-                  p-5
-                  text-sm
-                  text-slate-50
-                  shadow-md
-                  shadow-slate-900/10
-                "
-
-              >
-
-                {children}
-
-              </pre>
-
-            ),
-
-
-
-            code: ({
-
-              children,
-
-            }) => (
-
-              <code
-
-                className="
-                  rounded-md
-                  bg-slate-100
-                  px-1.5
-                  py-1
-                  text-sm
-                  text-slate-800
-                "
-
-              >
-
-                {children}
-
-              </code>
-
-            ),
-
-
-
-            ul: ({
-
-              children,
-
-            }) => (
-
-              <ul
-
-                className="
-                  my-5
-                  list-disc
-                  space-y-2
-                  pl-6
-                  text-slate-600
-                "
-
-              >
-
-                {children}
-
-              </ul>
-
-            ),
-
-
-
-            ol: ({
-
-              children,
-
-            }) => (
-
-              <ol
-
-                className="
-                  my-5
-                  list-decimal
-                  space-y-2
-                  pl-6
-                  text-slate-600
-                "
-
-              >
-
-                {children}
-
-              </ol>
-
-            ),
-
-
-
-            li: ({
-
-              children,
-
-            }) => (
-
-              <li
-
-                className="
-                  leading-7
-                "
-
-              >
-
-                {children}
-
-              </li>
-
-            ),
-
-
-
-            table: ({
-
-              children,
-
-            }) => (
-
-              <div
-
-                className="
-                  my-6
-                  overflow-x-auto
-                  rounded-xl
-                  border
-                  border-slate-200
-                "
-
-              >
-
-                <table
-
-                  className="
-                    w-full
-                    border-collapse
-                    text-sm
-                  "
-
-                >
-
-                  {children}
-
-                </table>
-
-              </div>
-
-            ),
-
-
-
-            th: ({
-
-              children,
-
-            }) => (
-
-              <th
-
-                className="
-                  border-b
-                  border-slate-200
-                  bg-slate-50
-                  px-4
-                  py-2.5
-                  text-left
-                  font-semibold
-                  text-slate-700
-                "
-
-              >
-
-                {children}
-
-              </th>
-
-            ),
-
-
-
-            td: ({
-
-              children,
-
-            }) => (
-
-              <td
-
-                className="
-                  border-b
-                  border-slate-100
-                  px-4
-                  py-2.5
-                  text-slate-600
-                "
-
-              >
-
-                {children}
-
-              </td>
-
-            ),
-
-
-
-          }}
-
-        >
-
-          {content}
-
-        </ReactMarkdown>
-
-
+  remarkPlugins={[remarkGfm]}
+  components={markdownComponents}
+>
+  {String(selectedChunk?.text ?? "")}
+</ReactMarkdown>
       </div>
-
-
     </article>
-
   );
-
 }
