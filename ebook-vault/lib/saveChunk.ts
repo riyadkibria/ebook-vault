@@ -1,4 +1,49 @@
+// File location:
+// lib/saveChunk.ts
+
+
 import { supabase } from "./supabase";
+
+
+
+export interface SaveChunk {
+
+  id?: number;
+
+
+  user_id:string;
+
+
+  book_name:string;
+
+
+  chunk_id:string | number;
+
+
+  chunk_number:number;
+
+
+  total_chunks:number;
+
+
+  content:string;
+
+
+  words:number;
+
+
+  estimated_tokens:number;
+
+
+  copy_count:number;
+
+
+  created_at?:string;
+
+
+}
+
+
 
 
 interface SaveChunkProps {
@@ -11,7 +56,10 @@ interface SaveChunkProps {
 
   chunkNumber:number;
 
+  totalChunks:number;
+
 }
+
 
 
 
@@ -25,57 +73,68 @@ export async function saveChunk({
 
   chunkNumber,
 
+  totalChunks,
+
 }:SaveChunkProps){
 
 
 
-const {data,error}=await supabase
+  const { data,error } = await supabase
 
-.from("chunk_library")
+    .from("chunk_library")
 
-.upsert(
+    .upsert(
 
-{
+      {
 
-user_id:userId,
+        user_id:userId,
 
-book_name:bookName,
+        book_name:bookName,
 
-chunk_id:chunk.id,
+        chunk_id:String(chunk.id),
 
-chunk_number:chunkNumber,
+        chunk_number:chunkNumber,
 
-content:chunk.text,
+        total_chunks:totalChunks,
 
-words:chunk.words,
+        content:chunk.text,
 
-tokens:chunk.estimatedTokens,
+        words:chunk.words,
 
-},
+        estimated_tokens:chunk.estimatedTokens,
 
+        copy_count:1,
 
-{
+      },
 
-onConflict:
-"user_id,book_name,chunk_id"
+      {
 
-}
+        onConflict:
+        "user_id,book_name,chunk_id"
 
+      }
 
-)
+    )
 
-.select();
+    .select()
 
-
-
-if(error){
-
-throw error;
-
-}
+    .single();
 
 
-return data;
 
+  if(error){
+
+    console.error(
+      "Save chunk error:",
+      error
+    );
+
+    throw error;
+
+  }
+
+
+
+  return data;
 
 }
