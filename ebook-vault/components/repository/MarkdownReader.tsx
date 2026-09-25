@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -12,7 +15,6 @@ import { markdownComponents } from "./MarkdownComponents";
 import ChunkManager from "@/components/chunk-manager/ChunkManager";
 
 import { splitIntoChunks } from "@/lib/chunk";
-import { normalizeMarkdown } from "@/lib/normalizeMarkdown";
 
 
 interface Props {
@@ -21,45 +23,78 @@ interface Props {
 }
 
 
+
+function normalizeMarkdown(text:string){
+
+  return text
+
+    // remove broken bold markers
+    .replace(/\*\*(.*?)$/, "$1")
+
+    // remove broken italic marker
+    .replace(/\*(.*?)$/, "$1")
+
+    // remove accidental html strong tags
+    .replace(/<\/?strong>/gi,"")
+
+    // normalize extra whitespace
+    .replace(/\n{3,}/g,"\n\n")
+
+    .trim();
+
+}
+
+
+
 export default function MarkdownReader({
   content,
   fileName,
-}: Props) {
+}:Props){
 
 
-  const [chunkSize, setChunkSize] = useState(500);
+  const [
+    chunkSize,
+    setChunkSize
+  ] = useState(500);
 
-  const [currentChunk, setCurrentChunk] = useState(0);
+
+  const [
+    currentChunk,
+    setCurrentChunk
+  ] = useState(0);
 
 
-  const chunks = useMemo(() => {
+
+  const chunks = useMemo(()=>{
+
     return splitIntoChunks(
       content,
       chunkSize
     );
-  }, [
+
+  },[
     content,
-    chunkSize,
+    chunkSize
   ]);
 
 
-  const selectedChunk = chunks[currentChunk];
+
+  const selectedChunk =
+    chunks[currentChunk];
 
 
-  const cleanedMarkdown = useMemo(() => {
 
-    return normalizeMarkdown(
-      String(selectedChunk?.text ?? "")
+  const cleanChunk =
+    normalizeMarkdown(
+      selectedChunk?.text ?? ""
     );
 
-  }, [
-    selectedChunk,
-  ]);
 
 
+  if(!content){
 
-  if (!content) {
     return (
+
       <div
         className="
           flex
@@ -67,19 +102,22 @@ export default function MarkdownReader({
           items-center
           justify-center
           text-sm
-          font-medium
           text-slate-400
         "
       >
         No content available.
       </div>
+
     );
+
   }
 
 
 
   return (
+
     <article
+
       className="
         mx-auto
         w-full
@@ -90,95 +128,112 @@ export default function MarkdownReader({
         bg-white
         p-6
         shadow-sm
-        shadow-slate-900/[0.03]
-        ring-1
-        ring-slate-900/[0.02]
         sm:p-10
       "
+
     >
 
 
-      {fileName && (
-        <div
-          className="
-            mb-8
-            flex
-            items-center
-            gap-3
-            border-b
-            border-slate-100
-            pb-5
-          "
-        >
+
+      {
+        fileName && (
 
           <div
+
             className="
+              mb-8
               flex
-              h-9
-              w-9
-              shrink-0
               items-center
-              justify-center
-              rounded-xl
-              bg-slate-100
+              gap-3
+              border-b
+              border-slate-100
+              pb-5
             "
+
           >
+
             <FileText
               size={16}
               className="text-slate-500"
             />
+
+
+            <h1
+
+              className="
+                text-xl
+                font-semibold
+                text-slate-800
+              "
+
+            >
+
+              {fileName}
+
+            </h1>
+
+
           </div>
 
-
-          <h1
-            className="
-              truncate
-              text-xl
-              font-semibold
-              tracking-tight
-              text-slate-800
-              sm:text-2xl
-            "
-          >
-            {fileName}
-          </h1>
-
-        </div>
-      )}
+        )
+      }
 
 
 
 
-      {selectedChunk && (
-        <ChunkManager
-          filename={fileName}
-          chunk={selectedChunk}
-          current={currentChunk}
-          total={chunks.length}
-          chunkSize={chunkSize}
-          setChunkSize={(value) => {
-            setChunkSize(value);
-            setCurrentChunk(0);
-          }}
-          next={() => {
-            setCurrentChunk((current) =>
-              Math.min(
-                current + 1,
-                chunks.length - 1
-              )
-            );
-          }}
-          previous={() => {
-            setCurrentChunk((current) =>
-              Math.max(
-                current - 1,
-                0
-              )
-            );
-          }}
-        />
-      )}
+      {
+        selectedChunk && (
 
+          <ChunkManager
+
+            filename={fileName}
+
+            chunk={selectedChunk}
+
+            current={currentChunk}
+
+            total={chunks.length}
+
+            chunkSize={chunkSize}
+
+            setChunkSize={(value)=>{
+
+              setChunkSize(value);
+
+              setCurrentChunk(0);
+
+            }}
+
+
+            next={()=>{
+
+              setCurrentChunk(
+                current =>
+                Math.min(
+                  current + 1,
+                  chunks.length - 1
+                )
+              );
+
+            }}
+
+
+            previous={()=>{
+
+              setCurrentChunk(
+                current =>
+                Math.max(
+                  current - 1,
+                  0
+                )
+              );
+
+            }}
+
+          />
+
+        )
+      }
 
 
 
@@ -186,17 +241,27 @@ export default function MarkdownReader({
       <div
         className="
           max-w-none
+          text-base
           font-normal
+          leading-8
+          text-slate-600
         "
       >
 
+
         <ReactMarkdown
+
           remarkPlugins={[
-            remarkGfm,
+            remarkGfm
           ]}
+
           components={markdownComponents}
+
         >
-          {cleanedMarkdown}
+
+          {cleanChunk}
+
+
         </ReactMarkdown>
 
 
@@ -204,5 +269,7 @@ export default function MarkdownReader({
 
 
     </article>
+
   );
+
 }
