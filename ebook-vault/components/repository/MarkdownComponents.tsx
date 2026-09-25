@@ -1,6 +1,10 @@
+// File location:
+// components/markdown/MarkdownComponents.tsx
+
 import type { Components } from "react-markdown";
 
 export const markdownComponents: Components = {
+
   h1: ({ children }) => (
     <h1
       className="
@@ -16,6 +20,7 @@ export const markdownComponents: Components = {
       {children}
     </h1>
   ),
+
 
   h2: ({ children }) => (
     <h2
@@ -35,6 +40,7 @@ export const markdownComponents: Components = {
     </h2>
   ),
 
+
   h3: ({ children }) => (
     <h3
       className="
@@ -49,17 +55,20 @@ export const markdownComponents: Components = {
     </h3>
   ),
 
+
   p: ({ children }) => (
     <p
       className="
         my-5
         leading-8
+        font-normal
         text-slate-600
       "
     >
       {children}
     </p>
   ),
+
 
   blockquote: ({ children }) => (
     <blockquote
@@ -71,6 +80,7 @@ export const markdownComponents: Components = {
         bg-slate-50
         px-5
         py-3
+        font-normal
         italic
         text-slate-500
       "
@@ -78,6 +88,7 @@ export const markdownComponents: Components = {
       {children}
     </blockquote>
   ),
+
 
   pre: ({ children }) => (
     <pre
@@ -88,6 +99,7 @@ export const markdownComponents: Components = {
         bg-slate-900
         p-5
         text-sm
+        font-normal
         text-slate-50
         shadow-md
         shadow-slate-900/10
@@ -97,6 +109,7 @@ export const markdownComponents: Components = {
     </pre>
   ),
 
+
   code: ({ children }) => (
     <code
       className="
@@ -105,12 +118,14 @@ export const markdownComponents: Components = {
         px-1.5
         py-1
         text-sm
+        font-normal
         text-slate-800
       "
     >
       {children}
     </code>
   ),
+
 
   ul: ({ children }) => (
     <ul
@@ -119,12 +134,14 @@ export const markdownComponents: Components = {
         list-disc
         space-y-2
         pl-6
+        font-normal
         text-slate-600
       "
     >
       {children}
     </ul>
   ),
+
 
   ol: ({ children }) => (
     <ol
@@ -133,6 +150,7 @@ export const markdownComponents: Components = {
         list-decimal
         space-y-2
         pl-6
+        font-normal
         text-slate-600
       "
     >
@@ -140,15 +158,18 @@ export const markdownComponents: Components = {
     </ol>
   ),
 
+
   li: ({ children }) => (
     <li
       className="
         leading-7
+        font-normal
       "
     >
       {children}
     </li>
   ),
+
 
   table: ({ children }) => (
     <div
@@ -165,12 +186,14 @@ export const markdownComponents: Components = {
           w-full
           border-collapse
           text-sm
+          font-normal
         "
       >
         {children}
       </table>
     </div>
   ),
+
 
   th: ({ children }) => (
     <th
@@ -189,6 +212,7 @@ export const markdownComponents: Components = {
     </th>
   ),
 
+
   td: ({ children }) => (
     <td
       className="
@@ -196,10 +220,12 @@ export const markdownComponents: Components = {
         border-slate-100
         px-4
         py-2.5
+        font-normal
         text-slate-600
       "
     >
       {children}
     </td>
   ),
+
 };
