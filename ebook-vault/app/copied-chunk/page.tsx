@@ -58,6 +58,7 @@ export default function CopiedChunksPage(){
 
 
 
+
   useEffect(()=>{
 
 
@@ -80,6 +81,7 @@ export default function CopiedChunksPage(){
             ascending:false
           }
         );
+
 
 
       if(error){
@@ -127,7 +129,7 @@ export default function CopiedChunksPage(){
 
       setCopiedId(null);
 
-    },1500);
+    },1200);
 
 
   }
@@ -142,17 +144,18 @@ export default function CopiedChunksPage(){
 
       className="
       mx-auto
-      max-w-3xl
-      p-6
+      max-w-4xl
+      p-5
       "
 
     >
 
 
+
       <h1
 
         className="
-        mb-6
+        mb-5
         text-2xl
         font-bold
         text-slate-900
@@ -160,10 +163,9 @@ export default function CopiedChunksPage(){
 
       >
 
-        Copied Chunks
+        Copied Knowledge
 
       </h1>
-
 
 
 
@@ -171,15 +173,19 @@ export default function CopiedChunksPage(){
       <div
 
         className="
-        space-y-3
+        overflow-hidden
+        rounded-xl
+        border
+        bg-white
         "
 
       >
 
 
+
         {
           chunks.map(
-            (chunk)=>(
+            (chunk,index)=>(
 
 
               <div
@@ -187,99 +193,163 @@ export default function CopiedChunksPage(){
                 key={chunk.id}
 
                 className="
-                flex
-                items-center
-                justify-between
-                rounded-xl
-                border
-                bg-white
-                px-4
-                py-3
-                shadow-sm
+                border-b
+                last:border-b-0
                 "
 
               >
 
 
 
+                {
+                  (
+                    index === 0 ||
+                    chunks[index - 1].book_name !== chunk.book_name
+                  )
+
+                  &&
+
+                  <div
+
+                    className="
+                    bg-slate-100
+                    px-4
+                    py-2
+                    text-sm
+                    font-semibold
+                    text-slate-800
+                    "
+
+                  >
+
+                    📘 {chunk.book_name}
+
+                  </div>
+
+                }
+
+
+
+
+
                 <div
-
-                  className="
-                  text-sm
-                  text-slate-700
-                  "
-
-                >
-
-                  <span className="font-semibold">
-
-                    Chunk {chunk.chunk_number}/{chunk.total_chunks}
-
-                  </span>
-
-
-
-                  <span className="ml-4 text-xs text-slate-500">
-
-                    Copied {chunk.copy_count}x
-
-                  </span>
-
-
-                </div>
-
-
-
-
-
-                <button
-
-                  onClick={
-                    ()=>copyChunk(chunk)
-                  }
 
                   className="
                   flex
                   items-center
-                  gap-1
-                  rounded-md
-                  bg-blue-600
-                  px-3
-                  py-1.5
-                  text-xs
-                  text-white
-                  hover:bg-blue-700
+                  justify-between
+                  px-4
+                  py-2
+                  hover:bg-slate-50
                   "
 
                 >
 
-                  {
-                    copiedId === chunk.id
-
-                    ?
-
-                    <>
-
-                    <Check size={14}/>
-
-                    Copied
-
-                    </>
-
-                    :
-
-                    <>
-
-                    <Copy size={14}/>
-
-                    Copy
-
-                    </>
-
-                  }
 
 
-                </button>
+                  <div
+
+                    className="
+                    flex
+                    items-center
+                    gap-4
+                    text-sm
+                    "
+
+                  >
+
+
+
+                    <span
+
+                      className="
+                      font-medium
+                      text-slate-700
+                      "
+
+                    >
+
+                      Chunk {chunk.chunk_number}/{chunk.total_chunks}
+
+                    </span>
+
+
+
+
+                    <span
+
+                      className="
+                      text-xs
+                      text-slate-500
+                      "
+
+                    >
+
+                      Copy {chunk.copy_count}x
+
+                    </span>
+
+
+
+                  </div>
+
+
+
+
+
+
+                  <button
+
+                    onClick={
+                      ()=>copyChunk(chunk)
+                    }
+
+                    className="
+                    flex
+                    items-center
+                    gap-1
+                    rounded-md
+                    bg-blue-600
+                    px-2.5
+                    py-1
+                    text-xs
+                    text-white
+                    hover:bg-blue-700
+                    "
+
+                  >
+
+                    {
+                      copiedId === chunk.id
+
+                      ?
+
+                      <>
+
+                      <Check size={13}/>
+
+                      Done
+
+                      </>
+
+                      :
+
+                      <>
+
+                      <Copy size={13}/>
+
+                      Copy
+
+                      </>
+
+                    }
+
+
+                  </button>
+
+
+
+                </div>
 
 
 
@@ -290,6 +360,7 @@ export default function CopiedChunksPage(){
 
           )
         }
+
 
 
       </div>
