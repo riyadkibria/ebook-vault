@@ -10,7 +10,11 @@ interface SaveChunkInput {
 
   bookName: string;
 
+  chapterName: string;
+
   chunkId: string | number;
+
+  chunkSize: number;
 
   chunkNumber: number;
 
@@ -28,7 +32,6 @@ interface SaveChunkInput {
 
 
 
-
 export async function saveCopiedChunk(
   data: SaveChunkInput
 ) {
@@ -37,15 +40,19 @@ export async function saveCopiedChunk(
   /*
     Unique identity:
 
-    book_name + chunk_id
+    book_name
+    +
+    chapter_name
+    +
+    chunk_id
+    +
+    chunk_size
 
-    First copy:
-    create row
 
     Same chunk copied again:
-    only increase copy_count
+    increase copy_count
 
-    No duplicate chunk
+    No duplicate row
   */
 
 
@@ -68,8 +75,18 @@ export async function saveCopiedChunk(
     )
 
     .eq(
+      "chapter_name",
+      data.chapterName
+    )
+
+    .eq(
       "chunk_id",
       String(data.chunkId)
+    )
+
+    .eq(
+      "chunk_size",
+      data.chunkSize
     )
 
     .maybeSingle();
@@ -135,6 +152,8 @@ export async function saveCopiedChunk(
 
 
 
+
+
     return {
 
       copyCount:
@@ -151,9 +170,7 @@ export async function saveCopiedChunk(
 
 
 
-
   // First time copy
-
 
   const {
     data: created,
@@ -168,23 +185,38 @@ export async function saveCopiedChunk(
       book_name:
         data.bookName,
 
+
+      chapter_name:
+        data.chapterName,
+
+
       chunk_id:
         String(data.chunkId),
+
+
+      chunk_size:
+        data.chunkSize,
+
 
       chunk_number:
         data.chunkNumber,
 
+
       total_chunks:
         data.totalChunks,
+
 
       words:
         data.words,
 
+
       estimated_tokens:
         data.estimatedTokens,
 
+
       content:
         data.content,
+
 
       copy_count:
         1
@@ -209,6 +241,8 @@ export async function saveCopiedChunk(
 
 
 
+
+
   return {
 
     copyCount:
@@ -226,11 +260,16 @@ export async function saveCopiedChunk(
 
 
 
+
 export async function getCopyCount(
 
   bookName: string,
 
-  chunkId: string | number
+  chapterName: string,
+
+  chunkId: string | number,
+
+  chunkSize: number
 
 ){
 
@@ -244,26 +283,31 @@ export async function getCopyCount(
 
   } = await supabase
 
-
     .from("copied_chunks")
-
 
     .select(
       "copy_count"
     )
-
 
     .eq(
       "book_name",
       bookName
     )
 
+    .eq(
+      "chapter_name",
+      chapterName
+    )
 
     .eq(
       "chunk_id",
       String(chunkId)
     )
 
+    .eq(
+      "chunk_size",
+      chunkSize
+    )
 
     .maybeSingle();
 
@@ -274,14 +318,18 @@ export async function getCopyCount(
   if(error){
 
     console.error(
+
       "Get copy count error:",
+
       error
+
     );
 
 
     return 0;
 
   }
+
 
 
 

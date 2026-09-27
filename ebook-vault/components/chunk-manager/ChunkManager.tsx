@@ -30,6 +30,12 @@ import {
 } from "@/lib/chunkProgress";
 
 
+import {
+  extractBookName,
+  extractChapterName
+} from "@/lib/bookIdentity";
+
+
 
 
 
@@ -107,6 +113,15 @@ export default function ChunkManager({
 
 
 
+  const bookName = extractBookName(filename);
+
+
+  const chapterName = extractChapterName(filename);
+
+
+
+
+
 
   useEffect(()=>{
 
@@ -119,9 +134,13 @@ export default function ChunkManager({
 
         const count = await getCopyCount(
 
-          filename,
+          bookName,
 
-          chunk.id
+          chapterName,
+
+          chunk.id,
+
+          chunkSize
 
         );
 
@@ -134,8 +153,11 @@ export default function ChunkManager({
 
 
         console.error(
+
           "Load copy count failed:",
+
           error
+
         );
 
 
@@ -146,13 +168,21 @@ export default function ChunkManager({
 
 
 
+
     loadCount();
 
 
 
   },[
-    filename,
-    chunk.id
+
+    bookName,
+
+    chapterName,
+
+    chunk.id,
+
+    chunkSize
+
   ]);
 
 
@@ -167,14 +197,21 @@ export default function ChunkManager({
 
 
     console.log(
+
       "COPY CLICKED"
+
     );
+
+
 
 
 
     const chunkText =
 
-`Book: ${filename}
+`Book: ${bookName}
+
+
+Chapter: ${chapterName}
 
 
 Chunk ${current + 1}/${total}
@@ -189,49 +226,37 @@ ${chunk.text}`;
     try{
 
 
-      /*
-        1. Copy clipboard
-      */
-
 
       await navigator.clipboard.writeText(
+
         chunkText
+
       );
 
 
 
 
-      console.log(
-        "Sending to Supabase",
-        {
-          book: filename,
-          chunkId: chunk.id
-        }
-      );
-
-
-
-
-
-
-
-      /*
-        2. Save chunk
-      */
 
 
       const result = await saveCopiedChunk({
 
 
-        bookName:
 
-          filename,
+        bookName,
+
+
+
+        chapterName,
 
 
 
         chunkId:
 
           chunk.id,
+
+
+
+        chunkSize,
 
 
 
@@ -273,8 +298,11 @@ ${chunk.text}`;
 
 
       console.log(
+
         "SUPABASE RESULT",
+
         result
+
       );
 
 
@@ -354,6 +382,7 @@ ${chunk.text}`;
 
 
 
+
   return (
 
 
@@ -390,6 +419,7 @@ shadow-lg
 
 
 
+
 <div
 
 className="
@@ -403,6 +433,8 @@ md:justify-between
 "
 
 >
+
+
 
 
 
@@ -449,6 +481,8 @@ AI Chunk
 
 
 
+
+
 <span
 
 className="
@@ -470,6 +504,8 @@ text-sm
 
 
 
+
+
 <span
 
 className="
@@ -485,6 +521,7 @@ text-sm
 {chunk.words} words
 
 </span>
+
 
 
 
@@ -520,6 +557,7 @@ text-sm
 
 
 
+
 <span
 
 className="
@@ -546,7 +584,9 @@ text-green-700
 
 
 
+
 </div>
+
 
 
 
@@ -565,9 +605,7 @@ onChange={(e)=>
 
 setChunkSize(
 
-Number(
-e.target.value
-)
+Number(e.target.value)
 
 )
 
@@ -585,11 +623,12 @@ shadow-sm
 outline-none
 "
 
+
 >
 
 
-
 {
+
 
 sizes.map(size=>(
 
@@ -602,16 +641,17 @@ value={size}
 
 >
 
+
 {size} words
+
 
 </option>
 
 
-
 ))
 
-}
 
+}
 
 
 </select>
@@ -620,7 +660,12 @@ value={size}
 
 
 
+
+
+
+
 </div>
+
 
 
 
@@ -671,9 +716,7 @@ width:`${progress}%`
 />
 
 
-
 </div>
-
 
 
 </div>
@@ -696,6 +739,7 @@ p-4
 "
 
 >
+
 
 
 
@@ -740,7 +784,6 @@ disabled:opacity-30
 
 
 
-
 <button
 
 
@@ -771,9 +814,12 @@ hover:scale-105
 
 {
 
+
 copied
 
+
 ?
+
 
 <>
 
@@ -836,9 +882,7 @@ disabled:opacity-30
 
 >
 
-
 <ChevronRight size={20}/>
-
 
 </button>
 
@@ -848,7 +892,10 @@ disabled:opacity-30
 
 
 
+
+
 </div>
+
 
 
 
