@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Check, Search, BookOpen, ChevronDown, Loader2, FileText } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Search,
+  BookOpen,
+  ChevronRight,
+  Loader2,
+  FileText,
+  Eye,
+  X,
+  Hash,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface CopiedChunk {
@@ -22,7 +33,8 @@ export default function CopiedChunksPage() {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [query, setQuery] = useState("");
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [viewingChunk, setViewingChunk] = useState<CopiedChunk | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -47,204 +59,280 @@ export default function CopiedChunksPage() {
     load();
   }, []);
 
+  // ---- Derived data ----
+
+  const bookCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const c of chunks) counts[c.book_name] = (counts[c.book_name] ?? 0) + 1;
+    return counts;
+  }, [chunks]);
+
+  const bookNames = useMemo(
+    () => Object.keys(bookCounts).sort((a, b) => a.localeCompare(b)),
+    [bookCounts]
+  );
+
   const filteredChunks = useMemo(() => {
-    if (!query.trim()) return chunks;
-    const q = query.toLowerCase();
-    return chunks.filter(
-      (c) =>
-        c.book_name.toLowerCase().includes(q) ||
-        c.content.toLowerCase().includes(q)
-    );
-  }, [chunks, query]);
+    let result = chunks;
 
-  const groupedChunks = useMemo(() => {
-    const grouped: Record<string, CopiedChunk[]> = {};
-
-    for (const chunk of filteredChunks) {
-      if (!grouped[chunk.book_name]) {
-        grouped[chunk.book_name] = [];
-      }
-      grouped[chunk.book_name].push(chunk);
+    if (selectedBook) {
+      result = result.filter((c) => c.book_name === selectedBook);
     }
 
-    return grouped;
-  }, [filteredChunks]);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.book_name.toLowerCase().includes(q) ||
+          c.content.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }, [chunks, selectedBook, query]);
 
   const totalWords = useMemo(
     () => chunks.reduce((sum, c) => sum + c.words, 0),
     [chunks]
   );
 
-  async function copyChunk(chunk: CopiedChunk) {
+  // ---- Actions ----
+
+  async function copyChunk(chunk: CopiedChunk, e?: React.MouseEvent) {
+    e?.stopPropagation();
     await navigator.clipboard.writeText(chunk.content);
     setCopiedId(chunk.id);
     setTimeout(() => setCopiedId(null), 1200);
   }
 
-  function toggleBook(bookName: string) {
-    setCollapsed((prev) => ({ ...prev, [bookName]: !prev[bookName] }));
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="mx-auto max-w-4xl px-5 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="mb-1 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900">
-              <BookOpen size={18} className="text-white" />
+    <div className="flex h-screen w-full overflow-hidden bg-[#1e1e1e] font-sans text-[#dcddde]">
+      {/* ---------------- Sidebar ---------------- */}
+      <aside className="flex w-60 shrink-0 flex-col border-r border-[#2a2a2a] bg-[#181818]">
+        <div className="flex items-center gap-2 px-3 py-3">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-[#7c5cff]/20">
+            <BookOpen size={13} className="text-[#a390ff]" />
+          </div>
+          <span className="text-[13px] font-semibold text-[#e6e6e6]">
+            Copied Knowledge
+          </span>
+        </div>
+
+        <div className="px-3 pb-2">
+          <div className="relative">
+            <Search
+              size={12.5}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6e6e6e]"
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full rounded-md border border-[#2f2f2f] bg-[#232323] py-1.5 pl-7 pr-2 text-[12px] text-[#dcddde] outline-none placeholder:text-[#6e6e6e] focus:border-[#7c5cff]/50"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-2 pb-3">
+          <button
+            onClick={() => setSelectedBook(null)}
+            className={`mb-0.5 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[12.5px] transition ${
+              selectedBook === null
+                ? "bg-[#7c5cff]/15 text-[#c9bfff]"
+                : "text-[#b3b3b3] hover:bg-[#2a2a2a]"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Hash size={12} className="opacity-60" />
+              All books
+            </span>
+            <span className="text-[10.5px] text-[#7a7a7a]">{chunks.length}</span>
+          </button>
+
+          {loading && (
+            <div className="flex items-center gap-2 px-2 py-3 text-[11.5px] text-[#6e6e6e]">
+              <Loader2 size={12} className="animate-spin" />
+              Loading…
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-              Copied Knowledge
-            </h1>
-          </div>
-          <p className="ml-11 text-sm text-slate-500">
-            {loading
-              ? "Loading your library…"
-              : `${chunks.length} chunk${chunks.length === 1 ? "" : "s"} across ${
-                  Object.keys(
-                    chunks.reduce((acc, c) => ({ ...acc, [c.book_name]: true }), {} as Record<string, boolean>)
-                  ).length
-                } book${chunks.length === 1 ? "" : "s"} · ${totalWords.toLocaleString()} words`}
-          </p>
+          )}
+
+          {!loading &&
+            bookNames.map((name) => (
+              <button
+                key={name}
+                onClick={() => setSelectedBook(name)}
+                className={`mb-0.5 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[12.5px] transition ${
+                  selectedBook === name
+                    ? "bg-[#7c5cff]/15 text-[#c9bfff]"
+                    : "text-[#b3b3b3] hover:bg-[#2a2a2a]"
+                }`}
+              >
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="shrink-0 text-[12px] opacity-80">📘</span>
+                  <span className="truncate">{name}</span>
+                </span>
+                <span className="shrink-0 text-[10.5px] text-[#7a7a7a]">
+                  {bookCounts[name]}
+                </span>
+              </button>
+            ))}
         </div>
 
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search
-            size={16}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by book or content…"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-          />
+        <div className="border-t border-[#2a2a2a] px-3 py-2 text-[10.5px] text-[#6e6e6e]">
+          {chunks.length} chunks · {totalWords.toLocaleString()} words
+        </div>
+      </aside>
+
+      {/* ---------------- Main list ---------------- */}
+      <main
+        className={`flex min-w-0 flex-col transition-all ${
+          viewingChunk ? "w-[42%]" : "flex-1"
+        }`}
+      >
+        <div className="flex items-center gap-1.5 border-b border-[#2a2a2a] px-4 py-2.5 text-[12px] text-[#8a8a8a]">
+          <span>{selectedBook ?? "All books"}</span>
+          {query && (
+            <>
+              <ChevronRight size={11} className="opacity-50" />
+              <span className="text-[#a390ff]">"{query}"</span>
+            </>
+          )}
+          <span className="ml-auto text-[#6e6e6e]">{filteredChunks.length}</span>
         </div>
 
-        {/* Loading state */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-20 text-slate-400">
-            <Loader2 size={22} className="animate-spin" />
-            <span className="text-sm">Fetching your chunks…</span>
-          </div>
-        )}
+        <div className="flex-1 overflow-y-auto">
+          {loading && (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-[#6e6e6e]">
+              <Loader2 size={18} className="animate-spin" />
+              <span className="text-[12px]">Fetching chunks…</span>
+            </div>
+          )}
 
-        {/* Empty state */}
-        {!loading && chunks.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center">
-            <FileText size={28} className="text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">No chunks yet</p>
-            <p className="max-w-xs text-xs text-slate-400">
-              Copied chunks will show up here once they've been saved.
-            </p>
-          </div>
-        )}
+          {!loading && chunks.length === 0 && (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-[#6e6e6e]">
+              <FileText size={22} className="opacity-40" />
+              <p className="text-[12.5px]">No chunks yet</p>
+            </div>
+          )}
 
-        {/* No search results */}
-        {!loading && chunks.length > 0 && Object.keys(groupedChunks).length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-            <Search size={22} className="text-slate-300" />
-            <p className="text-sm text-slate-500">
-              No results for <span className="font-medium text-slate-700">"{query}"</span>
-            </p>
-          </div>
-        )}
+          {!loading && chunks.length > 0 && filteredChunks.length === 0 && (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-[#6e6e6e]">
+              <Search size={18} className="opacity-40" />
+              <p className="text-[12.5px]">No matches</p>
+            </div>
+          )}
 
-        {/* Book groups */}
-        {!loading && Object.keys(groupedChunks).length > 0 && (
-          <div className="space-y-4">
-            {Object.entries(groupedChunks).map(([bookName, bookChunks]) => {
-              const isCollapsed = collapsed[bookName];
-
+          {!loading &&
+            filteredChunks.map((chunk) => {
+              const isViewing = viewingChunk?.id === chunk.id;
               return (
                 <div
-                  key={bookName}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  key={chunk.id}
+                  onClick={() => setViewingChunk(chunk)}
+                  className={`group flex cursor-pointer items-center justify-between gap-3 border-b border-[#232323] px-4 py-2 transition-colors ${
+                    isViewing ? "bg-[#7c5cff]/10" : "hover:bg-[#242424]"
+                  }`}
                 >
-                  {/* Book Heading */}
-                  <button
-                    onClick={() => toggleBook(bookName)}
-                    className="flex w-full items-center justify-between gap-3 bg-slate-50/80 px-5 py-3.5 text-left transition hover:bg-slate-100/80"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-base">📘</span>
-                      <span className="truncate text-sm font-semibold text-slate-800">
-                        {bookName}
+                  <div className="flex min-w-0 items-center gap-3 text-[12px]">
+                    {!viewingChunk && (
+                      <span className="shrink-0 truncate max-w-[140px] text-[#8a8a8a]">
+                        📘 {chunk.book_name}
                       </span>
-                      <span className="shrink-0 rounded-full bg-slate-200/70 px-2 py-0.5 text-[11px] font-medium text-slate-500">
-                        {bookChunks.length}
+                    )}
+                    <span className="shrink-0 font-medium text-[#dcddde]">
+                      #{chunk.chunk_number}
+                      <span className="text-[#6e6e6e]">/{chunk.total_chunks}</span>
+                    </span>
+                    <span className="hidden shrink-0 text-[10.5px] text-[#6e6e6e] sm:inline">
+                      {chunk.words}w
+                    </span>
+                    <span className="hidden shrink-0 text-[10.5px] text-[#6e6e6e] md:inline">
+                      ~{chunk.estimated_tokens}tok
+                    </span>
+                    {chunk.copy_count > 0 && (
+                      <span className="shrink-0 rounded-full bg-[#7c5cff]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#a390ff]">
+                        {chunk.copy_count}x
                       </span>
-                    </div>
-                    <ChevronDown
-                      size={16}
-                      className={`shrink-0 text-slate-400 transition-transform duration-200 ${
-                        isCollapsed ? "-rotate-90" : ""
+                    )}
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => setViewingChunk(chunk)}
+                      className="flex items-center gap-1 rounded-md border border-[#333] px-2 py-1 text-[10.5px] text-[#b3b3b3] hover:border-[#7c5cff]/50 hover:text-[#c9bfff]"
+                    >
+                      <Eye size={11} />
+                      View
+                    </button>
+                    <button
+                      onClick={(e) => copyChunk(chunk, e)}
+                      className={`flex items-center gap-1 rounded-md px-2 py-1 text-[10.5px] font-medium transition-colors ${
+                        copiedId === chunk.id
+                          ? "bg-emerald-600 text-white"
+                          : "bg-[#7c5cff] text-white hover:bg-[#8f6dff]"
                       }`}
-                    />
-                  </button>
-
-                  {/* Chunks */}
-                  {!isCollapsed && (
-                    <div className="divide-y divide-slate-100">
-                      {bookChunks.map((chunk) => (
-                        <div
-                          key={chunk.id}
-                          className="group flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-slate-50"
-                        >
-                          <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                            <span className="font-medium text-slate-700">
-                              Chunk {chunk.chunk_number}
-                              <span className="text-slate-400">/{chunk.total_chunks}</span>
-                            </span>
-
-                            <span className="text-xs text-slate-400">
-                              {chunk.words.toLocaleString()} words
-                            </span>
-
-                            <span className="text-xs text-slate-400">
-                              ~{chunk.estimated_tokens.toLocaleString()} tokens
-                            </span>
-
-                            {chunk.copy_count > 0 && (
-                              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-600">
-                                Copied {chunk.copy_count}x
-                              </span>
-                            )}
-                          </div>
-
-                          <button
-                            onClick={() => copyChunk(chunk)}
-                            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-                              copiedId === chunk.id
-                                ? "bg-emerald-600 text-white"
-                                : "bg-slate-900 text-white hover:bg-slate-700"
-                            }`}
-                          >
-                            {copiedId === chunk.id ? (
-                              <>
-                                <Check size={13} />
-                                Copied
-                              </>
-                            ) : (
-                              <>
-                                <Copy size={13} />
-                                Copy
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    >
+                      {copiedId === chunk.id ? <Check size={11} /> : <Copy size={11} />}
+                      {copiedId === chunk.id ? "Copied" : "Copy"}
+                    </button>
+                  </div>
                 </div>
               );
             })}
+        </div>
+      </main>
+
+      {/* ---------------- Reading pane ---------------- */}
+      {viewingChunk && (
+        <section className="flex w-[58%] flex-col border-l border-[#2a2a2a] bg-[#1a1a1a]">
+          <div className="flex items-center justify-between border-b border-[#2a2a2a] px-5 py-2.5">
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-semibold text-[#e6e6e6]">
+                📘 {viewingChunk.book_name}
+              </p>
+              <p className="text-[11px] text-[#6e6e6e]">
+                Chunk {viewingChunk.chunk_number}/{viewingChunk.total_chunks} ·{" "}
+                {viewingChunk.words.toLocaleString()} words · ~
+                {viewingChunk.estimated_tokens.toLocaleString()} tokens
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                onClick={(e) => copyChunk(viewingChunk, e)}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
+                  copiedId === viewingChunk.id
+                    ? "bg-emerald-600 text-white"
+                    : "bg-[#7c5cff] text-white hover:bg-[#8f6dff]"
+                }`}
+              >
+                {copiedId === viewingChunk.id ? (
+                  <>
+                    <Check size={12} />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy size={12} />
+                    Copy
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setViewingChunk(null)}
+                className="rounded-md p-1.5 text-[#8a8a8a] hover:bg-[#2a2a2a] hover:text-[#dcddde]"
+              >
+                <X size={15} />
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            <p className="whitespace-pre-wrap font-serif text-[14.5px] leading-[1.85] text-[#d4d4d4]">
+              {viewingChunk.content}
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
