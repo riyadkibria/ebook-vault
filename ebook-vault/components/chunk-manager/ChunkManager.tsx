@@ -122,6 +122,38 @@ export default function ChunkManager({
 
 
 
+  // Debug identity
+
+  useEffect(()=>{
+
+    console.log(
+      "RAW FILENAME:",
+      filename
+    );
+
+
+    console.log(
+      "FINAL BOOK NAME:",
+      bookName
+    );
+
+
+    console.log(
+      "FINAL CHAPTER NAME:",
+      chapterName
+    );
+
+
+  },[
+    filename,
+    bookName,
+    chapterName
+  ]);
+
+
+
+
+
 
   useEffect(()=>{
 
@@ -192,17 +224,14 @@ export default function ChunkManager({
 
 
 
+
   async function copyChunk(){
 
 
 
     console.log(
-
       "COPY CLICKED"
-
     );
-
-
 
 
 
@@ -223,8 +252,8 @@ ${chunk.text}`;
 
 
 
-    try{
 
+    try{
 
 
       await navigator.clipboard.writeText(
@@ -238,16 +267,27 @@ ${chunk.text}`;
 
 
 
+      console.log(
+        "SAVING:",
+        {
+          bookName,
+          chapterName,
+          chunkId: chunk.id,
+          chunkSize
+        }
+      );
+
+
+
+
+
+
       const result = await saveCopiedChunk({
-
-
 
         bookName,
 
 
-
         chapterName,
-
 
 
         chunkId:
@@ -255,9 +295,7 @@ ${chunk.text}`;
           chunk.id,
 
 
-
         chunkSize,
-
 
 
         chunkNumber:
@@ -265,11 +303,9 @@ ${chunk.text}`;
           current + 1,
 
 
-
         totalChunks:
 
           total,
-
 
 
         words:
@@ -277,11 +313,9 @@ ${chunk.text}`;
           chunk.words,
 
 
-
         estimatedTokens:
 
           chunk.estimatedTokens,
-
 
 
         content:
@@ -289,8 +323,8 @@ ${chunk.text}`;
           chunk.text
 
 
-
       });
+
 
 
 
@@ -309,7 +343,6 @@ ${chunk.text}`;
 
 
 
-
       setCopyCount(
 
         result.copyCount
@@ -323,7 +356,6 @@ ${chunk.text}`;
     }catch(error){
 
 
-
       console.error(
 
         "Chunk save failed:",
@@ -333,9 +365,7 @@ ${chunk.text}`;
       );
 
 
-
     }
-
 
 
 
@@ -365,6 +395,8 @@ ${chunk.text}`;
 
 
 
+
+
   const progress =
 
     total === 0
@@ -385,8 +417,6 @@ ${chunk.text}`;
 
   return (
 
-
-
 <div
 
 className="
@@ -397,7 +427,6 @@ mb-6
 "
 
 >
-
 
 
 <div
@@ -417,9 +446,6 @@ shadow-lg
 
 
 
-
-
-
 <div
 
 className="
@@ -433,8 +459,6 @@ md:justify-between
 "
 
 >
-
-
 
 
 
@@ -481,8 +505,6 @@ AI Chunk
 
 
 
-
-
 <span
 
 className="
@@ -498,8 +520,6 @@ text-sm
 {current + 1} / {total}
 
 </span>
-
-
 
 
 
@@ -527,8 +547,6 @@ text-sm
 
 
 
-
-
 <span
 
 className="
@@ -550,8 +568,6 @@ text-sm
 {chunk.estimatedTokens}
 
 </span>
-
-
 
 
 
@@ -594,7 +610,6 @@ text-green-700
 
 
 
-
 <select
 
 
@@ -623,15 +638,12 @@ shadow-sm
 outline-none
 "
 
-
 >
 
 
 {
 
-
 sizes.map(size=>(
-
 
 <option
 
@@ -641,15 +653,11 @@ value={size}
 
 >
 
-
 {size} words
-
 
 </option>
 
-
 ))
-
 
 }
 
@@ -661,12 +669,7 @@ value={size}
 
 
 
-
-
-
 </div>
-
-
 
 
 
@@ -745,16 +748,11 @@ p-4
 
 
 
-
-
 <button
-
 
 disabled={current===0}
 
-
 onClick={previous}
-
 
 className="
 flex
@@ -769,7 +767,6 @@ hover:bg-gray-100
 disabled:opacity-30
 "
 
-
 >
 
 <ChevronLeft size={20}/>
@@ -783,12 +780,9 @@ disabled:opacity-30
 
 
 
-
 <button
 
-
 onClick={copyChunk}
-
 
 className="
 inline-flex
@@ -808,18 +802,13 @@ transition
 hover:scale-105
 "
 
-
 >
-
 
 {
 
-
 copied
 
-
 ?
-
 
 <>
 
@@ -832,7 +821,6 @@ Saved
 
 :
 
-
 <>
 
 <Copy size={16}/>
@@ -840,8 +828,6 @@ Saved
 Copy Chunk
 
 </>
-
-
 
 }
 
@@ -856,15 +842,11 @@ Copy Chunk
 
 
 
-
 <button
-
 
 disabled={current===total-1}
 
-
 onClick={next}
-
 
 className="
 flex
@@ -879,7 +861,6 @@ hover:bg-gray-100
 disabled:opacity-30
 "
 
-
 >
 
 <ChevronRight size={20}/>
@@ -891,9 +872,6 @@ disabled:opacity-30
 
 
 
-
-
-
 </div>
 
 
@@ -905,9 +883,7 @@ disabled:opacity-30
 </div>
 
 
-
 </div>
-
 
 
   );
