@@ -207,22 +207,22 @@ export default function RepositoryExplorer({ repositories }: Props) {
       {/* Mobile Top Bar                        */}
       {/* ===================================== */}
 
-      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-2 border-b border-neutral-200 bg-white/85 px-3 backdrop-blur-xl md:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 flex h-11 items-center gap-1.5 border-b border-neutral-200 bg-white/85 px-2 backdrop-blur-xl md:hidden">
         <button
           onClick={() => setMobileSidebarOpen(true)}
           aria-label="Open file browser"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
         >
-          <Menu size={19} strokeWidth={1.75} />
+          <Menu size={17} strokeWidth={1.75} />
         </button>
 
-        <div className="flex min-w-0 flex-1 flex-col leading-tight">
-          <span className="truncate text-sm font-semibold tracking-tight text-neutral-900">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2">
+          <span className="truncate text-[13px] font-semibold tracking-tight text-neutral-900">
             {fileTitle ?? "Ebook Library"}
           </span>
 
-          {selectedRepository && (
-            <span className="truncate text-xs text-neutral-500">
+          {selectedRepository && fileTitle && (
+            <span className="truncate text-[11px] text-neutral-500">
               {selectedRepository.name}
             </span>
           )}
@@ -242,9 +242,9 @@ export default function RepositoryExplorer({ repositories }: Props) {
           <button
             onClick={() => setMobileSidebarOpen(false)}
             aria-label="Close file browser"
-            className="absolute right-3 top-3 z-50 flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 md:hidden"
+            className="absolute right-2 top-2 z-50 flex h-7 w-7 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 md:hidden"
           >
-            <X size={18} strokeWidth={1.75} />
+            <X size={16} strokeWidth={1.75} />
           </button>
 
           <ExplorerSidebar
@@ -275,13 +275,13 @@ export default function RepositoryExplorer({ repositories }: Props) {
       {/* Reader Column                         */}
       {/* ===================================== */}
 
-      <div className="relative flex min-w-0 flex-1 flex-col pt-14 md:pt-0">
+      <div className="relative flex min-w-0 flex-1 flex-col pt-11 md:pt-0">
         {/* Desktop Breadcrumb Bar */}
 
-        <div className="hidden h-12 shrink-0 items-center justify-between gap-4 border-b border-neutral-200 bg-white/80 px-8 backdrop-blur-xl md:flex">
+        <div className="hidden h-9 shrink-0 items-center justify-between gap-3 border-b border-neutral-200 bg-white/80 px-[1.5vw] backdrop-blur-xl md:flex">
           <nav
             aria-label="Breadcrumb"
-            className="flex min-w-0 items-center gap-1.5 text-sm"
+            className="flex min-w-0 items-center gap-1 text-xs"
           >
             {selectedRepository ? (
               <>
@@ -295,10 +295,10 @@ export default function RepositoryExplorer({ repositories }: Props) {
                   return (
                     <span
                       key={`${segment}-${index}`}
-                      className="flex min-w-0 items-center gap-1.5"
+                      className="flex min-w-0 items-center gap-1"
                     >
                       <ChevronRight
-                        size={14}
+                        size={12}
                         className="shrink-0 text-neutral-300"
                       />
 
@@ -325,9 +325,9 @@ export default function RepositoryExplorer({ repositories }: Props) {
               href={selectedRepository.url}
               target="_blank"
               rel="noreferrer"
-              className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+              className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
             >
-              <ExternalLink size={13} strokeWidth={1.75} />
+              <ExternalLink size={12} strokeWidth={1.75} />
               Open on GitHub
             </a>
           )}
@@ -336,7 +336,7 @@ export default function RepositoryExplorer({ repositories }: Props) {
         {/* Reading progress */}
 
         {selectedFile && !markdownLoading && markdown && (
-          <div className="absolute inset-x-0 top-14 z-20 h-0.5 bg-transparent md:top-12">
+          <div className="absolute inset-x-0 top-11 z-20 h-0.5 bg-transparent md:top-9">
             <div
               className="h-full origin-left bg-neutral-900 transition-transform duration-150 ease-out"
               style={{ transform: `scaleX(${readProgress})` }}
@@ -351,35 +351,35 @@ export default function RepositoryExplorer({ repositories }: Props) {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto scroll-smooth"
         >
-          <div className="mx-auto flex min-h-full max-w-4xl flex-col px-5 py-8 md:px-12 md:py-14">
+          <div className="mx-auto flex min-h-full w-full flex-col px-3 py-3 md:max-w-[82vw] md:px-[1.5vw] md:py-[1.5vw]">
             {/* Empty: nothing selected */}
 
             {!selectedFile && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-5 py-20 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white ring-1 ring-neutral-200">
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white ring-1 ring-neutral-200">
                   {selectedRepository ? (
                     <BookOpen
-                      size={22}
+                      size={17}
                       strokeWidth={1.5}
                       className="text-neutral-400"
                     />
                   ) : (
                     <FolderGit2
-                      size={22}
+                      size={17}
                       strokeWidth={1.5}
                       className="text-neutral-400"
                     />
                   )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <h2 className="text-base font-semibold tracking-tight text-neutral-900">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-semibold tracking-tight text-neutral-900">
                     {selectedRepository
                       ? "Pick a file to start reading"
                       : "Choose a repository"}
                   </h2>
 
-                  <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
+                  <p className="max-w-[16rem] text-xs leading-relaxed text-neutral-500">
                     {selectedRepository
                       ? `Browse the markdown files in ${selectedRepository.name} from the sidebar.`
                       : "Select a repository from the sidebar to browse its markdown files."}
@@ -388,9 +388,9 @@ export default function RepositoryExplorer({ repositories }: Props) {
 
                 <button
                   onClick={() => setMobileSidebarOpen(true)}
-                  className="flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 md:hidden"
+                  className="flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 md:hidden"
                 >
-                  <PanelLeft size={16} strokeWidth={1.75} />
+                  <PanelLeft size={14} strokeWidth={1.75} />
                   {selectedRepository ? "Browse files" : "Browse repositories"}
                 </button>
               </div>
@@ -402,25 +402,25 @@ export default function RepositoryExplorer({ repositories }: Props) {
               <div
                 role="status"
                 aria-live="polite"
-                className="animate-pulse space-y-8 pt-2"
+                className="animate-pulse space-y-5 rounded-xl bg-white p-4 ring-1 ring-neutral-200 md:p-[1.5vw]"
               >
                 <span className="sr-only">Loading markdown</span>
 
-                <div className="h-9 w-2/3 rounded-lg bg-neutral-200/80" />
+                <div className="h-6 w-1/2 rounded-md bg-neutral-200/80" />
 
-                <div className="space-y-3">
-                  <div className="h-3.5 w-full rounded bg-neutral-200/70" />
-                  <div className="h-3.5 w-11/12 rounded bg-neutral-200/70" />
-                  <div className="h-3.5 w-full rounded bg-neutral-200/70" />
-                  <div className="h-3.5 w-3/4 rounded bg-neutral-200/70" />
+                <div className="space-y-2">
+                  <div className="h-3 w-full rounded bg-neutral-200/70" />
+                  <div className="h-3 w-11/12 rounded bg-neutral-200/70" />
+                  <div className="h-3 w-full rounded bg-neutral-200/70" />
+                  <div className="h-3 w-3/4 rounded bg-neutral-200/70" />
                 </div>
 
-                <div className="h-32 w-full rounded-xl bg-neutral-200/60" />
+                <div className="h-24 w-full rounded-lg bg-neutral-200/60" />
 
-                <div className="space-y-3">
-                  <div className="h-3.5 w-full rounded bg-neutral-200/70" />
-                  <div className="h-3.5 w-5/6 rounded bg-neutral-200/70" />
-                  <div className="h-3.5 w-2/3 rounded bg-neutral-200/70" />
+                <div className="space-y-2">
+                  <div className="h-3 w-full rounded bg-neutral-200/70" />
+                  <div className="h-3 w-5/6 rounded bg-neutral-200/70" />
+                  <div className="h-3 w-2/3 rounded bg-neutral-200/70" />
                 </div>
               </div>
             )}
@@ -428,7 +428,7 @@ export default function RepositoryExplorer({ repositories }: Props) {
             {/* Content */}
 
             {selectedFile && !markdownLoading && markdown && (
-              <article className="rounded-2xl bg-white px-6 py-8 ring-1 ring-neutral-200 md:px-12 md:py-12">
+              <article className="rounded-xl bg-white p-4 ring-1 ring-neutral-200 md:p-[1.75vw]">
                 <MarkdownReader fileName={selectedFile} content={markdown} />
               </article>
             )}
@@ -436,12 +436,12 @@ export default function RepositoryExplorer({ repositories }: Props) {
             {/* Empty file / error */}
 
             {selectedFile && !markdownLoading && !markdown && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-2 py-20 text-center">
-                <h2 className="text-base font-semibold tracking-tight text-neutral-900">
+              <div className="flex flex-1 flex-col items-center justify-center gap-1 py-12 text-center">
+                <h2 className="text-sm font-semibold tracking-tight text-neutral-900">
                   This file is empty or couldn&apos;t be loaded
                 </h2>
 
-                <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
+                <p className="max-w-[16rem] text-xs leading-relaxed text-neutral-500">
                   Try opening it again, or pick another file from the sidebar.
                 </p>
               </div>
