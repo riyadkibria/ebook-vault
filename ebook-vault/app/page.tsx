@@ -11,7 +11,7 @@ export default function Home() {
             href="/repositories"
             className="rounded-lg border px-6 py-3 hover:bg-gray-100 transition"
           >
-            Repositories
+            click here to go to Repositories 
           </Link>
 
           <Link
