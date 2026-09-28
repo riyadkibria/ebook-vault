@@ -1,82 +1,27 @@
-export const dynamic = "force-dynamic";
+import Link from "next/link";
 
-export const revalidate = 0;
-
-
-import HomeClient from "@/components/home/HomeClient";
-
-
-import {  
-  getRepoTree,  
-  getRepositories  
-} from "@/lib/github"; 
-
-
-import {  
-  buildTree  
-} from "@/lib/buildTree"; 
-
-
-
-
-export default async function Home(){
-
-
-
-  const repos =
-
-    await getRepositories();
-
-
-
-
-  const files =
-
-    await getRepoTree();
-
-
-
-
-  const markdownFiles =
-
-    files.filter(
-
-      (file:any)=>
-
-        file.path
-
-          ?.toLowerCase()
-
-          .endsWith(".md")
-
-    );
-
-
-
-
-  const tree =
-
-    buildTree(
-
-      markdownFiles
-
-    );
-
-
-
-
-
+export default function Home() {
   return (
+    <main className="min-h-screen flex items-center justify-center bg-white">
+      <div className="space-y-4 text-center">
+        <h1 className="text-3xl font-bold">Ebook Vault</h1>
 
-    <HomeClient
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/repositories"
+            className="rounded-lg border px-6 py-3 hover:bg-gray-100 transition"
+          >
+            Repositories
+          </Link>
 
-      repos={repos}
-
-      initialTree={tree}
-
-    />
-
+          <Link
+            href="/copied-chunk"
+            className="rounded-lg border px-6 py-3 hover:bg-gray-100 transition"
+          >
+            Copied Chunks
+          </Link>
+        </div>
+      </div>
+    </main>
   );
-
-
 }
