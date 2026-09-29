@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  FileText,
+  BookOpen,
   Hash,
 } from "lucide-react";
 
@@ -111,34 +111,25 @@ ${chunk.text}`;
   const progress = total === 0 ? 0 : ((current + 1) / total) * 100;
 
   return (
-    <div className="sticky top-2 z-20 mb-4 sm:top-3 sm:mb-6">
-      <div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_10px_28px_-14px_rgba(15,23,42,0.18)] backdrop-blur-xl">
-        {/* Top: identity + stats + chunk size */}
-        <div className="flex items-center justify-between gap-3 px-3.5 pt-3 sm:px-4">
+    // Mobile: full-bleed (100vw), docked to the very top like an e-reader header.
+    // sm+: returns to a floating rounded card inside the page container.
+    <div className="sticky top-0 z-30 mb-2 ml-[calc(50%-50vw)] w-screen sm:top-3 sm:mb-6 sm:ml-0 sm:w-auto">
+      <div className="overflow-hidden border-b border-stone-200/80 bg-[#fcfbf8]/90 pt-[env(safe-area-inset-top)] shadow-[0_8px_24px_-16px_rgba(28,25,23,0.3)] backdrop-blur-xl sm:rounded-2xl sm:border sm:pt-0">
+        {/* Book + chapter, chunk size */}
+        <div className="flex items-center justify-between gap-3 px-3 pt-2 sm:px-4 sm:pt-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-              <FileText size={16} strokeWidth={2.25} />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-stone-600 ring-1 ring-stone-200/70">
+              <BookOpen size={15} strokeWidth={2} />
             </div>
 
             <div className="min-w-0 leading-tight">
-              <p className="text-[13px] font-semibold tracking-tight tabular-nums text-slate-900">
-                Chunk {current + 1}
-                <span className="font-medium text-slate-400"> / {total}</span>
+              <p className="truncate font-serif text-[14px] font-semibold text-stone-900">
+                {bookName}
               </p>
 
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] tabular-nums text-slate-500">
-                <span>{chunk.words} words</span>
-
-                <span className="inline-flex items-center gap-0.5">
-                  <Hash size={10} />
-                  {chunk.estimatedTokens}
-                </span>
-
-                <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  {copyCount} saved
-                </span>
-              </div>
+              <p className="truncate text-[11px] italic text-stone-500">
+                {chapterName}
+              </p>
             </div>
           </div>
 
@@ -147,7 +138,7 @@ ${chunk.text}`;
               aria-label="Chunk size"
               value={chunkSize}
               onChange={(e) => setChunkSize(Number(e.target.value))}
-              className="h-8 appearance-none rounded-lg border border-slate-200 bg-white pl-2.5 pr-7 text-xs font-medium text-slate-700 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+              className="h-8 appearance-none rounded-lg border border-stone-200 bg-white pl-2.5 pr-7 text-xs font-medium text-stone-700 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
             >
               {sizes.map((size) => (
                 <option key={size} value={size}>
@@ -158,34 +149,19 @@ ${chunk.text}`;
 
             <ChevronDown
               size={13}
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-stone-400"
             />
           </div>
         </div>
 
-        {/* Progress */}
-        <div
-          role="progressbar"
-          aria-label="Chunk progress"
-          aria-valuemin={1}
-          aria-valuemax={total}
-          aria-valuenow={current + 1}
-          className="mx-3.5 mt-3 h-1 overflow-hidden rounded-full bg-slate-100 sm:mx-4"
-        >
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-sky-300 via-sky-400 to-indigo-400 transition-[width] duration-500 ease-out motion-reduce:transition-none"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
         {/* Actions */}
-        <div className="flex items-center gap-2 p-3 sm:px-4">
+        <div className="flex items-center gap-2 px-3 pt-2 sm:px-4">
           <button
             type="button"
             aria-label="Previous chunk"
             disabled={current === 0}
             onClick={previous}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition active:scale-95 hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-white text-stone-600 transition active:scale-95 hover:bg-stone-50 disabled:pointer-events-none disabled:opacity-40"
           >
             <ChevronLeft size={18} />
           </button>
@@ -217,10 +193,46 @@ ${chunk.text}`;
             aria-label="Next chunk"
             disabled={current === total - 1}
             onClick={next}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition active:scale-95 hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-white text-stone-600 transition active:scale-95 hover:bg-stone-50 disabled:pointer-events-none disabled:opacity-40"
           >
             <ChevronRight size={18} />
           </button>
+        </div>
+
+        {/* Reader-style footer: position + stats */}
+        <div className="flex items-center justify-between px-3 pb-1.5 pt-2 text-[10.5px] tabular-nums text-stone-500 sm:px-4 sm:pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="font-semibold text-stone-700">
+              Chunk {current + 1} / {total}
+            </span>
+
+            <span>{chunk.words} words</span>
+
+            <span className="inline-flex items-center gap-0.5">
+              <Hash size={10} />
+              {chunk.estimatedTokens}
+            </span>
+          </div>
+
+          <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            {copyCount} saved
+          </span>
+        </div>
+
+        {/* Progress line, flush to the bottom edge */}
+        <div
+          role="progressbar"
+          aria-label="Chunk progress"
+          aria-valuemin={1}
+          aria-valuemax={total}
+          aria-valuenow={current + 1}
+          className="h-0.5 w-full bg-stone-200/70 sm:h-1"
+        >
+          <div
+            className="h-full bg-gradient-to-r from-sky-300 via-sky-400 to-indigo-400 transition-[width] duration-500 ease-out motion-reduce:transition-none"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     </div>
